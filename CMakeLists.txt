@@ -37,7 +37,7 @@ target_link_libraries(
 	boost_python3
 	)
 
-cuda_add_library(multivector SHARED src/modules/sparse_tensor/builder.cu)
+cuda_add_library(multivector SHARED src/modules/multivector/builder.cu)
 SET_TARGET_PROPERTIES(multivector PROPERTIES PREFIX "")
 target_link_libraries(
     multivector
