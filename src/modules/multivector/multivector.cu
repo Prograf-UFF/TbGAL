@@ -14,7 +14,6 @@
 #include "../metric/metric.cu"
 #include <thrust/device_vector.h>
 #include <thrust/device_ptr.h>
-
 #include <type_traits>
 #include <set>
 
@@ -48,6 +47,7 @@ class Multivector {
 
 	    Multivector* getComponent(IndexType idx);
 		Multivector* get_component_max_projection();
+		Multivector operator ~();
 	    // Multivector* REVERSE();
 		// Multivector* INVOLUTION();
 	    // Multivector* take_grade(IndexType grade);
@@ -62,7 +62,6 @@ IndexType Multivector::N_FULL = 0;
 /************************** END OF MULTIVECTOR.H ***************************/
 
 /************************** GENERAL OPERATIONS.H ***************************/
-
 
 template<typename MetricType>
 SparseTensor<IndexType, CoeffType, MemorySpace> *build_tensor(MetricType metric);
@@ -162,46 +161,6 @@ Multivector* Multivector::getComponent(IndexType idx) {
 	return new Multivector(new_core);
 }
 
-// Multivector* Multivector::take_grade(IndexType grade) {
-// 	if (this->getCore().getRank() == 1) {
-// 	    cusp::array1d<IndexType, MemorySpace> indices = this->getCore().getCore().column_indices;
-// 	    cusp::array1d<CoeffType, MemorySpace> values = this->getCore().getCore().values;
-//
-// 		cusp::array1d<IndexType, MemorySpace> new_indices(indices.size());
-// 		cusp::array1d<CoeffType, MemorySpace> new_values(values.size());
-//
-// 		thrust::copy_if(indices.begin(), indices.end(), &indices[0], &new_indices[0], is_grade<IndexType>(Multivector::get_N(), grade));
-// 		thrust::copy_if(values.begin(), values.end(), &indices[0], &new_values[0], is_grade<IndexType>(Multivector::get_N(), grade));
-//
-// 	    new_indices = this->getCore().erase_zeros<cusp::array1d<IndexType, MemorySpace>, cusp::array1d<CoeffType, MemorySpace>>(new_indices, new_values);
-// 	    new_values = this->getCore().erase_zeros<cusp::array1d<CoeffType, MemorySpace>, cusp::array1d<CoeffType, MemorySpace>>(new_values, new_values);
-//
-// 		std::vector<IndexType> dense_shape = this->getCore().getDenseShape();
-//
-// 		SparseTensor<IndexType, CoeffType, MemorySpace> new_core(new_indices, new_values, dense_shape, false);
-// 		return new Multivector(new_core);
-// 	}
-// 	// TODO handler for exception
-// 	return NULL;
-// }
-
-
-// Multivector* Multivector::REVERSE() {
-// 	auto grade_2 = this->take_grade(2);
-// 	auto new_mv = new Multivector(*this);
-// 	new_mv = ADD(new_mv, UNARY_MINUS(grade_2));
-//     new_mv = ADD(new_mv, UNARY_MINUS(grade_2));
-//     return new_mv;
-// }
-//
-// Multivector* Multivector::INVOLUTION() {
-// 	auto grade_1 = this->take_grade(1);
-// 	auto new_mv = new Multivector(*this);
-// 	new_mv = ADD(new_mv, UNARY_MINUS(grade_1));
-//     new_mv = ADD(new_mv, UNARY_MINUS(grade_1));
-//     return new_mv;
-// }
-
 Multivector* Multivector::get_component_max_projection() {
 	cusp::array1d<IndexType, MemorySpace> indices = this->getComponentIndexes();
 	cusp::array1d<CoeffType, MemorySpace> values = this->getCore().getCore().values;
@@ -252,18 +211,12 @@ std::string Multivector::to_string() const {
 	return repr;
 }
 
-
-/******************** END OF MULTIVECTOR IMPLEMENTATION **********************/
-
-/************************** GENERAL OPERATIONS.CPP ***************************/
-
 Multivector* e(IndexType index) {
   if (index > Multivector::get_N()) {
     throw std::logic_error("Can't allocate basis blade e(" + std::to_string(index) + ") in a " + std::to_string(Multivector::get_N()) + "-dimensional space");
   }
 	return new Multivector(index);
 }
-
 
 SparseTensor<IndexType, CoeffType, MemorySpace>* Multivector::get_GP_T() {
     return GP_T;
@@ -272,5 +225,12 @@ SparseTensor<IndexType, CoeffType, MemorySpace>* Multivector::get_GP_T() {
 SparseTensor<IndexType, CoeffType, MemorySpace>* Multivector::get_OP_T() {;
     return OP_T;
 }
+
+
+#include "operations.cu"
+Multivector Multivector::operator ~() {
+	return *MultivectorOperations::REVERSE(this);
+}
+
 
 #endif

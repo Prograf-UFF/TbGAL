@@ -3,9 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 find_package(CUDA QUIET REQUIRED)
 set(CUDA_HOST_COMPILER /usr/bin/gcc-6)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/TbGAl)
-#set(file "${CMAKE_CURRENT_BINARY_DIR}/file-to-touch")
-#file(WRITE filename "message to write"... )
 file(WRITE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/__init.py__ "")
 
 set(
@@ -21,6 +20,7 @@ include_directories(
 
 link_directories(
 	/usr/local/lib
+    /usr/lib/x86_64-linux-gnu
     )
 
 cuda_add_library(metric SHARED src/modules/metric/builder.cu)
@@ -42,4 +42,21 @@ SET_TARGET_PROPERTIES(multivector PROPERTIES PREFIX "")
 target_link_libraries(
     multivector
 	boost_python3
+	)
+
+include_directories(
+    src/modules/multivector
+    src/modules/metric
+    src/modules/sparse_tensor
+    )
+
+cuda_add_executable(
+    tests
+    src/modules/test/teste.cu
+    )
+
+target_link_libraries(
+    tests
+	-lboost_python3
+    -lpython3.6m
 	)

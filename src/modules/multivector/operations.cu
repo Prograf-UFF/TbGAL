@@ -1,3 +1,6 @@
+#ifndef OPERATIONS_CU
+#define OPERATIONS_CU
+
 #include "../../common.cu"
 
 #include "../sparse_tensor/SparseTensor.cu"
@@ -301,3 +304,5 @@ namespace MultivectorOperations {
     	return list;
     }
 }
+
+#endif
