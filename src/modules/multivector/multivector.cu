@@ -45,13 +45,13 @@ class Multivector {
 		std::vector<int> get_grade() const;
 	    cusp::array1d<IndexType, MemorySpace> getComponentIndexes() const;
 
-	    Multivector* getComponent(IndexType idx);
-		Multivector* get_component_max_projection();
+	    Multivector getComponent(IndexType idx);
+		Multivector get_component_max_projection();
 		Multivector operator ~();
-	    // Multivector* REVERSE();
+		// Multivector* REVERSE();
 		// Multivector* INVOLUTION();
 	    // Multivector* take_grade(IndexType grade);
-	    std::string to_string() const;
+	    std::string to_string();
 
 };
 
@@ -145,7 +145,7 @@ cusp::array1d<IndexType, MemorySpace> Multivector::getComponentIndexes() const {
 	return this->getCore().getCore().column_indices;
 }
 
-Multivector* Multivector::getComponent(IndexType idx) {
+Multivector Multivector::getComponent(IndexType idx) {
 	cusp::array1d<IndexType, MemorySpace> indices = this->getCore().getCore().column_indices;
 	cusp::array1d<CoeffType, MemorySpace> values = this->getCore().getCore().values;
 
@@ -158,15 +158,16 @@ Multivector* Multivector::getComponent(IndexType idx) {
 	std::vector<IndexType> dense_shape = this->getCore().getDenseShape();
 
 	SparseTensor<IndexType, CoeffType, MemorySpace> new_core(new_indices, new_values, dense_shape, false);
-	return new Multivector(new_core);
+	return Multivector(new_core);
 }
 
-Multivector* Multivector::get_component_max_projection() {
+Multivector Multivector::get_component_max_projection() {
 	cusp::array1d<IndexType, MemorySpace> indices = this->getComponentIndexes();
 	cusp::array1d<CoeffType, MemorySpace> values = this->getCore().getCore().values;
 
 	if (indices.size() == 0) {
-		return NULL;
+		// throw 
+		// return NULL;
 	}
 
 	thrust::device_vector<CoeffType>::iterator iter = thrust::max_element(values.begin(), values.end());
@@ -184,10 +185,10 @@ Multivector* Multivector::get_component_max_projection() {
 
 	// TODO fixop
 	// return new Multivector(indices[idx_max]);
-	return new Multivector(indices[idx_max], coeff_max);
+	return Multivector(indices[idx_max], coeff_max);
 }
 
-std::string Multivector::to_string() const {
+std::string Multivector::to_string() {
 	std::string repr = "";
 	bool first = true;
 	if (core.getCore().values.size() == 0) {
@@ -211,11 +212,11 @@ std::string Multivector::to_string() const {
 	return repr;
 }
 
-Multivector* e(IndexType index) {
+Multivector e(IndexType index) {
   if (index > Multivector::get_N()) {
     throw std::logic_error("Can't allocate basis blade e(" + std::to_string(index) + ") in a " + std::to_string(Multivector::get_N()) + "-dimensional space");
   }
-	return new Multivector(index);
+	return Multivector(index);
 }
 
 SparseTensor<IndexType, CoeffType, MemorySpace>* Multivector::get_GP_T() {
@@ -228,9 +229,9 @@ SparseTensor<IndexType, CoeffType, MemorySpace>* Multivector::get_OP_T() {;
 
 
 #include "operations.cu"
-Multivector Multivector::operator ~() {
-	return *MultivectorOperations::REVERSE(this);
-}
 
+Multivector Multivector::operator ~() {
+	return MultivectorOperations::REVERSE(*this);
+}
 
 #endif

@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/tests.dir/src/modules/test/tests_generated_teste.cu.o  -o bin/tests  -L/usr/local/lib  -L/home/eduardovera/Workspace/TbGAl/build/lib/TbGAl -Wl,-rpath,/usr/local/lib:/home/eduardovera/Workspace/TbGAl/build/lib/TbGAl -Wl,-Bstatic -lcudart_static -Wl,-Bdynamic -lpthread -ldl -lrt -lboost_python3 -ltbgal -lpython3.6m 
