@@ -215,8 +215,30 @@ namespace MultivectorOperations {
     	return NULL;
     }
 
-    boost::python::list FACT_BLADE(Multivector &m) {
-    	boost::python::list list;
+	template<typename Container, typename std::enable_if<std::is_same<Container, std::vector<Multivector>>::value, Container>::type* = nullptr>
+	Multivector getElementFromContainer(const Container &c, const IndexType &i) {
+		return c[i];
+	}
+
+	template<typename Container, typename std::enable_if<std::is_same<Container, boost::python::list>::value, Container>::type* = nullptr>
+	Multivector getElementFromContainer(const Container &c, const IndexType &i) {
+		return boost::python::extract<Multivector>(c[i]);
+	}
+
+
+	template<typename Container, typename std::enable_if<std::is_same<Container, std::vector<Multivector>>::value, Container>::type* = nullptr>
+	void insertIntoContainer(Container &c, Multivector &m) {
+		c.push_back(m);
+	}
+
+	template<typename Container, typename std::enable_if<std::is_same<Container, boost::python::list>::value, Container>::type* = nullptr>
+	void insertIntoContainer(Container &c, Multivector &m) {
+		c.append(m);
+	}
+
+	template<typename Container>
+    Container FACT_BLADE(Multivector &m) {
+    	Container list;
 
     	// Perwass approach
     	// Multivector *A = new Multivector(*m);
@@ -251,16 +273,20 @@ namespace MultivectorOperations {
     	for (IndexType i = 0; i < basis.size() - 1; i++) {
     		auto nj = LCONT(e(basis[i]), INVERSE(temp));
     		auto fatorj = PROD(nj, 1.0/NORM(nj));
-    		list.append(fatorj);
+			insertIntoContainer(list, fatorj);
+			// list.append(fatorj);
     		temp = LCONT(INVERSE(fatorj), temp);
     	}
-    	list.append(temp);
+		insertIntoContainer(list, temp);
+    	// list.append(temp);
 
         return list;
     }
 
-    boost::python::list FACT_VERSOR(const Multivector &V) {
-    	boost::python::list list;
+
+	template<typename Container>
+    Container FACT_VERSOR(const Multivector &V) {
+    	Container list;
 
     	Multivector rev_V = REVERSE(V);
     	std::vector<int> grades_V = rev_V.get_grade();
@@ -271,17 +297,19 @@ namespace MultivectorOperations {
     		// }
     		// k++;
     		auto A = take_grade(rev_V, grades_V[grades_V.size() - 1]);
-    		auto vectors = FACT_BLADE(A);
+    		auto vectors = FACT_BLADE<Container>(A);
     		int i = 0;
-    		while (dot(boost::python::extract<Multivector>(vectors[i]), boost::python::extract<Multivector>(vectors[i])).getCore().getCore().values[0] == 0) {
+    		while (dot(getElementFromContainer(vectors, i), getElementFromContainer(vectors, i)).getCore().getCore().values[0] == 0) {
     			i++;
     		}
-    		Multivector n = boost::python::extract<Multivector>(vectors[i]);
-    		list.append(n);
+    		Multivector n = getElementFromContainer(vectors, i);
+    		// list.append(n);
+			insertIntoContainer(list, n);
     		rev_V = GP(rev_V, n);
     		grades_V = rev_V.get_grade();
     	}
-    	list.append(rev_V);
+    	// list.append(rev_V);
+		insertIntoContainer(list, rev_V);
 
     	return list;
     }

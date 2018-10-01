@@ -47,7 +47,45 @@ class Multivector {
 
 	    Multivector getComponent(IndexType idx);
 		Multivector get_component_max_projection();
+
+		// REVERSE
 		Multivector operator ~();
+		// UNARY PLUS
+		Multivector operator +();
+		// UNARY MINUS
+		Multivector operator -();
+
+
+		// SUM
+		friend Multivector operator +(const Multivector &lhs, const Multivector &rhs);
+		template<typename ScalarType, typename>
+		friend Multivector operator +(const Multivector &lhs, const ScalarType &rhs);
+		template<typename ScalarType, typename>
+		friend Multivector operator +(const ScalarType &lhs, const Multivector &rhs);
+
+		// DIFF
+		friend Multivector operator -(const Multivector &lhs, const Multivector &rhs);
+		template<typename ScalarType, typename>
+		friend Multivector operator -(const Multivector &lhs, const ScalarType &rhs);
+		template<typename ScalarType, typename>
+		friend Multivector operator -(const ScalarType &lhs, const Multivector &rhs);
+
+		// OUTER PRODUCT
+		friend Multivector operator ^(const Multivector &lhs, const Multivector &rhs);
+
+		// PRODUCT
+		template<typename ScalarType, typename>
+		friend Multivector operator *(const Multivector &lhs, const ScalarType &rhs);
+		template<typename ScalarType, typename>
+		friend Multivector operator *(const ScalarType &lhs, const Multivector &rhs);
+
+		// OPERATOR ==
+		friend bool operator ==(const Multivector &lhs, const Multivector &rhs);
+
+		// OPERATOR <<
+		friend std::ostream& operator <<(std::ostream& os, Multivector& m);
+
+
 		// Multivector* REVERSE();
 		// Multivector* INVOLUTION();
 	    // Multivector* take_grade(IndexType grade);
@@ -166,7 +204,7 @@ Multivector Multivector::get_component_max_projection() {
 	cusp::array1d<CoeffType, MemorySpace> values = this->getCore().getCore().values;
 
 	if (indices.size() == 0) {
-		// throw 
+		// throw
 		// return NULL;
 	}
 
@@ -230,8 +268,63 @@ SparseTensor<IndexType, CoeffType, MemorySpace>* Multivector::get_OP_T() {;
 
 #include "operations.cu"
 
+// REVERSE
 Multivector Multivector::operator ~() {
 	return MultivectorOperations::REVERSE(*this);
+}
+// UNARY PLUS
+Multivector Multivector::operator +() {
+	return MultivectorOperations::UNARY_PLUS(*this);
+}
+// UNARY MINUS
+Multivector Multivector::operator -() {
+	return MultivectorOperations::UNARY_MINUS(*this);
+}
+// SUM
+Multivector operator +(const Multivector &lhs, const Multivector &rhs) {
+	return MultivectorOperations::ADD(lhs, rhs);
+}
+template<typename ScalarType>
+Multivector operator +(const Multivector &lhs, const ScalarType &rhs) {
+	return MultivectorOperations::ADD_SCALAR(lhs, rhs);
+}
+template<typename ScalarType>
+Multivector operator +(const ScalarType &lhs, const Multivector &rhs) {
+	return MultivectorOperations::ADD_SCALAR(rhs, lhs);
+}
+// DIFF
+Multivector operator -(const Multivector &lhs, const Multivector &rhs) {
+	return MultivectorOperations::SUB(lhs, rhs);
+}
+template<typename ScalarType>
+Multivector operator -(const Multivector &lhs, const ScalarType &rhs) {
+	return MultivectorOperations::SUB_SCALAR(lhs, rhs);
+}
+template<typename ScalarType>
+Multivector operator -(const ScalarType &lhs, const Multivector &rhs) {
+	return MultivectorOperations::SUB_SCALAR(rhs, lhs);
+}
+// OUTER PRODUCT
+Multivector operator ^(const Multivector &lhs, const Multivector &rhs) {
+	return MultivectorOperations::OP(lhs, rhs);
+}
+// PRODUCT
+template<typename ScalarType>
+Multivector operator *(const Multivector &lhs, const ScalarType &rhs) {
+	return MultivectorOperations::PROD(lhs, rhs);
+}
+template<typename ScalarType>
+Multivector operator *(const ScalarType &lhs, const Multivector &rhs) {
+	return MultivectorOperations::PROD(rhs, lhs);
+}
+// OPERATOR ==
+bool operator ==(const Multivector &lhs, const Multivector &rhs) {
+	return MultivectorOperations::is_equals(lhs, rhs);
+}
+// OPERATOR <<
+std::ostream& operator <<(std::ostream& os, Multivector& m) {
+	os << m.to_string();
+	return os;
 }
 
 #endif

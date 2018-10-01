@@ -92,8 +92,8 @@ BOOST_PYTHON_MODULE(multivector) {
 	python::def("SCP", &operations::SCP);
 
 	python::def("take_grade", &operations::take_grade);
-	python::def("fact_blade", &operations::FACT_BLADE);
-	python::def("fact_versor", &operations::FACT_VERSOR);
+	python::def("fact_blade", &operations::FACT_BLADE<python::list>);
+	python::def("fact_versor", &operations::FACT_VERSOR<python::list>);
 
 
 }

@@ -72,6 +72,6 @@ cuda_add_executable(
 target_link_libraries(
     tests
 	-lboost_python3
-	-ltbgal
+#	-ltbgal
     -lpython3.6m
 	)
