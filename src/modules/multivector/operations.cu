@@ -141,15 +141,22 @@ namespace MultivectorOperations {
     	return r;
     }
 
-    Multivector dot(const Multivector &lhs, const Multivector &rhs) {
+    CoeffType native(const Multivector &m) {
+      if (m.getCore().getCore().values.size() == 0) {
+        return (CoeffType) 0;
+      }
+      return m.getCore().getCore().values[0];
+    }
+
+    CoeffType dot(const Multivector &lhs, const Multivector &rhs) {
     	auto *T = extract_tensor(Multivector::get_N(), Multivector::get_GP_T(), Operation::DOT_PRODUCT); //TODO fix
-    	auto r = GP_tensor(lhs, rhs, T);
+    	auto r = native(GP_tensor(lhs, rhs, T));
     	return r;
     }
 
     CoeffType SQR_NORM(const Multivector &m) {
     	auto r = GP(m, REVERSE(m));
-    	return r.getCore().getCore().values[0];
+    	return native(r);
     }
 
     Multivector INVERSE(const Multivector &m) {
@@ -299,7 +306,7 @@ namespace MultivectorOperations {
     		auto A = take_grade(rev_V, grades_V[grades_V.size() - 1]);
     		auto vectors = FACT_BLADE<Container>(A);
     		int i = 0;
-    		while (dot(getElementFromContainer(vectors, i), getElementFromContainer(vectors, i)).getCore().getCore().values[0] == 0) {
+    		while (dot(getElementFromContainer(vectors, i), getElementFromContainer(vectors, i)) == 0) {
     			i++;
     		}
     		Multivector n = getElementFromContainer(vectors, i);

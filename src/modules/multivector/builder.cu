@@ -83,6 +83,7 @@ BOOST_PYTHON_MODULE(multivector) {
 	python::def("RCONT", &operations::RCONT);
 
 	python::def("DOT", &operations::dot);
+	python::def("NATIVE", &operations::native);
 
 	python::def("SQR_NORM", &operations::SQR_NORM);//, python::return_value_policy<python::manage_new_object>());
 	python::def("NORM", &operations::NORM);//, python::return_value_policy<python::manage_new_object>());
