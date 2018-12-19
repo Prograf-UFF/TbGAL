@@ -43,6 +43,7 @@ class Multivector {
 
 		SparseTensor<IndexType, CoeffType, MemorySpace> getCore() const;
 		std::vector<int> get_grade() const;
+		int get_grade_blade();
 	    cusp::array1d<IndexType, MemorySpace> getComponentIndexes() const;
 
 	    Multivector getComponent(IndexType idx);
@@ -112,6 +113,10 @@ SparseTensor<IndexType, CoeffType, MemorySpace> *build_tensor(MetricType metric)
   return new SparseTensor<IndexType, CoeffType, cusp::device_memory>(build_geometric_product_tensor<MetricType>(Multivector::get_N(), metric));
 }
 
+void setDevice(int device){
+  cudaSetDevice(device);
+}
+
 template<typename MetricType>
 void generate_T(const MetricType metric) {
     GP_T = new SparseTensor<IndexType, CoeffType, MemorySpace>(build_geometric_product_tensor<MetricType>(Multivector::get_N(), metric));
@@ -177,6 +182,10 @@ std::vector<int> Multivector::get_grade() const {
 	}
 	// TODO else for handling exception
 	return ret;
+}
+
+int Multivector::get_grade_blade() {
+	return this->get_grade()[0];
 }
 
 cusp::array1d<IndexType, MemorySpace> Multivector::getComponentIndexes() const {

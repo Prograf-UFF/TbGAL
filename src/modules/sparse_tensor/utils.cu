@@ -9,6 +9,7 @@
 #include <thrust/device_vector.h>
 #include "../metric/metric.cu"
 #include "util_functors.cu"
+#include <unistd.h>
 
 
 enum Axis {
@@ -246,6 +247,145 @@ struct GeometricProductTensorFunctor {
 	}
 };
 
+template < class MetricType, typename ReturnType, class = typename std::enable_if<std::is_base_of<Metric, MetricType>::value>::type>
+struct NONGeometricProductTensorFunctor {
+	NONGeometricProductTensorFunctor(IndexType N, const MetricType &metric, const Axis &axis) : metric(metric), axis(axis), N_(N) {}
+
+	short axis;
+	MetricType metric;
+	IndexType N_;
+
+	__host__ __device__ ReturnType operator() (const thrust::tuple<IndexType, IndexType> &it) {
+		IndexType j = thrust::get<0>(it);
+		IndexType i = thrust::get<1>(it);
+
+		if (axis == Axis::I) {
+			return i;
+		} else if (axis == Axis::J) {
+			return j;
+		}
+
+		IndexType K = 0;
+		CoeffType val = 0;
+
+		auto my_functor = idx2ji<IndexType>(N_);
+		thrust::tuple<IndexType, IndexType> basis_i = my_functor(i);
+		thrust::tuple<IndexType, IndexType> basis_j = my_functor(j);
+
+		IndexType u = thrust::get<0>(basis_j);
+		IndexType v = thrust::get<1>(basis_j);
+		IndexType x = thrust::get<0>(basis_i);
+		IndexType y = thrust::get<1>(basis_i);
+
+		if (i == 0) {
+			K = j;
+			val = 1;
+		} else if (j == 0) {
+			K = i;
+			val = 1;
+		} else {
+			if (i == j) {
+				K = 0;
+				val = canonical_sort(u, v, x, y) * metric.metric_factor(u, v);
+			} else if (u == x) {
+				K = output_basis(v, y, N_);
+				val = canonical_sort(u, v, x, y) * metric.diagonal_entry(u); // vy
+			} else if (u == y) {
+				K = output_basis(v, x, N_);
+				val = canonical_sort(u, v, x, y) * metric.diagonal_entry(u); // vx
+			} else if (v == x) {
+				K = output_basis(u, y, N_);
+				val = canonical_sort(u, v, x, y) * metric.diagonal_entry(v); // uy
+			} else if (v == y) {
+				K = output_basis(u, x, N_);
+				val = canonical_sort(u, v, x, y) * metric.diagonal_entry(v); // ux
+			}
+		}
+
+		if (axis == Axis::K) {
+			return K;
+		} else if (axis == Axis::VALUES) {
+			return val;
+		} else if (axis == Axis::EXISTS) {
+			return val == 0;
+		}
+		return 0;
+	}
+};
+
+
+// template < class MetricType, class = typename std::enable_if<std::is_base_of<Metric, MetricType>::value>::type>
+// SparseTensor<IndexType, CoeffType, cusp::device_memory> build_geometric_product_tensor(IndexType N, MetricType metric) {
+//
+// 	IndexType full_size = (N * (N + 1) >> 1) + 1;
+//
+// 	cusp::array1d<IndexType, cusp::host_memory> all_basis = cusp::counting_array<IndexType>(full_size);
+//
+// 	typedef typename thrust::host_vector<IndexType>::iterator Iterator;
+// 	repeated_range<Iterator> all_basis_repeated(all_basis.begin(), all_basis.end(), full_size);
+// 	tiled_range<Iterator> all_basis_tiled(all_basis.begin(), all_basis.end(), full_size);
+//
+// 	typedef typename repeated_range<Iterator>::iterator repeated_it;
+// 	typedef typename tiled_range<Iterator>::iterator tiled_it;
+//
+// 	typedef thrust::tuple<repeated_it, tiled_it> IteratorTuple;
+// 	typedef thrust::zip_iterator<IteratorTuple> ZipIterator;
+//
+//
+// 	ZipIterator zbegin = thrust::make_zip_iterator(thrust::make_tuple(all_basis_repeated.begin(), all_basis_tiled.begin()));
+// 	ZipIterator zend = thrust::make_zip_iterator(thrust::make_tuple(all_basis_repeated.begin(), all_basis_tiled.begin())) + (full_size * full_size);
+//
+// 	IndexType size = thrust::count_if<ZipIterator>(zbegin, zend, GeometricProductTensorFunctor<MetricType, bool>(N, metric, Axis::EXISTS));
+//
+// 	// std::cout << "FULL SIZE: " << full_size * full_size << std::endl;
+// 	// std::cout << "SIZE: " << size << std::endl;
+//
+// 	cusp::array1d<thrust::tuple<IndexType, IndexType>, cusp::host_memory> tuples(size);
+//
+// 	thrust::copy_if(thrust::host, zbegin, zend, tuples.begin(), GeometricProductTensorFunctor<MetricType, bool>(N, metric, Axis::EXISTS));
+//
+// 	cusp::array1d<IndexType, cusp::host_memory> K(size);
+// 	thrust::transform(thrust::host, tuples.begin(), tuples.end(),
+// 		K.begin(),
+// 		GeometricProductTensorFunctor<MetricType, IndexType>(N, metric, Axis::K));
+//
+// 	cusp::array1d<IndexType, cusp::host_memory> I(size);
+// 	thrust::transform(thrust::host, tuples.begin(), tuples.end(),
+// 		I.begin(),
+// 		GeometricProductTensorFunctor<MetricType, IndexType>(N, metric, Axis::I));
+//
+// 	cusp::array1d<IndexType, cusp::host_memory> J(size);
+// 	thrust::transform(thrust::host, tuples.begin(), tuples.end(),
+// 		J.begin(),
+// 		GeometricProductTensorFunctor<MetricType, IndexType>(N, metric, Axis::J));
+//
+//
+// 	cusp::array1d<CoeffType, cusp::host_memory> values(size);
+// 	thrust::transform(thrust::host, tuples.begin(), tuples.end(),
+// 		values.begin(),
+// 		GeometricProductTensorFunctor<MetricType, CoeffType>(N, metric, Axis::VALUES));
+//
+// 	// std::cout << "I: " << *(thrust::max_element(I.begin(), I.end())) << std::endl;
+// 	// std::cout << "J: " << *(thrust::max_element(J.begin(), J.end())) << std::endl;
+// 	// std::cout << "K: " << *(thrust::max_element(K.begin(), K.end())) << std::endl;
+//
+// 	std::vector<IndexType> shape = { full_size, full_size, full_size };
+//
+// 	FILE *pfile;
+// 	pfile = fopen("/home/eduardovera/values.bin", "wb");
+// 	fwrite(&(*values.begin()), sizeof(values), values.size(), pfile);
+// 	fclose(pfile);
+//
+// 	cusp::array1d<IndexType, cusp::device_memory> I_dev(I.begin(), I.end());
+// 	cusp::array1d<IndexType, cusp::device_memory> J_dev(J.begin(), J.end());
+// 	cusp::array1d<IndexType, cusp::device_memory> K_dev(K.begin(), K.end());
+// 	cusp::array1d<CoeffType, cusp::device_memory> values_dev(values.begin(), values.end());
+//
+//
+// 	return SparseTensor<IndexType, CoeffType, cusp::device_memory>(I_dev, J_dev, K_dev, values_dev, shape);
+// }
+
+
 template < class MetricType, class = typename std::enable_if<std::is_base_of<Metric, MetricType>::value>::type>
 SparseTensor<IndexType, CoeffType, cusp::device_memory> build_geometric_product_tensor(IndexType N, MetricType metric) {
 
@@ -267,33 +407,51 @@ SparseTensor<IndexType, CoeffType, cusp::device_memory> build_geometric_product_
 	ZipIterator zbegin = thrust::make_zip_iterator(thrust::make_tuple(all_basis_repeated.begin(), all_basis_tiled.begin()));
 	ZipIterator zend = thrust::make_zip_iterator(thrust::make_tuple(all_basis_repeated.begin(), all_basis_tiled.begin())) + (full_size * full_size);
 
+	std::cout << "SIZE: " << thrust::distance(zbegin, zend) << std::endl;
+
 	IndexType size = thrust::count_if<ZipIterator>(zbegin, zend, GeometricProductTensorFunctor<MetricType, bool>(N, metric, Axis::EXISTS));
 
-	// std::cout << "FULL SIZE: " << full_size * full_size << std::endl;
-	// std::cout << "SIZE: " << size << std::endl;
+	std::cout << "SIZE: " << size << std::endl;
 
-	cusp::array1d<thrust::tuple<IndexType, IndexType>, cusp::device_memory> tuples(size);
+	// cusp::array1d<thrust::tuple<IndexType, IndexType>, cusp::device_memory> tuples(size);
+	// cusp::array1d<ZipIterator, cusp::device_memory> tuples(size);
 
-	thrust::copy_if(zbegin, zend, tuples.begin(), GeometricProductTensorFunctor<MetricType, bool>(N, metric, Axis::EXISTS));
+	cusp::array1d<IndexType, cusp::device_memory> indices(size);
+
+	thrust::counting_iterator<IndexType> first_index(0);
+
+	thrust::counting_iterator<IndexType> last_index(thrust::distance(zbegin, zend));
+
+
+	thrust::copy_if(first_index, last_index, zbegin, indices.begin(), GeometricProductTensorFunctor<MetricType, bool>(N, metric, Axis::EXISTS));
+	// ZipIterator nzend = thrust::remove_copy_if(zbegin, zend, tuples.begin(), NONGeometricProductTensorFunctor<MetricType, bool>(N, metric, Axis::EXISTS));
+
+	// std::cout << "SIZE: " << tuples.end() - tuples.begin() << std::endl;
+
+	typedef thrust::device_vector<IndexType>::iterator IndexIterator;
+
+	thrust::permutation_iterator<ZipIterator, IndexIterator> permiter_begin(zbegin, indices.begin());
+	thrust::permutation_iterator<ZipIterator, IndexIterator> permiter_end(zbegin, indices.end());
+
+	// delete indices?
 
 	cusp::array1d<IndexType, cusp::device_memory> K(size);
-	thrust::transform(tuples.begin(), tuples.end(),
+	thrust::transform(permiter_begin, permiter_end,
 		K.begin(),
 		GeometricProductTensorFunctor<MetricType, IndexType>(N, metric, Axis::K));
 
 	cusp::array1d<IndexType, cusp::device_memory> I(size);
-	thrust::transform(tuples.begin(), tuples.end(),
+	thrust::transform(permiter_begin, permiter_end,
 		I.begin(),
 		GeometricProductTensorFunctor<MetricType, IndexType>(N, metric, Axis::I));
 
 	cusp::array1d<IndexType, cusp::device_memory> J(size);
-	thrust::transform(tuples.begin(), tuples.end(),
+	thrust::transform(permiter_begin, permiter_end,
 		J.begin(),
 		GeometricProductTensorFunctor<MetricType, IndexType>(N, metric, Axis::J));
 
-
 	cusp::array1d<CoeffType, cusp::device_memory> values(size);
-	thrust::transform(tuples.begin(), tuples.end(),
+	thrust::transform(permiter_begin, permiter_end,
 		values.begin(),
 		GeometricProductTensorFunctor<MetricType, CoeffType>(N, metric, Axis::VALUES));
 
@@ -305,6 +463,7 @@ SparseTensor<IndexType, CoeffType, cusp::device_memory> build_geometric_product_
 
 	return SparseTensor<IndexType, CoeffType, cusp::device_memory>(I, J, K, values, shape);
 }
+
 
 
 template <typename ReturnType>

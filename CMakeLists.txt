@@ -10,39 +10,49 @@ file(WRITE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/__init.py__ "")
 set(
     CUDA_NVCC_FLAGS
     ${CUDA_NVCC_FLAGS};
-    -O3 --expt-relaxed-constexpr -Xcompiler -fPIC -shared -std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0/1
+    -O3 --gpu-architecture=compute_35 --gpu-code=sm_35 --expt-relaxed-constexpr -Xcompiler -fPIC -shared -std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0/1
     )
 
 include_directories(
-    /usr/local/include/CUSP/
-	/usr/include/python3.6
+    /home/eduardovera/libs/CUSP/
+	/home/eduardovera/libs/BOOST/
+	/home/eduardovera/.anaconda3/include/python3.7m
     )
 
 link_directories(
+	/usr/local/cuda/lib64
+	/home/eduardovera/libs/BOOST/lib
 	/usr/local/lib
     /usr/lib/x86_64-linux-gnu
 	/home/eduardovera/Workspace/TbGAl/build/lib/TbGAl
+	/home/eduardovera/.anaconda3/lib
     )
 
 cuda_add_library(metric SHARED src/modules/metric/builder.cu)
 SET_TARGET_PROPERTIES(metric PROPERTIES PREFIX "")
 target_link_libraries(
     metric
-	boost_python3
+	boost_python37
+	cuda
+	cudart
 	)
 
 cuda_add_library(sparse_tensor SHARED src/modules/sparse_tensor/builder.cu)
 SET_TARGET_PROPERTIES(sparse_tensor PROPERTIES PREFIX "")
 target_link_libraries(
     sparse_tensor
-	boost_python3
+	boost_python37
+	cuda
+	cudart
 	)
 
 cuda_add_library(multivector SHARED src/modules/multivector/builder.cu)
 SET_TARGET_PROPERTIES(multivector PROPERTIES PREFIX "")
 target_link_libraries(
     multivector
-	boost_python3
+	boost_python37
+	cuda
+	cudart
 	)
 
 #cuda_add_library(tbgal SHARED src/modules/multivector/multivector.cu)
@@ -59,19 +69,19 @@ include_directories(
     src/modules/sparse_tensor
     )
 
-cuda_add_executable(
-    tests
-    src/modules/test/teste.cu
-    )
+#cuda_add_executable(
+#    tests
+#    src/modules/test/teste.cu
+#    )
 
 #add_dependencies(
 #	tests
 #	tbgal
 #)
 
-target_link_libraries(
-    tests
-	-lboost_python3
+#target_link_libraries(
+#    tests
+#	-lboost_python37
 #	-ltbgal
-    -lpython3.6m
-	)
+#    -lpython3.7m
+#	)

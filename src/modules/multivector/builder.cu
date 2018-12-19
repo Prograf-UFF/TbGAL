@@ -25,7 +25,7 @@ BOOST_PYTHON_MODULE(multivector) {
 		.def("get_N_FULL", &Multivector::get_N_FULL)
 			.staticmethod("get_N_FULL")
 		.def("getComponent", &Multivector::getComponent)
-
+		.def("getGrade", &Multivector::get_grade_blade)
 		.def("get_component_max_projection", &Multivector::get_component_max_projection)
 
 		.def("__eq__", &operations::is_equals)
@@ -95,7 +95,7 @@ BOOST_PYTHON_MODULE(multivector) {
 	python::def("take_grade", &operations::take_grade);
 	python::def("fact_blade", &operations::FACT_BLADE<python::list>);
 	python::def("fact_versor", &operations::FACT_VERSOR<python::list>);
-
+	python::def("set_device", &setDevice);
 
 }
 #endif
