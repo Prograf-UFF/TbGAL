@@ -1,1 +1,3 @@
 build/*
+src/modules/test/__pycache__/*
+src/modules/test/.ipynb_checkpoints/*
