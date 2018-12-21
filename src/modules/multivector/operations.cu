@@ -121,10 +121,10 @@ namespace MultivectorOperations {
     }
 
     Multivector OP(const Multivector &lhs, const Multivector &rhs) {
-    	if (Multivector::get_OP_T() == NULL) {
-    		OP_T = extract_tensor(Multivector::get_N(), Multivector::get_GP_T(), Operation::OUTER_PRODUCT); //TODO fix
-    	}
-    	auto r = GP_tensor(lhs, rhs, Multivector::get_OP_T());
+    	// if (Multivector::get_OP_T() == NULL) {
+    		auto *T = extract_tensor(Multivector::get_N(), Multivector::get_GP_T(), Operation::OUTER_PRODUCT); //TODO fix
+    	// }
+    	auto r = GP_tensor(lhs, rhs, T);
     	return r;
     }
 
@@ -259,8 +259,8 @@ namespace MultivectorOperations {
 
     	//Fernandes et al approach
     	auto component_max_projection = m.get_component_max_projection();
-    	// auto scalar = NORM(m);
-    	auto temp = m;//PROD(m, 1.0 / scalar);
+    	auto scalar = NORM(m);
+    	auto temp = PROD(m, 1.0 / scalar);
 
     	// list.append(scalar);
     	// list.append(temp);
@@ -285,6 +285,10 @@ namespace MultivectorOperations {
     		temp = LCONT(INVERSE(fatorj), temp);
     	}
 		insertIntoContainer(list, temp);
+    if (abs(scalar - 1) > epsilon) {
+      auto norm = Multivector(0, scalar);
+      insertIntoContainer(list, norm);
+    }
     	// list.append(temp);
 
         return list;
@@ -316,7 +320,9 @@ namespace MultivectorOperations {
     		grades_V = rev_V.get_grade();
     	}
     	// list.append(rev_V);
-		insertIntoContainer(list, rev_V);
+      if (abs(NORM(rev_V)) - 1 > epsilon) {
+        insertIntoContainer(list, rev_V);
+      }
 
     	return list;
     }

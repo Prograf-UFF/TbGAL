@@ -247,11 +247,11 @@ std::string Multivector::to_string() {
 				repr += (core.getCore().values[i] > 0.0 ? (first ? "" : "+" ) : "") + std::to_string(core.getCore().values[i]);
 				first = false;
 			} else if (core.getCore().column_indices[i] <= Multivector::get_N()){
-				repr += (core.getCore().values[i] > 0.0 ? (first ? "" : "+" ) : "") + (core.getCore().values[i] == 1.0 ? "" : std::to_string(core.getCore().values[i])) + "e(" + std::to_string(core.getCore().column_indices[i]) + ")";
+				repr += (core.getCore().values[i] > 0.0 ? (first ? "" : "+" ) : "") + (core.getCore().values[i] == 1.0 ? "" : std::to_string(core.getCore().values[i]) + "*") + "e(" + std::to_string(core.getCore().column_indices[i]) + ")";
 				first = false;
 			} else {
 				thrust::tuple<IndexType, IndexType> basis = func(core.getCore().column_indices[i]);
-				repr += (core.getCore().values[i] > 0.0 ? (first ? "" : "+" ) : "") + (core.getCore().values[i] == 1.0 ? "" : std::to_string(core.getCore().values[i])) + "e(" + std::to_string(thrust::get<0>(basis)) + ")^e(" + std::to_string(thrust::get<1>(basis)) + ")";
+				repr += (core.getCore().values[i] > 0.0 ? (first ? "" : "+" ) : "") + (core.getCore().values[i] == 1.0 ? "" : std::to_string(core.getCore().values[i]) + "*") + "e(" + std::to_string(thrust::get<0>(basis)) + ")^e(" + std::to_string(thrust::get<1>(basis)) + ")";
 				first = false;
 			}
 		}
