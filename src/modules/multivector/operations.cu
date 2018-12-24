@@ -20,11 +20,26 @@
 #include <set>
 
 #include <boost/python.hpp>
+#include <boost/python/stl_iterator.hpp>
 
 namespace MultivectorOperations {
 
     Multivector GP_tensor(const Multivector &lhs, const Multivector &rhs, SparseTensor<IndexType, CoeffType, MemorySpace> *tensor);
-    Multivector GP(const Multivector &lhs, const Multivector &rhs);
+    // Multivector GP(const Multivector &lhs, const Multivector &rhs);
+
+    template<typename Container, typename std::enable_if<std::is_same<Container, Multivector>::value, Container>::type* = nullptr>
+    Container GP(const Container &lhs, const Container &rhs);
+
+    template<typename Container, typename std::enable_if<std::is_same<Container, std::vector<Multivector>>::value, Container>::type* = nullptr>
+  	Container GP(const Container &lhs, const Container &rhs);
+
+  	template<typename Container, typename std::enable_if<std::is_same<Container, boost::python::list>::value, Container>::type* = nullptr>
+  	Container GP(const Container &lhs, const Container &rhs);
+
+    template<typename Container, typename std::enable_if<std::is_same<Container, boost::python::list>::value, Container>::type* = nullptr>
+    Container process_factors(const Container &factors_A, const Multivector &factor_B);
+
+
     Multivector ADD(const Multivector &lhs, const Multivector &rhs);
     Multivector SUB(const Multivector &lhs, const Multivector &rhs);
     Multivector SCP(const Multivector &lhs, const Multivector &rhs);
@@ -44,6 +59,19 @@ namespace MultivectorOperations {
     template<typename ScalarType, typename = typename std::enable_if<std::is_arithmetic<ScalarType>::value, ScalarType>::type>
     Multivector R_SUB_SCALAR(const Multivector &lhs, const ScalarType &rhs);
 
+
+    template<typename Container, typename std::enable_if<std::is_same<Container, std::vector<Multivector>>::value, Container>::type* = nullptr>
+  	Multivector getElementFromContainer(const Container &c, const IndexType &i);
+
+  	template<typename Container, typename std::enable_if<std::is_same<Container, boost::python::list>::value, Container>::type* = nullptr>
+  	Multivector getElementFromContainer(const Container &c, const IndexType &i);
+
+
+  	template<typename Container, typename std::enable_if<std::is_same<Container, std::vector<Multivector>>::value, Container>::type* = nullptr>
+  	void insertIntoContainer(Container &c, Multivector &m);
+
+  	template<typename Container, typename std::enable_if<std::is_same<Container, boost::python::list>::value, Container>::type* = nullptr>
+  	void insertIntoContainer(Container &c, Multivector &m);
 
     Multivector ADD(const Multivector &lhs, const Multivector &rhs) {
         return Multivector(lhs.getCore() + rhs.getCore());
@@ -107,8 +135,50 @@ namespace MultivectorOperations {
     }
 
     Multivector GP(const Multivector &lhs, const Multivector &rhs) {
-    	return GP_tensor(lhs, rhs, Multivector::get_GP_T());
+      return GP<Multivector>(lhs, rhs);
     }
+
+    template<typename Container, typename std::enable_if<std::is_same<Container, Multivector>::value, Container>::type*>
+    Container GP(const Container &lhs, const Container &rhs) {
+      return GP_tensor(lhs, rhs, Multivector::get_GP_T());
+    }
+
+    template<typename Container, typename std::enable_if<std::is_same<Container, std::vector<Multivector>>::value, Container>::type*>
+  	Container GP(const Container &lhs, const Container &rhs) {
+  		return lhs;
+  	}
+
+    // Container new_factors_A;
+    // Multivector inv_factor_B = INVERSE(factor_B);
+    // Multivector new_factor = GP(getElementFromContainer(factors_A, 0), inv_factor_B);
+    // if (new_factor.get_grade_blade() == 2 ) {
+    //   new_factors_A += FACT_VERSOR<Container>(new_factor);
+    // } else {
+    //   new_factors_A.append(new_factor);
+    // }
+    // for (IndexType i = 1; i < boost::python::len(factors_A); i++) {
+    //   new_factor = GP(GP(factor_B, getElementFromContainer(factors_A, i)), inv_factor_B);
+    //   if (new_factor.get_grade_blade() ==2 ) {
+    //     new_factors_A += FACT_VERSOR<Container>(new_factor);
+    //   } else {
+    //     new_factors_A.append(new_factor);
+    //   }
+    // }
+
+
+  	template<typename Container, typename std::enable_if<std::is_same<Container, boost::python::list>::value, Container>::type*>
+  	Container GP(const Container &lhs, const Container &rhs) {
+      Container new_factors = lhs;
+      for (IndexType i = 0; i < boost::python::len(rhs); i++) {
+        Container newest_factors;
+        Container processed_factors = process_factors(new_factors, getElementFromContainer(rhs, i));
+        for (IndexType k = 0; k < boost::python::len(processed_factors); k++) {
+          newest_factors.append(getElementFromContainer(processed_factors, k));
+        }
+        new_factors = newest_factors;
+      }
+      return new_factors;
+  	}
 
     Multivector SCP(const Multivector &lhs, const Multivector &rhs) {
     	Multivector ret = GP(lhs, rhs);
@@ -222,23 +292,23 @@ namespace MultivectorOperations {
     	return NULL;
     }
 
-	template<typename Container, typename std::enable_if<std::is_same<Container, std::vector<Multivector>>::value, Container>::type* = nullptr>
+	template<typename Container, typename std::enable_if<std::is_same<Container, std::vector<Multivector>>::value, Container>::type*>
 	Multivector getElementFromContainer(const Container &c, const IndexType &i) {
 		return c[i];
 	}
 
-	template<typename Container, typename std::enable_if<std::is_same<Container, boost::python::list>::value, Container>::type* = nullptr>
+	template<typename Container, typename std::enable_if<std::is_same<Container, boost::python::list>::value, Container>::type*>
 	Multivector getElementFromContainer(const Container &c, const IndexType &i) {
 		return boost::python::extract<Multivector>(c[i]);
 	}
 
 
-	template<typename Container, typename std::enable_if<std::is_same<Container, std::vector<Multivector>>::value, Container>::type* = nullptr>
+	template<typename Container, typename std::enable_if<std::is_same<Container, std::vector<Multivector>>::value, Container>::type*>
 	void insertIntoContainer(Container &c, Multivector &m) {
 		c.push_back(m);
 	}
 
-	template<typename Container, typename std::enable_if<std::is_same<Container, boost::python::list>::value, Container>::type* = nullptr>
+	template<typename Container, typename std::enable_if<std::is_same<Container, boost::python::list>::value, Container>::type*>
 	void insertIntoContainer(Container &c, Multivector &m) {
 		c.append(m);
 	}
@@ -326,6 +396,49 @@ namespace MultivectorOperations {
 
     	return list;
     }
+
+
+    template< typename T >
+    std::vector< T > to_std_vector( const boost::python::list &iterable ) {
+        return std::vector< T >( boost::python::stl_input_iterator< T >( iterable ),
+                                 boost::python::stl_input_iterator< T >( ) );
+    }
+
+
+    template<typename Container, typename std::enable_if<std::is_same<Container, boost::python::list>::value, Container>::type*>
+    Container process_factors(const Container &factors_A, const Multivector &factor_B) {
+      std::vector<Multivector> std_factors_A = to_std_vector<Multivector>(factors_A);
+      if ((std_factors_A[std_factors_A.size()-1]^factor_B) == (e(1)^e(1))) {
+        if (std_factors_A[std_factors_A.size()-1] == factor_B) {
+          std_factors_A.pop_back();
+          return boost::python::list(std_factors_A);
+        }
+        std_factors_A[std_factors_A.size()-1] = GP(std_factors_A[std_factors_A.size()-1], factor_B);
+        return boost::python::list(std_factors_A);
+      }
+
+      std::vector<Multivector> new_factors_A;
+      Multivector inv_factor_B = INVERSE(factor_B);
+      Multivector new_factor = GP(std_factors_A[0], inv_factor_B);
+      if (new_factor.get_grade_blade() == 2 ) {
+        auto factors_from_new_factor = FACT_VERSOR<std::vector<Multivector>>(new_factor);
+        new_factors_A.insert(std::end(new_factors_A), std::begin(factors_from_new_factor), std::end(factors_from_new_factor));
+      } else {
+        new_factors_A.push_back(new_factor);
+      }
+      for (IndexType i = 1; i < std_factors_A.size(); i++) {
+        new_factor = GP(GP(factor_B, std_factors_A[i]), inv_factor_B);
+        if (new_factor.get_grade_blade() ==2 ) {
+          auto factors_from_new_factor = FACT_VERSOR<std::vector<Multivector>>(new_factor);
+          new_factors_A.insert(std::end(new_factors_A), std::begin(factors_from_new_factor), std::end(factors_from_new_factor));
+        } else {
+          new_factors_A.push_back(new_factor);
+        }
+      }
+      new_factors_A[new_factors_A.size() - 1] = PROD(static_cast<Multivector>(new_factors_A[new_factors_A.size() - 1]), NORM(factor_B));
+      return boost::python::list(new_factors_A);
+    }
+
 }
 
 #endif

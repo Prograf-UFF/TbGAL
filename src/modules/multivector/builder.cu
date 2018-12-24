@@ -9,11 +9,15 @@
 #include <vector>
 #include <boost/python/object.hpp>
 #include <boost/python/stl_iterator.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 
 BOOST_PYTHON_MODULE(multivector) {
 	namespace python = boost::python;
 	namespace operations = MultivectorOperations;
+
+	python::class_<std::vector<Multivector>>("MultivectorContainer")
+					.def(python::vector_indexing_suite<std::vector<Multivector>>() );
 
 
 	python::class_<Multivector>("Multivector", python::no_init)
@@ -64,7 +68,6 @@ BOOST_PYTHON_MODULE(multivector) {
 
 		;
 
-
 	python::def("e", &e);
 	python::def("generate_T", &generate_T<EuclideanMetric>);
 	python::def("build_tensor", &build_tensor<EuclideanMetric>, python::return_value_policy<python::manage_new_object>());
@@ -77,7 +80,8 @@ BOOST_PYTHON_MODULE(multivector) {
 	python::def("INVERSE", &operations::INVERSE);
 
 	python::def("GP", &operations::GP_tensor);
-	python::def("GP", &operations::GP);
+	python::def("GP", &operations::GP<Multivector>);
+	python::def("GP", &operations::GP<python::list>);
 
 	python::def("LCONT", &operations::LCONT);
 	python::def("RCONT", &operations::RCONT);
@@ -96,6 +100,8 @@ BOOST_PYTHON_MODULE(multivector) {
 	python::def("fact_blade", &operations::FACT_BLADE<python::list>);
 	python::def("fact_versor", &operations::FACT_VERSOR<python::list>);
 	python::def("set_device", &setDevice);
+
+	// python::def("teste", &operations::teste);
 
 }
 #endif
