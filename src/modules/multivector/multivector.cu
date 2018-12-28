@@ -39,8 +39,9 @@ class Multivector {
 		Multivector();
 		Multivector(const Multivector& m);
 		Multivector(const SparseTensor<IndexType, CoeffType, MemorySpace> &core);
-	    Multivector(IndexType index, CoeffType coeff = 1);
-
+	  Multivector(IndexType index, CoeffType coeff = 1);
+		~Multivector() {
+		}
 		SparseTensor<IndexType, CoeffType, MemorySpace> getCore() const;
 		std::vector<int> get_grade() const;
 		int get_grade_blade();
@@ -120,6 +121,10 @@ void setDevice(int device){
 template<typename MetricType>
 void generate_T(const MetricType metric) {
     GP_T = new SparseTensor<IndexType, CoeffType, MemorySpace>(build_geometric_product_tensor<MetricType>(Multivector::get_N(), metric));
+}
+
+void delete_T() {
+    delete GP_T;
 }
 
 

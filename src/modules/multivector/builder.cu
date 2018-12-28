@@ -70,6 +70,7 @@ BOOST_PYTHON_MODULE(multivector) {
 
 	python::def("e", &e);
 	python::def("generate_T", &generate_T<EuclideanMetric>);
+	python::def("delete_T", &delete_T);
 	python::def("build_tensor", &build_tensor<EuclideanMetric>, python::return_value_policy<python::manage_new_object>());
 	python::def("extract_tensor", &extract_tensor, python::return_value_policy<python::manage_new_object>());
 	python::def("get_GP_T", &Multivector::get_GP_T, python::return_value_policy<python::manage_new_object>());
