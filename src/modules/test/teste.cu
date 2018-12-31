@@ -35,7 +35,6 @@ void run_loops(std::vector<Multivector> &R, std::vector<Multivector> &S, const i
 void run_iterations(const int &DIMS, const int &RUNS) {
 	std::vector<Multivector> R;
 	std::vector<Multivector> S;
-	auto results = ofstream("results.csv", std::ios::app);
 	for (IndexType r = 3; r <= DIMS; r++) {
 		process_lines(read_lines("R", DIMS, r), R);
 		for (IndexType s = 3; s <= DIMS; s++) {
@@ -44,32 +43,49 @@ void run_iterations(const int &DIMS, const int &RUNS) {
 			double avg_time = 0;
 			double std_dev = 0;
 
-			run_loops(R, S, RUNS, avg_time, std_dev);
+			// run_loops(R, S, RUNS, avg_time, std_dev);
 			S.clear();
 			S.resize(0);
 			S.shrink_to_fit();
-			results << std::to_string(DIMS) << "," << std::to_string(r) << "," << std::to_string(s) << "," << std::to_string(avg_time) << "," << std::to_string(std_dev) << std::endl;
 		}
 		R.clear();
 		R.resize(0);
 		R.shrink_to_fit();
 	}
-	results.close();
+	// results.close();
 }
 
-int main() {
+int main(int argc, char* argv[]) {
 
-	IndexType MAX_DIMS = 100;
+	int DIMS = atoi(argv[1]);
+	int r = atoi(argv[2]);
+	int s = atoi(argv[3]);
 	int RUNS = 10;
-	ofstream results ("results.csv");
-	results << "N,R,S,avg_time,std_dev_time" << std::endl;
+	// ofstream results ("results.csv");
+	// results << "N,R,S,avg_time,std_dev_time" << std::endl;
+	// results.close();
+	// auto DIMS = 30;
+	// for (IndexType DIMS = 3; DIMS <= MAX_DIMS; DIMS++) {
+	Multivector::set_N(DIMS);
+	generate_T<EuclideanMetric>(EuclideanMetric());
+
+
+	std::vector<Multivector> R;
+	process_lines(read_lines("R", DIMS, r), R);
+	std::vector<Multivector> S;
+	process_lines(read_lines("S", DIMS, s), S);
+
+	double avg_time = 0;
+	double std_dev = 0;
+	std::cout << "Starting loops..." << std::endl;
+	run_loops(R, S, RUNS, avg_time, std_dev);
+	auto results = ofstream("results.csv", std::ios::app);
+	results << std::to_string(DIMS) << "," << std::to_string(r) << "," << std::to_string(s) << "," << std::to_string(avg_time) << "," << std::to_string(std_dev) << std::endl;
 	results.close();
-	for (IndexType DIMS = 3; DIMS <= MAX_DIMS; DIMS++) {
-		Multivector::set_N(DIMS);
-		generate_T<EuclideanMetric>(EuclideanMetric());
-		run_iterations(DIMS, RUNS);
-		delete_T();
-	}
+
+	// run_iterations(DIMS, RUNS);
+	delete_T();
+	// }
 
 
 	// auto M = (e(1)^e(2)) + (e(1)^e(3));

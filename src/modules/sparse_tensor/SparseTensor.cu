@@ -165,7 +165,34 @@ public:
 
 	/* DEFAULT DESTRUCTOR */
 	~SparseTensor() {
+		
+		// this->I.clear();
+		// this->I.resize(0);
+		// this->I.shrink_to_fit();
 
+		// this->J.clear();
+		// this->J.resize(0);
+		// this->J.shrink_to_fit();
+
+		// this->K.clear();
+		// this->K.resize(0);
+		// this->K.shrink_to_fit();
+
+		// this->data.clear();
+		// this->data.resize(0);
+		// this->data.shrink_to_fit();
+
+		// this->core.column_indices.clear();
+		// this->core.column_indices.resize(0);
+		// this->core.column_indices.shrink_to_fit();
+
+		// this->core.row_indices.clear();
+		// this->core.row_indices.resize(0);
+		// this->core.row_indices.shrink_to_fit();
+
+		// this->core.values.clear();
+		// this->core.values.resize(0);
+		// this->core.values.shrink_to_fit();
 	}
 
 	template<typename IndexT, typename DataT, typename MemoryS>

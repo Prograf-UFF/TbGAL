@@ -35,6 +35,12 @@ vector<string> read_lines(const string &op, const int &N, const int &grade) {
   return lines;
 }
 
+// void process_lines(const std::vector<string> &factors, vector<Multivector> &ret) {
+//   for (int i = 1; i < factors.size(); i++) {
+//     3*e(i);
+//   }
+// }
+
 void process_lines(const std::vector<string> &factors, vector<Multivector> &ret) {
   for (const string &f : factors) {
     std::vector<string> terms;

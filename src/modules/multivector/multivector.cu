@@ -40,8 +40,17 @@ class Multivector {
 		Multivector(const Multivector& m);
 		Multivector(const SparseTensor<IndexType, CoeffType, MemorySpace> &core);
 	  Multivector(IndexType index, CoeffType coeff = 1);
+
 		~Multivector() {
+			core.core.values.clear();
+			core.core.values.shrink_to_fit();
+			core.core.row_indices.clear();
+			core.core.row_indices.shrink_to_fit();
+			core.core.column_indices.clear();
+			core.core.column_indices.shrink_to_fit();
+
 		}
+
 		SparseTensor<IndexType, CoeffType, MemorySpace> getCore() const;
 		std::vector<int> get_grade() const;
 		int get_grade_blade();
