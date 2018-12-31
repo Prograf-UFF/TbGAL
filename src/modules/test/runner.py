@@ -3,7 +3,7 @@ from subprocess import call
 with open('results.csv', 'w') as file:
 	file.write("N,R,S,avg_time,std_dev_time")
 
-possible_N = [3, 6, 12, 24, 48, 96, 192]
+possible_N = [3, 4, 5, 6, 7, 8, 9, 10, 12, 24, 48, 96, 192]
 
 for N in possible_N:
 	for r in range(3, N+1):
