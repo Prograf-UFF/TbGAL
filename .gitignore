@@ -1,3 +1,8 @@
 build/*
 src/modules/test/__pycache__/*
 src/modules/test/.ipynb_checkpoints/*
+/.vscode
+/cuda/modules/test/.ipynb_checkpoints
+/cuda/modules/test/__pycache__
+/cuda/modules/test/*.so
+/cuda/modules/test/*.pyc
