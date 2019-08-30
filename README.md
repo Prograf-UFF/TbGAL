@@ -1,2 +1,2 @@
-# TbGAl
-Tensor-based Geometric Algebra library
+# TbGAL
+Tensor-based Geometric Algebra Library
