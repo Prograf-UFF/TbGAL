@@ -4,21 +4,22 @@
 namespace tbgal {
 
     template<typename SymmetricMatrixType>
-    class MetricSpace {
+    class MetricSpace final {
     public:
 
         using IndexType = detail::index_type_t<SymmetricMatrixType>;
+        
+        constexpr IndexType DimensionsAtCompileTime = /*TODO Implementar*/;
 
         constexpr MetricSpace(MetricSpace const &) = default;
         constexpr MetricSpace(MetricSpace &&) = default;
 
         constexpr MetricSpace(SymmetricMatrixType &&metric_matrix) noexcept :
             metric_matrix_{ std::move(metric_matrix) } {
-            std::assert(detail::is_symmetric(metric_matrix_));
         }
 
         constexpr IndexType dimensions() const noexcept {
-            return detail::rows_count(metric_matrix_);
+            return detail::rows(metric_matrix_);
         }
 
     private:

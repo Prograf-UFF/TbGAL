@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <tuple>
 
 #include "traits.hpp"
 #include "matrix_traits.hpp"
@@ -33,5 +34,7 @@
 #include "reverse_norm.hpp"
 #include "inversion.hpp"
 #include "dualization.hpp"
+
+//TODO Verificar se o espaço métrico de todos os argumentos é o mesmo.
 
 #endif // __TBGAL_CORE_HPP__

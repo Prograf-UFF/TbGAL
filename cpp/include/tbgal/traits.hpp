@@ -5,6 +5,9 @@ namespace tbgal {
     
     namespace detail {
 
+        template<typename T, typename... Rest>
+        constexpr bool is_any_v = std::disjunction_v<std::bool_constant<std::is_same_v<T, Rest> >...>;
+
         template<typename Type>
         struct is_factoring_product;
 

@@ -4,7 +4,7 @@
 namespace tbgal {
 
     template<typename FactoringProductType, typename SquareMatrixType>
-    class FactoredMultivector {
+    class FactoredMultivector final {
     public:
 
         static_assert(detail::is_factoring_product_v<FactoringProductType>, "Invalid FactoringProductType.");
@@ -18,23 +18,27 @@ namespace tbgal {
         constexpr FactoredMultivector(FactoredMultivector &&) = default;
 
         constexpr FactoredMultivector(SpaceType const &space) noexcept :
+            space_(space),
             scalar_(0),
             factors_(detail::make_identity_matrix<ScalarType>(space)),
-            factors_count_(0),
-            space_(space) {
+            factors_count_(0) {
         }
 
         template<typename OtherScalarType>
-        constexpr FactoredMultivector(OtherScalarType &&scalar, SpaceType const &space) noexcept :
+        constexpr FactoredMultivector(SpaceType const &space, OtherScalarType &&scalar) noexcept :
+            space_(space),
             scalar_(std::move(scalar)),
             factors_(detail::make_identity_matrix<ScalarType>(space)),
-            factors_count_(0),
-            space_(space) {
+            factors_count_(0) {
         }
 
         template<typename OtherFactoringProductType, typename OtherSquareMatrixType>
         constexpr FactoredMultivector(FactoredMultivector<OtherFactoringProductType, OtherSquareMatrixType> const &other) noexcept;
         //TODO Especializar
+
+        constexpr SpaceType& space() const noexcept {
+            return space_;
+        }
 
         constexpr ScalarType scalar() const noexcept {
             return scalar_;
@@ -48,17 +52,13 @@ namespace tbgal {
             return factors_count_;
         }
 
-        constexpr SpaceType& space() const noexcept {
-            return space_;
-        }
-
     private:
 
-        constexpr FactoredMultivector(ScalarType &&scalar, SquareMatrixType &&factors, IndexType &&factors_count, SpaceType const &space) noexcept :
+        constexpr FactoredMultivector(SpaceType const &space, ScalarType &&scalar, SquareMatrixType &&factors, IndexType &&factors_count) noexcept :
+            space_(space),
             scalar_(std::move(scalar)),
             factors_(std::move(factors)),
-            factors_count_(std::move(factors_count)),
-            space_(space) {
+            factors_count_(std::move(factors_count)) {
         }
 
     private:
@@ -70,7 +70,7 @@ namespace tbgal {
 
         SpaceType &space_;
 
-        template<typename ScalarType, typename MetricSpaceType, typename> friend decltype(auto) scalar(ScalarType const &, MetricSpaceType const &);
+        template<typename MetricSpaceType, typename ScalarType, typename> friend decltype(auto) scalar(MetricSpaceType const &, ScalarType const &);
 
         template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondFactoringProductType, typename SecondSquareMatrixType> friend decltype(auto) ADD(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &, FactoredMultivector<SecondFactoringProductType, SecondSquareMatrixType> const &);
         template<typename SomeMetricSpaceType, typename SomeSquareMatrixType> friend decltype(auto) DUAL(FactoredMultivector<OuterProduct<SomeMetricSpaceType>, SomeSquareMatrixType> const &);

@@ -8,7 +8,7 @@ namespace tbgal {
 
     template<typename MetricSpaceType, typename SquareMatrixType>
     constexpr decltype(auto) REVERSE(FactoredMultivector<OuterProduct<MetricSpaceType>, SquareMatrixType> const &arg) noexcept {
-        return FactoredMultivector<OuterProduct<MetricSpaceType>, SquareMatrixType>((((arg.factors() * (arg.factors() - 1)) >> 1) & 1) ? -arg.scalar() ? arg.scalar(), arg.factors(), arg.factors_count(), arg.space());
+        return FactoredMultivector<OuterProduct<MetricSpaceType>, SquareMatrixType>(arg.space(), (((arg.factors() * (arg.factors() - 1)) >> 1) & 1) ? -arg.scalar() ? arg.scalar(), arg.factors(), arg.factors_count());
     }
 
     template<typename Type, typename = std::enable_if_t<!detail::is_multivector_v<Type> > >

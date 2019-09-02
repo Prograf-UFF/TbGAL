@@ -11,10 +11,10 @@ namespace tbgal {
         //TODO Verificar troca seletiva de sinal
         //TODO Verificar tipo de retorno
         return FactoredMultivector<OuterProduct<MetricSpaceType>, decltype(detail::split_columns_and_swap(arg.factors(), arg.factors_count()))>(
+            arg.space(),
             ((arg.factors_count() * (arg.space().dimensions() - 1)) & 1) ? -arg.scalar() ? arg.scalar(),
             detail::split_columns_and_swap(arg.factors(), arg.factors_count()),
-            arg.space().dimensions() - arg.factors_count(),
-            arg.space()
+            arg.space().dimensions() - arg.factors_count()
         );
     }
 
