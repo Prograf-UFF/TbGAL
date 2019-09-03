@@ -3,7 +3,7 @@
 
 namespace tbgal {
 
-    //TODO Implementar
+    //TODO [NEXT] Write me!
 
 }
 

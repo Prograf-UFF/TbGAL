@@ -3,26 +3,32 @@
 
 namespace tbgal {
 
-    template<typename FactoringProductType, typename SquareMatrixType>
-    constexpr decltype(auto) DUAL(FactoredMultivector<FactoringProductType, SquareMatrixType> const &arg);
+    template<typename MetricSpaceType, typename SquareMatrixType>
+    constexpr decltype(auto) DUAL(FactoredMultivector<GeometricProduct<MetricSpaceType>, SquareMatrixType> const &arg);
+    //TODO [FUTURE] Implement dualization for the general case (when the input multivector is not a blade).
 
     template<typename MetricSpaceType, typename SquareMatrixType>
     constexpr decltype(auto) DUAL(FactoredMultivector<OuterProduct<MetricSpaceType>, SquareMatrixType> const &arg) noexcept {
-        //TODO Verificar troca seletiva de sinal
-        //TODO Verificar tipo de retorno
-        return FactoredMultivector<OuterProduct<MetricSpaceType>, decltype(detail::split_columns_and_swap(arg.factors(), arg.factors_count()))>(
+        using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
+        using ResultingSquareMatrixType = decltype(detail::split_columns_and_swap(arg.factors(), arg.factors_count()));
+        using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
+        return ResultingFactoredMultivectorType(
             arg.space(),
             ((arg.factors_count() * (arg.space().dimensions() - 1)) & 1) ? -arg.scalar() ? arg.scalar(),
             detail::split_columns_and_swap(arg.factors(), arg.factors_count()),
             arg.space().dimensions() - arg.factors_count()
         );
+        //TODO [CHECK] Sign change.
     }
 
-    //TODO Especializar para FactoredMultivector<GeometricProduct<MetricSpaceType>, SquareMatrixType>
+    template<typename ScalarType>
+    constexpr decltype(auto) DUAL(ScalarType const &arg);
+    //TODO [FUTURE] Implement dualization for the general case (when the input multivector is a native scalar value).
 
-    template<typename FactoringProductType, typename SquareMatrixType>
-    constexpr decltype(auto) UNDUAL(FactoredMultivector<FactoringProductType, SquareMatrixType> const &arg) noexcept {
-        return DUAL(arg); //TODO Acho que não precisa do UNDUAL
+    template<typename Type>
+    constexpr decltype(auto) UNDUAL(Type const &arg) noexcept {
+        return DUAL(arg);
+        //TODO [CHECK] Is the UNDUAL necessary?
     }
 
 }

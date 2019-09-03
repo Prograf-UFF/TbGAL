@@ -8,15 +8,16 @@ namespace tbgal {
         return UNDUAL(OP(arg1, DUAL(arg2)));
     }
 
-    template<typename FirstFactoringProduct, typename FirstSquareMatrixType, typename SecondType, typename = std::enable_if_t<!detail::is_multivector_v<SecondType> > >
-    constexpr decltype(auto) LCONT(FactoredMultivector<FirstFactoringProduct, FirstSquareMatrixType> const &arg1, SecondType const &arg2) noexcept {
-        return scalar(arg2.space(), arg1.factors_count() == 0 ? arg1.scalar() * arg2 : 0);
+    template<typename FirstFactoringProduct, typename FirstSquareMatrixType, typename SecondScalarType, typename = std::enable_if_t<!detail::is_multivector_v<SecondScalarType> > >
+    constexpr decltype(auto) LCONT(FactoredMultivector<FirstFactoringProduct, FirstSquareMatrixType> const &arg1, SecondScalarType const &arg2) noexcept {
+        using ResultingType = std::common_type_t<typename FactoredMultivector<FirstFactoringProduct, FirstSquareMatrixType>::ScalarType, SecondScalarType>;
+        return arg1.factors_count() == 0 ? arg1.scalar() * arg2 : ResultingType(0);
     }
 
-    template<typename FirstType, typename SecondFactoringProduct, typename SecondSquareMatrixType, typename = std::enable_if_t<!detail::is_multivector_v<FirstType> > >
-    constexpr decltype(auto) LCONT(FirstType const &arg1, FactoredMultivector<SecondFactoringProduct, SecondSquareMatrixType> const &arg2) noexcept {
+    template<typename FirstScalarType, typename SecondFactoringProduct, typename SecondSquareMatrixType, typename = std::enable_if_t<!detail::is_multivector_v<FirstScalarType> > >
+    constexpr decltype(auto) LCONT(FirstScalarType const &arg1, FactoredMultivector<SecondFactoringProduct, SecondSquareMatrixType> const &arg2) noexcept {
         using ResultingFactoringProductType = SecondFactoringProduct;
-        using ResultingSquareMatrixType = detail::common_type_t<FirstType, SecondSquareMatrixType>;
+        using ResultingSquareMatrixType = detail::common_type_t<FirstScalarType, SecondSquareMatrixType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
         auto resulting_scalar = arg1 * arg2.scalar();
         if (resulting_scalar != 0) {
@@ -27,8 +28,8 @@ namespace tbgal {
         }
     }
 
-    template<typename FirstType, typename SecondType, typename = std::enable_if_t<!(detail::is_multivector_v<FirstType> || detail::is_multivector_v<SecondType>)> >
-    constexpr decltype(auto) LCONT(FirstType const &arg1, SecondType const &arg2) noexcept {
+    template<typename FirstScalarType, typename SecondScalarType, typename = std::enable_if_t<!(detail::is_multivector_v<FirstScalarType> || detail::is_multivector_v<SecondScalarType>)> >
+    constexpr decltype(auto) LCONT(FirstScalarType const &arg1, SecondScalarType const &arg2) noexcept {
         return arg1 * arg2;
     }
 

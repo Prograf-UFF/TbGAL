@@ -24,32 +24,53 @@ namespace tbgal {
         template<typename MatrixType>
         using scalar_type_t = typename MatrixType::Scalar;
 
-        template<typename ResultingMatrixType, typename InputMatrixType>
-        constexpr ResultingMatrixType& copy_first_columns(ResultingMatrixType &, std::size_t, InputMatrixType const &, std::size_t);
+        template<typename MatrixType>
+        struct cols_at_compile_time;
         
-        template<typename UpperTriangularMatrixType>
-        constexpr decltype(auto) determinant_triangular(UpperTriangularMatrixType const &);
+        template<typename MatrixType>
+        constexpr auto cols_at_compile_time_v = cols_at_compile_time<MatrixType>::value;
 
         template<typename MatrixType>
-        constexpr MatrixType make_matrix(std::size_t, std::size_t);
+        struct rows_at_compile_time;
         
-        template<typename ScalarType, typename MetricSpaceType>
+        template<typename MatrixType>
+        constexpr auto rows_at_compile_time_v = rows_at_compile_time<MatrixType>::value;
+
+        template<typename MatrixType>
+        constexpr decltype(auto) cols(MatrixType const &) noexcept;
+
+        template<typename MatrixType>
+        constexpr decltype(auto) rows(MatrixType const &) noexcept;
+
+        template<typename ScalarType, std::int32_t SizeAtCompileTime>
         struct identity_matrix_type;
 
-        template<typename ScalarType, typename MetricSpaceType>
-        using identity_matrix_type_t = typename identity_matrix_type<ScalarType, MetricSpaceType>::type;
+        template<typename ScalarType, std::int32_t SizeAtCompileTime>
+        using identity_matrix_type_t = typename identity_matrix_type<ScalarType, SizeAtCompileTime>::type;
         
-        template<typename ScalarType, typename MetricSpaceType>
-        constexpr decltype(auto) make_identity_matrix(MetricSpaceType const &);
+        template<typename ScalarType, std::int32_t SizeAtCompileTime>
+        constexpr decltype(auto) make_identity_matrix(std::int32_t) noexcept;
+
+        template<typename ScalarType, std::int32_t RowsAtCompileTime, std::int32_t ColsAtCompileTime>
+        struct matrix_type;
+
+        template<typename ScalarType, std::int32_t RowsAtCompileTime, std::int32_t ColsAtCompileTime>
+        using matrix_type_t = typename matrix_type<ScalarType, RowsAtCompileTime, ColsAtCompileTime>::type;
+
+        template<typename ScalarType, std::int32_t RowsAtCompileTime, std::int32_t ColsAtCompileTime>
+        constexpr decltype(auto) make_matrix(std::int32_t, std::int32_t) noexcept;
+
+        template<typename... ScalarTypes>
+        constexpr decltype(auto) make_column_matrix(ScalarTypes &&... args) noexcept;
+
+        template<typename InputMatrixType, typename ResultingMatrixType>
+        constexpr ResultingMatrixType& copy_columns(InputMatrixType const &, std::int32_t, ResultingMatrixType &, std::int32_t, std::int32_t) noexcept;
+
+        template<typename TriangularMatrixType>
+        constexpr decltype(auto) determinant_triangular_matrix(TriangularMatrixType const &, std::int32_t) noexcept;
 
         template<typename MatrixType>
-        constexpr decltype(auto) cols(MatrixType const &);
-
-        template<typename MatrixType>
-        constexpr decltype(auto) rows(MatrixType const &);
-
-        template<typename MatrixType>
-        constexpr decltype(auto) split_columns_and_swap(MatrixType const &, std::size_t);
+        constexpr decltype(auto) split_columns_and_swap(MatrixType const &, std::int32_t) noexcept;
 
         template<typename MatrixQType_, typename MatrixRType_>
         class BaseQRDecompositionResult {
@@ -69,7 +90,7 @@ namespace tbgal {
         };
 
         template<typename MatrixType>
-        constexpr decltype(auto) qr_decomposition(MatrixType const &);
+        constexpr decltype(auto) qr_decomposition(MatrixType const &) noexcept;
 
     }
 

@@ -4,7 +4,7 @@
 namespace tbgal {
 
     template<typename MetricSpaceType>
-    struct GeometricProduct {
+    struct GeometricProduct final {
     public:
 
         static_assert(detail::is_metric_space_v<MetricSpaceType>, "Invalid MetricSpaceType.");
@@ -19,7 +19,7 @@ namespace tbgal {
     };
 
     template<typename MetricSpaceType>
-    struct OuterProduct {
+    struct OuterProduct final {
     public:
 
         static_assert(detail::is_metric_space_v<MetricSpaceType>, "Invalid MetricSpaceType.");

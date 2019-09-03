@@ -4,10 +4,23 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <tuple>
+
+#ifndef TBGAL_DEFAULT_SCALAR_TYPE
+    #define TBGAL_DEFAULT_SCALAR_TYPE std::double_t
+#endif // TBGAL_DEFAULT_SCALAR_TYPE
+
+namespace tbgal {
+
+    using DefaultScalarType = TBGAL_DEFAULT_SCALAR_TYPE;
+
+    constexpr std::int32_t Dynamic = -1;
+
+}
 
 #include "traits.hpp"
 #include "matrix_traits.hpp"
@@ -35,6 +48,12 @@
 #include "inversion.hpp"
 #include "dualization.hpp"
 
-//TODO Verificar se o espaço métrico de todos os argumentos é o mesmo.
+#include "macro.hpp"
+
+#include "Euclidean/metric_space.hpp"
+#include "Euclidean/macro.hpp"
+
+#include "Homogeneous/metric_space.hpp"
+#include "Homogeneous/macro.hpp"
 
 #endif // __TBGAL_CORE_HPP__

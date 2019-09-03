@@ -3,80 +3,92 @@
 
 namespace tbgal {
 
+    //TODO [FUTURE] Implement the outer product for the general case (when input multivectors may not be blades).
+
     namespace detail {
 
-        template<bool AllNativeScalars>
+        template<bool AnyMultivectorType>
         struct OP_impl {
-
-            template<typename FirstType, typename... NextTypes>
-            constexpr decltype(auto) eval(FirstType const &arg1, NextTypes const &... args) noexcept {
-                return arg1 * eval(args...);
-            }
-
-            template<typename FirstType, typename SecondType>
-            constexpr decltype(auto) eval(FirstType const &arg1, SecondType const &arg2) noexcept {
-                return arg1 * arg2;
-            }
-        };
-
-        template<>
-        struct OP_impl<false> {
         private:
 
             template<typename FirstType, typename... NextTypes>
-            struct factoring_product_type;
+            struct common_scalar_type;
 
             template<typename FirstType, typename... NextTypes>
-            using factoring_product_type_t = typename factoring_product_type<FirstType, NextTypes...>::type;
+            using common_scalar_type_t = typename common_scalar_type<FirstType, NextTypes...>::type;
 
-            template<typename FirstType, typename... NextTypes>
-            struct factoring_product_type :
-                factoring_product_type<NextTypes...> {
+            template<typename FirstScalarType, typename... NextTypes>
+            struct common_scalar_type {
+                using type = std::common_type_t<FirstScalarType, common_scalar_type_t<NextTypes...> >;
             };
 
-            template<typename FactoringProductType, typename SquareMatrixType, typename... NextTypes>
-            struct factoring_product_type<FactoredMultivector<FactoringProductType, SquareMatrixType>, NextTypes...> {
-                using type = std::conditional_t<
-                    detail::is_any_v<std::true_type, detail::is_multivector_t<NextTypes>...>,
-                    FactoredMultivector<OuterProduct<typename FactoringProductType::SpaceType>, SquareMatrixType>,
-                    FactoredMultivector<FactoringProductType, SquareMatrixType>
-                >;
+            template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename... NextTypes>
+            struct common_scalar_type<FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType>, NextTypes...> {
+                using type = std::common_type_t<typename FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType>::ScalarType, common_scalar_type_t<NextTypes...> >;
+            };
+
+            template<typename ScalarType>
+            struct common_scalar_type {
+                using type = ScalarType;
+            };
+
+            template<typename FactoringProductType, typename SquareMatrixType>
+            struct common_scalar_type<FactoredMultivector<FactoringProductType, SquareMatrixType> > {
+                using type = typename FactoredMultivector<FactoringProductType, SquareMatrixType>::ScalarType;
+            };
+
+            template<typename FirstType, typename... NextTypes>
+            struct metric_space_type;
+
+            template<typename FirstType, typename... NextTypes>
+            using metric_space_type_t = typename metric_space_type<FirstType, NextTypes...>::type;
+
+            template<typename FirstType, typename... NextTypes>
+            struct metric_space_type :
+                metric_space_type<NextTypes...> {
+            };
+
+            template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename... NextTypes>
+            struct metric_space_type<FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType>, NextTypes...> {
+                using type = typename FirstFactoringProductType::SpaceType;
             };
 
             template<typename Type>
-            struct factoring_product_type {
+            struct metric_space_type {
                 using type = std::nullptr_t;
             };
 
             template<typename FactoringProductType, typename SquareMatrixType>
-            struct factoring_product_type<FactoredMultivector<FactoringProductType, SquareMatrixType> > {
-                using type = FactoringProductType;
+            struct metric_space_type<FactoredMultivector<FactoringProductType, SquareMatrixType> > {
+                using type = typename FactoringProductType::SpaceType;
             };
 
-            template<typename ResultingMatrixType, typename FirstType, typename... NextTypes>
-            constexpr std::tuple<ResultingMatrixType&, std::size_t> build_input_matrix(ResultingMatrixType &result, FirstType const &arg1, NextTypes const &... args) noexcept {
+            template<typename ResultingMatrixType, typename FirstScalarType, typename... NextTypes>
+            constexpr std::tuple<ResultingMatrixType&, std::int32_t> build_input_matrix(ResultingMatrixType &result, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
                 return build_input_matrix(result, args...);
             }
 
             template<typename ResultingMatrixType, typename FirstFactoringProductType, typename FirstSquareMatrixType, typename... NextTypes>
-            constexpr std::tuple<ResultingMatrixType&, std::size_t> build_input_matrix(ResultingMatrixType &result, FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &arg1, NextTypes const &... args) noexcept {
-                constexpr std::size_t end_column_index = std::get<1>(build_input_matrix(result, args...));
-                return std::make_tuple(copy_first_columns(result, end_column_index - arg1.factors_count(), arg1, arg1.factors_count()), end_column_index - arg1.factors_count());
+            constexpr std::tuple<ResultingMatrixType&, std::int32_t> build_input_matrix(ResultingMatrixType &result, FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &arg1, NextTypes const &... args) noexcept {
+                std::assert(is_blade(arg1));
+                constexpr std::int32_t end_column_index = std::get<1>(build_input_matrix(result, args...));
+                return std::make_tuple(copy_columns(arg1, 0, result, end_column_index - arg1.factors_count(), arg1.factors_count()), end_column_index - arg1.factors_count());
             }
 
             template<typename ResultingMatrixType, typename Type>
-            constexpr std::tuple<ResultingMatrixType&, std::size_t> build_input_matrix(ResultingMatrixType &result, Type const &) noexcept {
+            constexpr std::tuple<ResultingMatrixType&, std::int32_t> build_input_matrix(ResultingMatrixType &result, Type const &) noexcept {
                 return std::make_tuple(result, cols(result));
             }
 
             template<typename ResultingMatrixType, typename FactoringProductType, typename SquareMatrixType>
-            constexpr std::tuple<ResultingMatrixType&, std::size_t> build_input_matrix(ResultingMatrixType &result, FactoredMultivector<FactoringProductType, SquareMatrixType> const &arg) noexcept {
-                constexpr std::size_t end_column_index = cols(result);
-                return std::make_tuple(copy_first_columns(result, end_column_index - arg.factors_count(), arg, arg.factors_count()), end_column_index - arg.factors_count());
+            constexpr std::tuple<ResultingMatrixType&, std::int32_t> build_input_matrix(ResultingMatrixType &result, FactoredMultivector<FactoringProductType, SquareMatrixType> const &arg) noexcept {
+                std::assert(is_blade(arg));
+                constexpr std::int32_t end_column_index = cols(result);
+                return std::make_tuple(copy_columns(arg, 0, result, end_column_index - arg.factors_count(), arg.factors_count()), end_column_index - arg.factors_count());
             }
 
-            template<typename FirstType, typename... NextTypes>
-            constexpr decltype(auto) multiply_scalars(FirstType const &arg1, NextTypes const &... args) noexcept {
+            template<typename FirstScalarType, typename... NextTypes>
+            constexpr decltype(auto) multiply_scalars(FirstScalarType const &arg1, NextTypes const &... args) noexcept {
                 return arg1 * multiply_scalars(args...);
             }
 
@@ -95,13 +107,14 @@ namespace tbgal {
                 return arg.scalar();
             }
 
-            template<typename FirstType, typename... NextTypes>
-            constexpr decltype(auto) space_ptr(FirstType const &, NextTypes const &... args) noexcept {
+            template<typename FirstScalarType, typename... NextTypes>
+            constexpr decltype(auto) space_ptr(FirstScalarType const &, NextTypes const &... args) noexcept {
                 return space_ptr(args...);
             }
 
             template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename... NextTypes>
             constexpr decltype(auto) space_ptr(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &arg1, NextTypes const &... args) noexcept {
+                std::assert(space_ptr(args...) == &arg1.space() || space_ptr(args...) == nullptr);
                 return &arg1.space();
             }
 
@@ -115,13 +128,14 @@ namespace tbgal {
                 return &arg.space();
             }
 
-            template<typename FirstType, typename... NextTypes>
-            constexpr decltype(auto) sum_factors_count(FirstType const &, NextTypes const &... args) noexcept {
+            template<typename FirstScalarType, typename... NextTypes>
+            constexpr decltype(auto) sum_factors_count(FirstScalarType const &, NextTypes const &... args) noexcept {
                 return sum_factors_count(args...);
             }
 
             template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename... NextTypes>
             constexpr decltype(auto) sum_factors_count(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &arg1, NextTypes const &... args) noexcept {
+                std::assert(is_blade(arg1));
                 return arg1.factors_count() + sum_factors_count(args...);
             }
 
@@ -132,6 +146,7 @@ namespace tbgal {
 
             template<typename FactoringProductType, typename SquareMatrixType>
             constexpr decltype(auto) sum_factors_count(FactoredMultivector<FactoringProductType, SquareMatrixType> const &arg) noexcept {
+                std::assert(is_blade(arg));
                 return arg.factors_count();
             }
 
@@ -139,18 +154,19 @@ namespace tbgal {
 
             template<typename FirstType, typename... NextTypes>
             constexpr decltype(auto) eval(FirstType const &arg1, NextTypes const &... args) noexcept {
-                using InputFactorsMatrixType = input_factors_matrix_type_t<FirstType, NextTypes...>;
-                using ResultingFactoringProductType = factoring_product_type_t<FirstType, NextTypes...>;
-                using ResultingSquareMatrixType = squared_matrix_type_t<FirstType, NextTypes...>;
+                using ResultingScalarType = common_scalar_type_t<FirstType, NextTypes...>;
+                using ResultingMetricSpaceType = metric_space_type_t<FirstType, NextTypes...>;
+                using ResultingFactoringProductType = OuterProduct<ResultingMetricSpaceType>;
+                using ResultingSquareMatrixType = matrix_type_t<ResultingScalarType, ResultingMetricSpaceType::DimensionsAtCompileTime, ResultingMetricSpaceType::DimensionsAtCompileTime>;
                 using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
                 auto& space = *space_ptr(arg1, args...);
                 auto factors_count = sum_factors_count(arg1, args...);
                 if (factors_count <= space.dimensions()) {
                     auto prod_scalar = multiply_scalars(arg1, args...);
                     if (prod_scalar != 0) {
-                        auto qr = qr_decomposition(std::get<0>(build_input_matrix(make_matrix<InputFactorsMatrixType>(space.dimensions(), factors_count), arg1, args...)));
+                        auto qr = qr_decomposition(std::get<0>(build_input_matrix(make_matrix<ResultingScalarType, ResultingMetricSpaceType::DimensionsAtCompileTime, Dynamic>(space.dimensions(), factors_count), arg1, args...)));
                         if (factors_count == qr.rank()) {
-                            return ResultingFactoredMultivectorType(space, prod_scalar * determinant_triangular(qr.matrix_r()), qr.matrix_q(), factors_count);
+                            return ResultingFactoredMultivectorType(space, prod_scalar * determinant_triangular_matrix(qr.matrix_r(), factors_count), qr.matrix_q(), factors_count);
                         }
                     }
                 }
@@ -158,11 +174,25 @@ namespace tbgal {
             }
         };
 
+        template<>
+        struct OP_impl<false> {
+
+            template<typename FirstScalarType, typename... NextScalarTypes>
+            constexpr decltype(auto) eval(FirstScalarType const &arg1, NextScalarTypes const &... args) noexcept {
+                return arg1 * eval(args...);
+            }
+
+            template<typename FirstScalarType, typename SecondScalarType>
+            constexpr decltype(auto) eval(FirstScalarType const &arg1, SecondScalarType const &arg2) noexcept {
+                return arg1 * arg2;
+            }
+        };
+
     }
 
     template<typename FirstType, typename... NextTypes>
     constexpr decltype(auto) OP(FirstType const &arg1, NextTypes const &... args) noexcept {
-        return detail::OP_impl<!detail::is_any_v<std::true_type, detail::is_multivector_t<FirstType>, detail::is_multivector_t<NextTypes>...> >::eval(arg1, args...);
+        return detail::OP_impl<detail::is_any_v<std::true_type, detail::is_multivector_t<FirstType>, detail::is_multivector_t<NextTypes>...> >::eval(arg1, args...);
     }
 
     template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondFactoringProductType, typename SecondSquareMatrixType>
@@ -170,8 +200,8 @@ namespace tbgal {
         return OP(arg1, arg2);
     }
 
-    template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondType, typename = std::enable_if_t<!detail::is_multivector_v<SecondType> > >
-    constexpr decltype(auto) operator^(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &arg1, SecondType const &arg2) noexcept {
+    template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondScalarType, typename = std::enable_if_t<!detail::is_multivector_v<SecondScalarType> > >
+    constexpr decltype(auto) operator^(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &arg1, SecondScalarType const &arg2) noexcept {
         return OP(arg1, arg2);
     }
 
