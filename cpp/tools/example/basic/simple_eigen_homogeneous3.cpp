@@ -1,6 +1,5 @@
-#include <tbgal/using_Eigen.hpp>
-#include <tbgal/assuming_Homogeneous3.hpp>
-#include <tbgal/assuming_HomogeneousD.hpp>
+#include "../../../include/tbgal/using_Eigen.hpp" //TODO [DEBUG]
+#include "../../../include/tbgal/assuming_Homogeneous3.hpp" //TODO [DEBUG]
 
 using namespace tbgal;
 

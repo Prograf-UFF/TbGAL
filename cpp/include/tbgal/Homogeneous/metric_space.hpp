@@ -38,11 +38,11 @@ namespace tbgal {
 
         constexpr HomogeneousMetricSpace(std::int32_t base_dimensions) noexcept :
             Super(detail::make_identity_matrix<ScalarType, Dynamic>(base_dimensions + 1)) {
-            std::assert(base_dimensions > 0);
+            assert(base_dimensions > 0);
         }
 
         constexpr void set_base_dimensions(std::int32_t base_dimensions) noexcept {
-            std::assert(base_dimensions > 0);
+            assert(base_dimensions > 0);
             Super::metric_matrix_ = detail::make_identity_matrix<ScalarType, Dynamic>(base_dimensions + 1);
         }
     };

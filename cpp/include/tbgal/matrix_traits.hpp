@@ -60,14 +60,14 @@ namespace tbgal {
         template<typename ScalarType, std::int32_t RowsAtCompileTime, std::int32_t ColsAtCompileTime>
         constexpr decltype(auto) make_matrix(std::int32_t, std::int32_t) noexcept;
 
-        template<typename... ScalarTypes>
-        constexpr decltype(auto) make_column_matrix(ScalarTypes &&... args) noexcept;
-
-        template<typename InputMatrixType, typename ResultingMatrixType>
-        constexpr ResultingMatrixType& copy_columns(InputMatrixType const &, std::int32_t, ResultingMatrixType &, std::int32_t, std::int32_t) noexcept;
+        template<typename SourceMatrixType, typename TargetMatrixType>
+        constexpr TargetMatrixType& copy_columns(SourceMatrixType const &, std::int32_t, TargetMatrixType &, std::int32_t, std::int32_t) noexcept;
 
         template<typename TriangularMatrixType>
         constexpr decltype(auto) determinant_triangular_matrix(TriangularMatrixType const &, std::int32_t) noexcept;
+
+        template<typename... ScalarTypes>
+        constexpr decltype(auto) fill_column_matrix(ScalarTypes &&... args) noexcept;
 
         template<typename MatrixType>
         constexpr decltype(auto) split_columns_and_swap(MatrixType const &, std::int32_t) noexcept;

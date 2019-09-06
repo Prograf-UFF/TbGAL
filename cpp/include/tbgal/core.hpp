@@ -20,7 +20,15 @@ namespace tbgal {
 
     constexpr std::int32_t Dynamic = -1;
 
+    namespace detail {
+
+        template<bool AnyMultivectorType> struct OP_impl;
+
+    }
+
 }
+
+#include "exception.hpp"
 
 #include "traits.hpp"
 #include "matrix_traits.hpp"

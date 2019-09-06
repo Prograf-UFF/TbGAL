@@ -82,12 +82,12 @@ namespace tbgal {
 
         template<typename MatrixType>
         struct cols_at_compile_time {
-            constexpr auto value = MatrixType::ColsAtCompileTime;
+            constexpr static auto value = MatrixType::ColsAtCompileTime;
         };
 
         template<typename MatrixType>
         struct rows_at_compile_time {
-            constexpr auto value = MatrixType::RowsAtCompileTime;
+            constexpr static auto value = MatrixType::RowsAtCompileTime;
         };
 
         template<typename MatrixType>
@@ -107,7 +107,9 @@ namespace tbgal {
 
         template<typename ScalarType, std::int32_t SizeAtCompileTime>
         constexpr decltype(auto) make_identity_matrix(std::int32_t size) noexcept {
-            return identity_matrix_type_t<ScalarType, SizeAtCompileTime>::Identity(size);
+            identity_matrix_type_t<ScalarType, SizeAtCompileTime> result(size);
+            result.setIdentity();
+            return result;
         }
 
         template<typename ScalarType, std::int32_t RowsAtCompileTime, std::int32_t ColsAtCompileTime>
@@ -120,21 +122,40 @@ namespace tbgal {
             return matrix_type_t<ScalarType, RowsAtCompileTime, ColsAtCompileTime>(rows, cols);
         }
         
-        template<typename... ScalarTypes>
-        constexpr decltype(auto) make_column_matrix(ScalarTypes &&... args) noexcept {
-            matrix_type_t<std::common_type_t<std::remove_cv_t<std::remove_reference_t<ScalarTypes> >...>, sizeof...(ScalarTypes), 1> result;
-            result << std::move(args)...;
-            return result;
-        }
-
-        template<typename InputMatrixType, typename ResultingMatrixType>
-        constexpr ResultingMatrixType& copy_columns(InputMatrixType const &source, std::int32_t first_source, ResultingMatrixType &target, std::int32_t first_target, std::int32_t count) noexcept {
-            for (std::int32_t offset = 0, col_source = first_source, col_target = first_target; offset < count; ++offset, ++col_source, ++col_target) {
-                for (Eigen::Index row = 0; row != target.rows(); ++row) {
-                    target(row, col_target) = source(row, col_source);
+        template<typename SourceMatrixType>
+        struct _copy_columns_impl {
+            template<typename TargetMatrixType>
+            constexpr static TargetMatrixType& eval(SourceMatrixType const &source, std::int32_t first_source, TargetMatrixType &target, std::int32_t first_target, std::int32_t count) noexcept {
+                for (std::int32_t offset = 0, col_source = first_source, col_target = first_target; offset < count; ++offset, ++col_source, ++col_target) {
+                    for (std::int32_t row = 0; row != target.rows(); ++row) {
+                        target(row, col_target) = source(row, col_source);
+                    }
                 }
+                return target;
             }
-            return target;
+        };
+        
+        template<typename SourceScalarType, int SourceSizeAtCompileTime, int SourceMaxSizeAtCompileTime>
+        struct _copy_columns_impl<Eigen::DiagonalMatrix<SourceScalarType, SourceSizeAtCompileTime, SourceMaxSizeAtCompileTime> > {
+            
+            template<typename TargetMatrixType>
+            constexpr static TargetMatrixType& eval(Eigen::DiagonalMatrix<SourceScalarType, SourceSizeAtCompileTime, SourceMaxSizeAtCompileTime> const &source, std::int32_t first_source, TargetMatrixType &target, std::int32_t first_target, std::int32_t count) noexcept {
+                for (std::int32_t offset = 0, col_source = first_source, col_target = first_target; offset < count; ++offset, ++col_source, ++col_target) {
+                    for (std::int32_t row = 0; row < col_source; ++row) {
+                        target(row, col_target) = 0;
+                    }
+                    target(col_source, col_target) = source.diagonal()[col_source];
+                    for (std::int32_t row = col_source + 1; row < target.rows(); ++row) {
+                        target(row, col_target) = 0;
+                    }
+                }
+                return target;
+            }
+        };
+        
+        template<typename SourceMatrixType, typename TargetMatrixType>
+        constexpr TargetMatrixType& copy_columns(SourceMatrixType const &source, std::int32_t first_source, TargetMatrixType &target, std::int32_t first_target, std::int32_t count) noexcept {
+            return _copy_columns_impl<SourceMatrixType>::eval(source, first_source, target, first_target, count);
         }
 
         template<typename TriangularMatrixType>
@@ -145,6 +166,23 @@ namespace tbgal {
                 result *= arg(ind, ind);
             }
             return result;
+        }
+
+        template<typename MatrixType>
+        constexpr MatrixType& _fill_column_matrix_impl(MatrixType &target) noexcept {
+            return target;
+        }
+        
+        template<typename MatrixType, typename FirstScalarType, typename... NextScalarTypes>
+        constexpr MatrixType& _fill_column_matrix_impl(MatrixType &target, FirstScalarType &&arg1, NextScalarTypes &&... args) noexcept {
+            target(target.rows() - (1 + sizeof...(NextScalarTypes)), 0) = std::move(arg1);
+            return _fill_column_matrix_impl(target, std::move(args)...);
+        }
+        
+        template<typename... ScalarTypes>
+        constexpr decltype(auto) fill_column_matrix(ScalarTypes &&... args) noexcept {
+            matrix_type_t<std::common_type_t<std::remove_cv_t<std::remove_reference_t<ScalarTypes> >...>, sizeof...(ScalarTypes), 1> result;
+            return _fill_column_matrix_impl(result, std::move(args)...);
         }
 
         template<typename MatrixType>
@@ -169,7 +207,18 @@ namespace tbgal {
             typename Eigen::ColPivHouseholderQR<MatrixType_>::HouseholderSequenceType,
             typename Eigen::ColPivHouseholderQR<MatrixType_>::MatrixType
         > {
+        private:
+
+            using Super = BaseQRDecompositionResult<
+                typename Eigen::ColPivHouseholderQR<MatrixType_>::HouseholderSequenceType,
+                typename Eigen::ColPivHouseholderQR<MatrixType_>::MatrixType
+            >;
+
         public:
+
+            using MatrixQType = typename Super::MatrixQType;
+            using MatrixRType = typename Super::MatrixRType;
+            using IndexType = typename Super::IndexType;
 
             using MatrixType = MatrixType_;
 
@@ -177,11 +226,12 @@ namespace tbgal {
             constexpr QRDecompositionResult(QRDecompositionResult &&) = default;
 
             constexpr QRDecompositionResult(MatrixType const &arg) :
-                qr_(arg) {
+                qr_(arg),
+                matrix_q_(qr_.householderQ()) {
             }
 
             constexpr MatrixQType const & matrix_q() const noexcept override {
-                return qr_.householderQ();
+                return matrix_q_;
             }
 
             constexpr MatrixRType const & matrix_r() const noexcept override {
@@ -195,6 +245,7 @@ namespace tbgal {
         private:
 
             Eigen::ColPivHouseholderQR<MatrixType> qr_;
+            MatrixQType matrix_q_;
         };
 
         template<typename MatrixType>

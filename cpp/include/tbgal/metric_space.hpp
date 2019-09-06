@@ -9,7 +9,7 @@ namespace tbgal {
 
         using IndexType = detail::index_type_t<SymmetricMatrixType>;
         
-        constexpr auto DimensionsAtCompileTime = detail::rows_at_compile_time_v<SymmetricMatrixType>;
+        constexpr static auto DimensionsAtCompileTime = detail::rows_at_compile_time_v<SymmetricMatrixType>;
 
         constexpr MetricSpace(MetricSpace const &) = default;
         constexpr MetricSpace(MetricSpace &&) = default;
@@ -24,7 +24,7 @@ namespace tbgal {
             metric_matrix_{ std::move(metric_matrix) } {
         }
 
-        constexpr SymmetricMatrixType metric_matrix_;
+        SymmetricMatrixType metric_matrix_;
     };
 
     namespace detail {
