@@ -42,35 +42,35 @@ namespace tbgal {
         template<typename MatrixType>
         constexpr decltype(auto) rows(MatrixType const &) noexcept;
 
-        template<typename ScalarType, std::int32_t SizeAtCompileTime>
+        template<typename ScalarType, DefaultIndexType SizeAtCompileTime>
         struct identity_matrix_type;
 
-        template<typename ScalarType, std::int32_t SizeAtCompileTime>
+        template<typename ScalarType, DefaultIndexType SizeAtCompileTime>
         using identity_matrix_type_t = typename identity_matrix_type<ScalarType, SizeAtCompileTime>::type;
         
-        template<typename ScalarType, std::int32_t SizeAtCompileTime>
-        constexpr decltype(auto) make_identity_matrix(std::int32_t) noexcept;
+        template<typename ScalarType, DefaultIndexType SizeAtCompileTime>
+        constexpr decltype(auto) make_identity_matrix(DefaultIndexType) noexcept;
 
-        template<typename ScalarType, std::int32_t RowsAtCompileTime, std::int32_t ColsAtCompileTime>
+        template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime>
         struct matrix_type;
 
-        template<typename ScalarType, std::int32_t RowsAtCompileTime, std::int32_t ColsAtCompileTime>
+        template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime>
         using matrix_type_t = typename matrix_type<ScalarType, RowsAtCompileTime, ColsAtCompileTime>::type;
 
-        template<typename ScalarType, std::int32_t RowsAtCompileTime, std::int32_t ColsAtCompileTime>
-        constexpr decltype(auto) make_matrix(std::int32_t, std::int32_t) noexcept;
+        template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime>
+        constexpr decltype(auto) make_matrix(DefaultIndexType, DefaultIndexType) noexcept;
 
         template<typename SourceMatrixType, typename TargetMatrixType>
-        constexpr TargetMatrixType& copy_columns(SourceMatrixType const &, std::int32_t, TargetMatrixType &, std::int32_t, std::int32_t) noexcept;
+        constexpr TargetMatrixType& copy_columns(SourceMatrixType const &, DefaultIndexType, TargetMatrixType &, DefaultIndexType, DefaultIndexType) noexcept;
 
         template<typename TriangularMatrixType>
-        constexpr decltype(auto) determinant_triangular_matrix(TriangularMatrixType const &, std::int32_t) noexcept;
+        constexpr decltype(auto) determinant_triangular_matrix(TriangularMatrixType const &, DefaultIndexType) noexcept;
 
         template<typename... ScalarTypes>
         constexpr decltype(auto) fill_column_matrix(ScalarTypes &&... args) noexcept;
 
         template<typename MatrixType>
-        constexpr decltype(auto) split_columns_and_swap(MatrixType const &, std::int32_t) noexcept;
+        constexpr decltype(auto) split_columns_and_swap(MatrixType const &, DefaultIndexType) noexcept;
 
         template<typename MatrixQType_, typename MatrixRType_>
         class BaseQRDecompositionResult {

@@ -40,7 +40,7 @@ namespace tbgal {
     }
 
     template<typename ScalarType, typename MetricSpaceType>
-    decltype(auto) e(MetricSpaceType const &space, std::int32_t index) noexcept {
+    decltype(auto) e(MetricSpaceType const &space, DefaultIndexType index) noexcept {
         using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
         using ResultingSquareMatrixType = detail::matrix_type_t<ScalarType, MetricSpaceType::DimensionsAtCompileTime, MetricSpaceType::DimensionsAtCompileTime>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;

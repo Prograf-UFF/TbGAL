@@ -3,7 +3,7 @@
 
 namespace tbgal {
 
-    template<typename ScalarType, std::int32_t DimensionsAtCompileTime>
+    template<typename ScalarType, DefaultIndexType DimensionsAtCompileTime>
     class EuclideanMetricSpace : public MetricSpace<detail::identity_matrix_type_t<ScalarType, DimensionsAtCompileTime> > {
     private:
 
@@ -36,12 +36,12 @@ namespace tbgal {
             Super(detail::make_identity_matrix<ScalarType, Dynamic>(0)) {
         }
 
-        constexpr EuclideanMetricSpace(std::int32_t dimensions) noexcept :
+        constexpr EuclideanMetricSpace(DefaultIndexType dimensions) noexcept :
             Super(detail::make_identity_matrix<ScalarType, Dynamic>(dimensions)) {
             assert(dimensions > 0);
         }
 
-        constexpr void set_dimensions(std::int32_t dimensions) noexcept {
+        constexpr void set_dimensions(DefaultIndexType dimensions) noexcept {
             assert(dimensions > 0);
             Super::metric_matrix_ = detail::make_identity_matrix<ScalarType, Dynamic>(dimensions);
         }
@@ -49,7 +49,7 @@ namespace tbgal {
 
     namespace detail {
 
-        template<typename ScalarType, std::int32_t DimensionsAtCompileTime>
+        template<typename ScalarType, DefaultIndexType DimensionsAtCompileTime>
         struct is_metric_space<EuclideanMetricSpace<ScalarType, DimensionsAtCompileTime> > :
             std::true_type {
         };

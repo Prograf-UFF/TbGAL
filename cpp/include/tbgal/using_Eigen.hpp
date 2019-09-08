@@ -2,7 +2,7 @@
 #define __TBGAL_USING_EIGEN_HPP__
 
 #include "core.hpp"
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 namespace tbgal {
 
@@ -100,34 +100,34 @@ namespace tbgal {
             return arg.rows();
         }
 
-        template<typename ScalarType, std::int32_t SizeAtCompileTime>
+        template<typename ScalarType, DefaultIndexType SizeAtCompileTime>
         struct identity_matrix_type {
             using type = Eigen::DiagonalMatrix<ScalarType, SizeAtCompileTime>;
         };
 
-        template<typename ScalarType, std::int32_t SizeAtCompileTime>
-        constexpr decltype(auto) make_identity_matrix(std::int32_t size) noexcept {
+        template<typename ScalarType, DefaultIndexType SizeAtCompileTime>
+        constexpr decltype(auto) make_identity_matrix(DefaultIndexType size) noexcept {
             identity_matrix_type_t<ScalarType, SizeAtCompileTime> result(size);
             result.setIdentity();
             return result;
         }
 
-        template<typename ScalarType, std::int32_t RowsAtCompileTime, std::int32_t ColsAtCompileTime>
+        template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime>
         struct matrix_type {
             using type = Eigen::Matrix<ScalarType, RowsAtCompileTime, ColsAtCompileTime>;
         };
 
-        template<typename ScalarType, std::int32_t RowsAtCompileTime, std::int32_t ColsAtCompileTime>
-        constexpr decltype(auto) make_matrix(std::int32_t rows, std::int32_t cols) noexcept {
+        template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime>
+        constexpr decltype(auto) make_matrix(DefaultIndexType rows, DefaultIndexType cols) noexcept {
             return matrix_type_t<ScalarType, RowsAtCompileTime, ColsAtCompileTime>(rows, cols);
         }
         
         template<typename SourceMatrixType>
         struct _copy_columns_impl {
             template<typename TargetMatrixType>
-            constexpr static TargetMatrixType& eval(SourceMatrixType const &source, std::int32_t first_source, TargetMatrixType &target, std::int32_t first_target, std::int32_t count) noexcept {
-                for (std::int32_t offset = 0, col_source = first_source, col_target = first_target; offset < count; ++offset, ++col_source, ++col_target) {
-                    for (std::int32_t row = 0; row != target.rows(); ++row) {
+            constexpr static TargetMatrixType& eval(SourceMatrixType const &source, DefaultIndexType first_source, TargetMatrixType &target, DefaultIndexType first_target, DefaultIndexType count) noexcept {
+                for (DefaultIndexType offset = 0, col_source = first_source, col_target = first_target; offset < count; ++offset, ++col_source, ++col_target) {
+                    for (DefaultIndexType row = 0; row != target.rows(); ++row) {
                         target(row, col_target) = source(row, col_source);
                     }
                 }
@@ -139,13 +139,13 @@ namespace tbgal {
         struct _copy_columns_impl<Eigen::DiagonalMatrix<SourceScalarType, SourceSizeAtCompileTime, SourceMaxSizeAtCompileTime> > {
             
             template<typename TargetMatrixType>
-            constexpr static TargetMatrixType& eval(Eigen::DiagonalMatrix<SourceScalarType, SourceSizeAtCompileTime, SourceMaxSizeAtCompileTime> const &source, std::int32_t first_source, TargetMatrixType &target, std::int32_t first_target, std::int32_t count) noexcept {
-                for (std::int32_t offset = 0, col_source = first_source, col_target = first_target; offset < count; ++offset, ++col_source, ++col_target) {
-                    for (std::int32_t row = 0; row < col_source; ++row) {
+            constexpr static TargetMatrixType& eval(Eigen::DiagonalMatrix<SourceScalarType, SourceSizeAtCompileTime, SourceMaxSizeAtCompileTime> const &source, DefaultIndexType first_source, TargetMatrixType &target, DefaultIndexType first_target, DefaultIndexType count) noexcept {
+                for (DefaultIndexType offset = 0, col_source = first_source, col_target = first_target; offset < count; ++offset, ++col_source, ++col_target) {
+                    for (DefaultIndexType row = 0; row < col_source; ++row) {
                         target(row, col_target) = 0;
                     }
                     target(col_source, col_target) = source.diagonal()[col_source];
-                    for (std::int32_t row = col_source + 1; row < target.rows(); ++row) {
+                    for (DefaultIndexType row = col_source + 1; row < target.rows(); ++row) {
                         target(row, col_target) = 0;
                     }
                 }
@@ -154,15 +154,15 @@ namespace tbgal {
         };
         
         template<typename SourceMatrixType, typename TargetMatrixType>
-        constexpr TargetMatrixType& copy_columns(SourceMatrixType const &source, std::int32_t first_source, TargetMatrixType &target, std::int32_t first_target, std::int32_t count) noexcept {
+        constexpr TargetMatrixType& copy_columns(SourceMatrixType const &source, DefaultIndexType first_source, TargetMatrixType &target, DefaultIndexType first_target, DefaultIndexType count) noexcept {
             return _copy_columns_impl<SourceMatrixType>::eval(source, first_source, target, first_target, count);
         }
 
         template<typename TriangularMatrixType>
-        constexpr decltype(auto) determinant_triangular_matrix(TriangularMatrixType const &arg, std::int32_t size) noexcept {
+        constexpr decltype(auto) determinant_triangular_matrix(TriangularMatrixType const &arg, DefaultIndexType size) noexcept {
             using ScalarType = typename TriangularMatrixType::Scalar;
             ScalarType result = 1;
-            for (std::int32_t ind = 0; ind != size; ++ind) {
+            for (DefaultIndexType ind = 0; ind != size; ++ind) {
                 result *= arg(ind, ind);
             }
             return result;
@@ -186,15 +186,15 @@ namespace tbgal {
         }
 
         template<typename MatrixType>
-        constexpr decltype(auto) split_columns_and_swap(MatrixType const &input, std::int32_t col) noexcept {
+        constexpr decltype(auto) split_columns_and_swap(MatrixType const &input, DefaultIndexType col) noexcept {
             using ResultingMatrixType = Eigen::Matrix<typename MatrixType::Scalar, MatrixType::RowsAtCompileTime, MatrixType::ColsAtCompileTime>;
             ResultingMatrixType result(input.rows(), input.cols());
-            for (std::int32_t offset = 0, end = input.cols() - col; offset != end; ++offset) {
+            for (DefaultIndexType offset = 0, end = input.cols() - col; offset != end; ++offset) {
                 for (Eigen::Index row = 0; row != input.rows(); ++row) {
                     result(row, offset) = input(row, col + offset);
                 }
             }
-            for (std::int32_t offset = 0, first = input.cols() - col; offset != col; ++offset) {
+            for (DefaultIndexType offset = 0, first = input.cols() - col; offset != col; ++offset) {
                 for (Eigen::Index row = 0; row != input.rows(); ++row) {
                     result(row, first + offset) = input(row, offset);
                 }

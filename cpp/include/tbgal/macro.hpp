@@ -3,7 +3,7 @@
 
 #define _TBGAL_OVERLOAD_UTILS(METRIC_SPACE) \
     \
-    decltype(auto) e(std::int32_t index) noexcept { \
+    decltype(auto) e(DefaultIndexType index) noexcept { \
         return tbgal::e<tbgal::DefaultScalarType>(METRIC_SPACE, index); \
     } \
     \

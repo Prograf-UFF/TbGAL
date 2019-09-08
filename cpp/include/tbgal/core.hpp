@@ -14,11 +14,16 @@
     #define TBGAL_DEFAULT_SCALAR_TYPE std::double_t
 #endif // TBGAL_DEFAULT_SCALAR_TYPE
 
+#ifndef TBGAL_DEFAULT_INDEX_TYPE
+    #define TBGAL_DEFAULT_INDEX_TYPE std::int64_t
+#endif // TBGAL_DEFAULT_INDEX_TYPE
+
 namespace tbgal {
 
     using DefaultScalarType = TBGAL_DEFAULT_SCALAR_TYPE;
+    using DefaultIndexType = TBGAL_DEFAULT_INDEX_TYPE;
 
-    constexpr std::int32_t Dynamic = -1;
+    constexpr static DefaultIndexType Dynamic = -1;
 
     namespace detail {
 

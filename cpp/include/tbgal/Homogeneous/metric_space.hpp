@@ -3,7 +3,7 @@
 
 namespace tbgal {
 
-    template<typename ScalarType, std::int32_t BaseDimensionsAtCompileTime>
+    template<typename ScalarType, DefaultIndexType BaseDimensionsAtCompileTime>
     class HomogeneousMetricSpace : public MetricSpace<detail::identity_matrix_type_t<ScalarType, BaseDimensionsAtCompileTime + 1> > {
     private:
 
@@ -36,12 +36,12 @@ namespace tbgal {
             Super(detail::make_identity_matrix<ScalarType, Dynamic>(1)) {
         }
 
-        constexpr HomogeneousMetricSpace(std::int32_t base_dimensions) noexcept :
+        constexpr HomogeneousMetricSpace(DefaultIndexType base_dimensions) noexcept :
             Super(detail::make_identity_matrix<ScalarType, Dynamic>(base_dimensions + 1)) {
             assert(base_dimensions > 0);
         }
 
-        constexpr void set_base_dimensions(std::int32_t base_dimensions) noexcept {
+        constexpr void set_base_dimensions(DefaultIndexType base_dimensions) noexcept {
             assert(base_dimensions > 0);
             Super::metric_matrix_ = detail::make_identity_matrix<ScalarType, Dynamic>(base_dimensions + 1);
         }
@@ -49,7 +49,7 @@ namespace tbgal {
 
     namespace detail {
 
-        template<typename ScalarType, std::int32_t BaseDimensionsAtCompileTime>
+        template<typename ScalarType, DefaultIndexType BaseDimensionsAtCompileTime>
         struct is_metric_space<HomogeneousMetricSpace<ScalarType, BaseDimensionsAtCompileTime> > :
             std::true_type {
         };
