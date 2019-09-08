@@ -14,6 +14,8 @@ namespace tbgal {
         constexpr MetricSpace(MetricSpace const &) = default;
         constexpr MetricSpace(MetricSpace &&) = default;
 
+        virtual std::string const & basis_vector_str(IndexType index) const noexcept = 0;
+
         constexpr IndexType dimensions() const noexcept {
             return detail::rows(metric_matrix_);
         }

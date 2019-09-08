@@ -1,6 +1,7 @@
 #ifndef __TBGAL_CORE_HPP__
 #define __TBGAL_CORE_HPP__
 
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -9,6 +10,7 @@
 #include <string>
 #include <type_traits>
 #include <tuple>
+#include <vector>
 
 #ifndef TBGAL_DEFAULT_SCALAR_TYPE
     #define TBGAL_DEFAULT_SCALAR_TYPE std::double_t
@@ -61,6 +63,7 @@ namespace tbgal {
 #include "inversion.hpp"
 #include "dualization.hpp"
 
+#include "write.hpp"
 #include "macro.hpp"
 
 #include "Euclidean/metric_space.hpp"

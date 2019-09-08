@@ -37,6 +37,9 @@ namespace tbgal {
         constexpr auto rows_at_compile_time_v = rows_at_compile_time<MatrixType>::value;
 
         template<typename MatrixType>
+        constexpr decltype(auto) coeff(MatrixType const &, DefaultIndexType, DefaultIndexType) noexcept;
+
+        template<typename MatrixType>
         constexpr decltype(auto) cols(MatrixType const &) noexcept;
 
         template<typename MatrixType>

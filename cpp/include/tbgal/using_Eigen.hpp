@@ -91,6 +91,25 @@ namespace tbgal {
         };
 
         template<typename MatrixType>
+        struct _coeff_impl {
+            constexpr static decltype(auto) eval(MatrixType const &arg, DefaultIndexType row, DefaultIndexType col) noexcept {
+                return arg(row, col);
+            }
+        };
+
+        template<typename SecondScalarType, int SecondSizeAtCompileTime, int SecondMaxSizeAtCompileTime>
+        struct _coeff_impl<Eigen::DiagonalMatrix<SecondScalarType, SecondSizeAtCompileTime, SecondMaxSizeAtCompileTime> > {
+            constexpr static decltype(auto) eval(Eigen::DiagonalMatrix<SecondScalarType, SecondSizeAtCompileTime, SecondMaxSizeAtCompileTime> const &arg, DefaultIndexType row, DefaultIndexType col) noexcept {
+                return (row == col) ? arg.diagonal()[row] : 0;
+            }
+        };
+
+        template<typename MatrixType>
+        constexpr decltype(auto) coeff(MatrixType const &arg, DefaultIndexType row, DefaultIndexType col) noexcept {
+            return _coeff_impl<MatrixType>::eval(arg, row, col);
+        }
+
+        template<typename MatrixType>
         constexpr decltype(auto) cols(MatrixType const &arg) noexcept {
             return arg.cols();
         }

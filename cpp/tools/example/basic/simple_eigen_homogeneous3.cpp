@@ -19,10 +19,9 @@ int main(int argc, char *argv[]) {
 
     std::cout << "-- Result" << std::endl;
     std::cout << std::endl;
-    //TODO [FUTURE] Write multivectors.
-    //std::cout << "p = " << p << std::endl;
-    //std::cout << "d = " << d << std::endl;
-    //std::cout << "l = p ^ d = " << l << std::endl;
+    std::cout << "p = " << p << std::endl;
+    std::cout << "d = " << d << std::endl;
+    std::cout << "l = p ^ d = " << l << std::endl;
     std::cout << std::endl;
 
     return EXIT_SUCCESS;

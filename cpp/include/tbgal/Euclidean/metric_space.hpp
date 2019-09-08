@@ -13,12 +13,26 @@ namespace tbgal {
     
     public:
 
+        using IndexType = typename Super::IndexType;
+
         constexpr EuclideanMetricSpace(EuclideanMetricSpace const &) = default;
         constexpr EuclideanMetricSpace(EuclideanMetricSpace &&) = default;
 
         constexpr EuclideanMetricSpace() noexcept :
-            Super(detail::make_identity_matrix<ScalarType, DimensionsAtCompileTime>(DimensionsAtCompileTime)) {
+            Super(detail::make_identity_matrix<ScalarType, DimensionsAtCompileTime>(DimensionsAtCompileTime)),
+            basis_vectors_str_() {
+            for (DefaultIndexType ind = 0; ind != DimensionsAtCompileTime; ++ind) {
+                basis_vectors_str_[ind] = "e" + std::to_string(ind + 1);
+            }
         }
+
+        constexpr std::string const & basis_vector_str(IndexType index) const noexcept override {
+            return basis_vectors_str_[index];
+        }
+
+    private:
+
+        std::array<std::string, DimensionsAtCompileTime> basis_vectors_str_;
     };
 
     template<typename ScalarType>
@@ -29,22 +43,43 @@ namespace tbgal {
     
     public:
 
+        using IndexType = typename Super::IndexType;
+
         constexpr EuclideanMetricSpace(EuclideanMetricSpace const &) = default;
         constexpr EuclideanMetricSpace(EuclideanMetricSpace &&) = default;
 
         constexpr EuclideanMetricSpace() noexcept :
-            Super(detail::make_identity_matrix<ScalarType, Dynamic>(0)) {
+            Super(detail::make_identity_matrix<ScalarType, Dynamic>(0)),
+            basis_vectors_str_() {
         }
 
-        constexpr EuclideanMetricSpace(DefaultIndexType dimensions) noexcept :
-            Super(detail::make_identity_matrix<ScalarType, Dynamic>(dimensions)) {
+        constexpr EuclideanMetricSpace(IndexType dimensions) noexcept :
+            Super(detail::make_identity_matrix<ScalarType, Dynamic>(dimensions)),
+            basis_vectors_str_() {
             assert(dimensions > 0);
+            update_basis_vectors_str();
         }
 
-        constexpr void set_dimensions(DefaultIndexType dimensions) noexcept {
+        constexpr std::string const & basis_vector_str(IndexType index) const noexcept override {
+            return basis_vectors_str_[index];
+        }
+
+        constexpr void set_dimensions(IndexType dimensions) noexcept {
             assert(dimensions > 0);
             Super::metric_matrix_ = detail::make_identity_matrix<ScalarType, Dynamic>(dimensions);
+            update_basis_vectors_str();
         }
+
+    private:
+
+        constexpr void update_basis_vectors_str() noexcept {
+            basis_vectors_str_.resize(dimensions());
+            for (IndexType ind = 0; ind != dimensions(); ++ind) {
+                basis_vectors_str_[ind] = "e" + std::to_string(ind + 1);
+            }
+        }
+
+        std::vector<std::string> basis_vectors_str_;
     };
 
     namespace detail {
