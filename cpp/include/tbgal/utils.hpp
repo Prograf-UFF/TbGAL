@@ -25,7 +25,6 @@ namespace tbgal {
         using ResultingSquareMatrixType = detail::identity_matrix_type_t<std::remove_cv_t<std::remove_reference_t<ScalarType> >, MetricSpaceType::DimensionsAtCompileTime>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
         return ResultingFactoredMultivectorType(space, std::move(scalar));
-        //TODO [CHECK] Is it always an identity matrix?
     }
 
     template<typename MetricSpaceType, typename... ScalarTypes>

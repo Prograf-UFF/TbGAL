@@ -7,10 +7,10 @@ namespace tbgal {
 
     template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondFactoringProductType, typename SecondSquareMatrixType>
     constexpr decltype(auto) ADD(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &arg1, FactoredMultivector<SecondFactoringProductType, SecondSquareMatrixType> const &arg2) noexcept {
-        using ResultingFactoringProductType = OuterProduct<typename FirstFactoringProductType::SpaceType>;
+        using ResultingFactoringProductType = OuterProduct<typename FirstFactoringProductType::MetricSpaceType>;
         using ResultingSquareMatrixType = detail::common_type_t<FirstSquareMatrixType, SecondSquareMatrixType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
-        static_assert(std::is_same_v<typename FirstFactoringProductType::SpaceType, typename SecondFactoringProductType::SpaceType>, "The multivectors must have the same metric space.");
+        static_assert(std::is_same_v<typename FirstFactoringProductType::MetricSpaceType, typename SecondFactoringProductType::MetricSpaceType>, "The multivectors must have the same metric space.");
         assert(&arg1.space() == &arg2.space());
         if (arg1.factors_count() == arg2.factors_count()) {
             if (arg1.factors_count() == 0) {

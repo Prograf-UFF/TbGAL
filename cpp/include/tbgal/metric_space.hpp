@@ -3,36 +3,31 @@
 
 namespace tbgal {
 
-    template<typename SymmetricMatrixType>
+    template<typename MetricSpaceType>
     class MetricSpace {
     public:
 
-        using IndexType = detail::index_type_t<SymmetricMatrixType>;
-        
-        constexpr static auto DimensionsAtCompileTime = detail::rows_at_compile_time_v<SymmetricMatrixType>;
+        using ActualType = MetricSpaceType;
+        using IndexType = DefaultIndexType;
 
-        constexpr MetricSpace(MetricSpace const &) = default;
-        constexpr MetricSpace(MetricSpace &&) = default;
+        virtual std::string const & basis_vector_str(IndexType) const noexcept = 0;
 
-        virtual std::string const & basis_vector_str(IndexType index) const noexcept = 0;
-
-        constexpr IndexType dimensions() const noexcept {
-            return detail::rows(metric_matrix_);
-        }
+        virtual IndexType dimensions() const noexcept = 0;
 
     protected:
 
-        constexpr MetricSpace(SymmetricMatrixType &&metric_matrix) noexcept :
-            metric_matrix_{ std::move(metric_matrix) } {
-        }
+        constexpr MetricSpace() = default;
+        constexpr MetricSpace(MetricSpace const &) = default;
+        constexpr MetricSpace(MetricSpace &&) = default;
 
-        SymmetricMatrixType metric_matrix_;
+        constexpr MetricSpace & operator=(MetricSpace const &) = default;
+        constexpr MetricSpace & operator=(MetricSpace &&) = default;
     };
 
     namespace detail {
 
-        template<typename SymmetricMatrixType>
-        struct is_metric_space<MetricSpace<SymmetricMatrixType> > :
+        template<typename MetricSpaceType>
+        struct is_metric_space<MetricSpace<MetricSpaceType> > :
             std::true_type {
         };
 

@@ -5,9 +5,9 @@
 
 namespace tbgal {
 
-    namespace Homogeneous2 {
+    namespace Homogeneous1 {
         
-        using MetricSpaceType = HomogeneousMetricSpace<DefaultScalarType, 2>;
+        using MetricSpaceType = HomogeneousMetricSpace<1>;
 
         static MetricSpaceType const SPACE;
         

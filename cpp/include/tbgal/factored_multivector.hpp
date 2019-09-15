@@ -12,23 +12,23 @@ namespace tbgal {
         using ScalarType = detail::scalar_type_t<SquareMatrixType>;
         using IndexType = detail::index_type_t<SquareMatrixType>;
 
-        using SpaceType = typename FactoringProductType::SpaceType;
+        using MetricSpaceType = typename FactoringProductType::MetricSpaceType;
 
         constexpr FactoredMultivector(FactoredMultivector const &) = default;
         constexpr FactoredMultivector(FactoredMultivector &&) = default;
 
-        constexpr FactoredMultivector(SpaceType const &space) noexcept :
+        constexpr FactoredMultivector(MetricSpaceType const &space) noexcept :
             space_(space),
             scalar_(0),
-            factors_(detail::make_identity_matrix<ScalarType, SpaceType::DimensionsAtCompileTime>(space.dimensions())),
+            factors_(detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime>(space.dimensions())),
             factors_count_(0) {
         }
 
         template<typename OtherScalarType>
-        constexpr FactoredMultivector(SpaceType const &space, OtherScalarType &&scalar) noexcept :
+        constexpr FactoredMultivector(MetricSpaceType const &space, OtherScalarType &&scalar) noexcept :
             space_(space),
             scalar_(std::move(scalar)),
-            factors_(detail::make_identity_matrix<ScalarType, SpaceType::DimensionsAtCompileTime>(space.dimensions())),
+            factors_(detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime>(space.dimensions())),
             factors_count_(0) {
         }
 
@@ -36,7 +36,14 @@ namespace tbgal {
         //template<typename OtherFactoringProductType, typename OtherSquareMatrixType>
         //constexpr FactoredMultivector(FactoredMultivector<OtherFactoringProductType, OtherSquareMatrixType> const &other) noexcept;
 
-        constexpr SpaceType const & space() const noexcept {
+        constexpr FactoredMultivector & operator=(FactoredMultivector const &) = default;
+        constexpr FactoredMultivector & operator=(FactoredMultivector &&) = default;
+
+        //TODO [FUTURE] Specialization.
+        //template<typename OtherFactoringProductType, typename OtherSquareMatrixType>
+        //constexpr FactoredMultivector & operator=(FactoredMultivector<OtherFactoringProductType, OtherSquareMatrixType> const &) = default;
+
+        constexpr MetricSpaceType const & space() const noexcept {
             return space_;
         }
 
@@ -55,7 +62,7 @@ namespace tbgal {
     private:
 
         template<typename OtherScalarType, typename OtherSquareMatrixType, typename OtherIndexType>
-        constexpr FactoredMultivector(SpaceType const &space, OtherScalarType &&scalar, OtherSquareMatrixType &&factors, OtherIndexType &&factors_count) noexcept :
+        constexpr FactoredMultivector(MetricSpaceType const &space, OtherScalarType &&scalar, OtherSquareMatrixType &&factors, OtherIndexType &&factors_count) noexcept :
             space_(space),
             scalar_(std::move(scalar)),
             factors_(std::move(factors)),
@@ -64,7 +71,7 @@ namespace tbgal {
 
     private:
 
-        SpaceType const &space_;
+        MetricSpaceType const &space_;
 
         ScalarType scalar_;
 

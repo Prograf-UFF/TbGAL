@@ -3,33 +3,33 @@
 
 namespace tbgal {
 
-    template<typename MetricSpaceType>
+    template<typename MetricSpaceType_>
     struct GeometricProduct final {
     public:
 
-        static_assert(detail::is_metric_space_v<MetricSpaceType>, "Invalid MetricSpaceType.");
+        static_assert(detail::is_metric_space_v<MetricSpaceType_>, "Invalid MetricSpaceType.");
 
-        using SpaceType = MetricSpaceType;
+        using MetricSpaceType = MetricSpaceType_;
 
     private:
 
         constexpr GeometricProduct() {
-            // Nothing to do. It just avoid the instantiation of GeometricProduct<SpaceType>.
+            // Nothing to do. It just avoid the instantiation of GeometricProduct<MetricSpaceType>.
         }
     };
 
-    template<typename MetricSpaceType>
+    template<typename MetricSpaceType_>
     struct OuterProduct final {
     public:
 
-        static_assert(detail::is_metric_space_v<MetricSpaceType>, "Invalid MetricSpaceType.");
+        static_assert(detail::is_metric_space_v<MetricSpaceType_>, "Invalid MetricSpaceType.");
 
-        using SpaceType = MetricSpaceType;
+        using MetricSpaceType = MetricSpaceType_;
 
     private:
 
         constexpr OuterProduct() {
-            // Nothing to do. It just avoid the instantiation of OuterProduct<SpaceType>.
+            // Nothing to do. It just avoid the instantiation of OuterProduct<MetricSpaceType>.
         }
     };
 

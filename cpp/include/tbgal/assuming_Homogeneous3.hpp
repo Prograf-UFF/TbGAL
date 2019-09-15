@@ -7,7 +7,7 @@ namespace tbgal {
 
     namespace Homogeneous3 {
         
-        using MetricSpaceType = HomogeneousMetricSpace<DefaultScalarType, 3>;
+        using MetricSpaceType = HomogeneousMetricSpace<3>;
 
         static MetricSpaceType const SPACE;
         

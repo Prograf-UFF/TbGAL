@@ -3,31 +3,40 @@
 
 namespace tbgal {
 
-    template<typename ScalarType, DefaultIndexType DimensionsAtCompileTime>
-    class EuclideanMetricSpace : public MetricSpace<detail::identity_matrix_type_t<ScalarType, DimensionsAtCompileTime> > {
+    template<DefaultIndexType DimensionsAtCompileTime_>
+    class EuclideanMetricSpace : public MetricSpace<EuclideanMetricSpace<DimensionsAtCompileTime_> > {
     private:
 
-        static_assert(DimensionsAtCompileTime > 0, "Invalid number of dimensions.");
+        static_assert(DimensionsAtCompileTime_ > 0, "Invalid number of dimensions.");
 
-        using Super = MetricSpace<detail::identity_matrix_type_t<ScalarType, DimensionsAtCompileTime> >;
+        using Super = MetricSpace<EuclideanMetricSpace<DimensionsAtCompileTime_> >;
     
     public:
 
         using IndexType = typename Super::IndexType;
 
-        constexpr EuclideanMetricSpace(EuclideanMetricSpace const &) = default;
-        constexpr EuclideanMetricSpace(EuclideanMetricSpace &&) = default;
+        constexpr static IndexType DimensionsAtCompileTime = DimensionsAtCompileTime_;
 
         constexpr EuclideanMetricSpace() noexcept :
-            Super(detail::make_identity_matrix<ScalarType, DimensionsAtCompileTime>(DimensionsAtCompileTime)),
+            Super(),
             basis_vectors_str_() {
-            for (DefaultIndexType ind = 0; ind != DimensionsAtCompileTime; ++ind) {
+            for (IndexType ind = 0; ind != DimensionsAtCompileTime; ++ind) {
                 basis_vectors_str_[ind] = "e" + std::to_string(ind + 1);
             }
         }
 
+        constexpr EuclideanMetricSpace(EuclideanMetricSpace const &) = default;
+        constexpr EuclideanMetricSpace(EuclideanMetricSpace &&) = default;
+
+        constexpr EuclideanMetricSpace & operator=(EuclideanMetricSpace const &) = default;
+        constexpr EuclideanMetricSpace & operator=(EuclideanMetricSpace &&) = default;
+
         constexpr std::string const & basis_vector_str(IndexType index) const noexcept override {
             return basis_vectors_str_[index];
+        }
+        
+        constexpr IndexType dimensions() const noexcept override {
+            return DimensionsAtCompileTime;
         }
 
     private:
@@ -35,46 +44,53 @@ namespace tbgal {
         std::array<std::string, DimensionsAtCompileTime> basis_vectors_str_;
     };
 
-    template<typename ScalarType>
-    class EuclideanMetricSpace<ScalarType, Dynamic> : public MetricSpace<detail::identity_matrix_type_t<ScalarType, Dynamic> > {
+    template<>
+    class EuclideanMetricSpace<Dynamic> : public MetricSpace<EuclideanMetricSpace<Dynamic> > {
     private:
 
-        using Super = MetricSpace<detail::identity_matrix_type_t<ScalarType, Dynamic> >;
+        using Super = MetricSpace<EuclideanMetricSpace<Dynamic> >;
     
     public:
 
         using IndexType = typename Super::IndexType;
 
-        constexpr EuclideanMetricSpace(EuclideanMetricSpace const &) = default;
-        constexpr EuclideanMetricSpace(EuclideanMetricSpace &&) = default;
+        constexpr static IndexType DimensionsAtCompileTime = Dynamic;
 
-        constexpr EuclideanMetricSpace() noexcept :
-            Super(detail::make_identity_matrix<ScalarType, Dynamic>(0)),
-            basis_vectors_str_() {
+        inline EuclideanMetricSpace() noexcept :
+            Super(),
+            basis_vectors_str_(0) {
         }
 
-        constexpr EuclideanMetricSpace(IndexType dimensions) noexcept :
-            Super(detail::make_identity_matrix<ScalarType, Dynamic>(dimensions)),
-            basis_vectors_str_() {
-            assert(dimensions > 0);
-            update_basis_vectors_str();
+        inline EuclideanMetricSpace(EuclideanMetricSpace const &) = default;
+        inline EuclideanMetricSpace(EuclideanMetricSpace &&) = default;
+
+        inline EuclideanMetricSpace(IndexType dimensions) noexcept :
+            Super(),
+            basis_vectors_str_(0) {
+            update_basis_vectors_str(dimensions);
         }
 
-        constexpr std::string const & basis_vector_str(IndexType index) const noexcept override {
+        inline EuclideanMetricSpace & operator=(EuclideanMetricSpace const &) = default;
+        inline EuclideanMetricSpace & operator=(EuclideanMetricSpace &&) = default;
+
+        inline std::string const & basis_vector_str(IndexType index) const noexcept override {
             return basis_vectors_str_[index];
         }
 
-        constexpr void set_dimensions(IndexType dimensions) noexcept {
-            assert(dimensions > 0);
-            Super::metric_matrix_ = detail::make_identity_matrix<ScalarType, Dynamic>(dimensions);
-            update_basis_vectors_str();
+        inline IndexType dimensions() const noexcept override {
+            return basis_vectors_str_.size();
+        }
+
+        inline void set_dimensions(IndexType dimensions) noexcept {
+            update_basis_vectors_str(dimensions);
         }
 
     private:
 
-        constexpr void update_basis_vectors_str() noexcept {
-            basis_vectors_str_.resize(dimensions());
-            for (IndexType ind = 0; ind != dimensions(); ++ind) {
+        inline void update_basis_vectors_str(IndexType dimensions) noexcept {
+            assert(dimensions > 0);
+            basis_vectors_str_.resize(dimensions);
+            for (IndexType ind = 0; ind != dimensions; ++ind) {
                 basis_vectors_str_[ind] = "e" + std::to_string(ind + 1);
             }
         }
@@ -84,8 +100,8 @@ namespace tbgal {
 
     namespace detail {
 
-        template<typename ScalarType, DefaultIndexType DimensionsAtCompileTime>
-        struct is_metric_space<EuclideanMetricSpace<ScalarType, DimensionsAtCompileTime> > :
+        template<DefaultIndexType DimensionsAtCompileTime>
+        struct is_metric_space<EuclideanMetricSpace<DimensionsAtCompileTime> > :
             std::true_type {
         };
 

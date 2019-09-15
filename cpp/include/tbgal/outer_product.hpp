@@ -53,11 +53,11 @@ namespace tbgal {
             private:
 
                 using NextSpaceType = metric_space_type_t<NextTypes...>;
-                static_assert(std::is_same_v<NextSpaceType, std::nullptr_t> || std::is_same_v<NextSpaceType, typename FirstFactoringProductType::SpaceType>, "The multivectors must have the same metric space.");
+                static_assert(std::is_same_v<NextSpaceType, std::nullptr_t> || std::is_same_v<NextSpaceType, typename FirstFactoringProductType::MetricSpaceType>, "The multivectors must have the same metric space.");
 
             public:
 
-                using type = typename FirstFactoringProductType::SpaceType;
+                using type = typename FirstFactoringProductType::MetricSpaceType;
             };
 
             template<typename Type>
@@ -67,7 +67,7 @@ namespace tbgal {
 
             template<typename FactoringProductType, typename SquareMatrixType>
             struct metric_space_type<FactoredMultivector<FactoringProductType, SquareMatrixType> > {
-                using type = typename FactoringProductType::SpaceType;
+                using type = typename FactoringProductType::MetricSpaceType;
             };
 
             template<typename ResultingMatrixType, typename FirstScalarType, typename... NextTypes>

@@ -7,7 +7,7 @@ namespace tbgal {
 
     namespace HomogeneousD {
         
-        using MetricSpaceType = HomogeneousMetricSpace<DefaultScalarType, Dynamic>;
+        using MetricSpaceType = HomogeneousMetricSpace<Dynamic>;
 
         static MetricSpaceType SPACE;
         

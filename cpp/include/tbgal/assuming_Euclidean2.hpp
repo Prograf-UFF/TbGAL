@@ -7,7 +7,7 @@ namespace tbgal {
 
     namespace Euclidean2 {
         
-        using MetricSpaceType = EuclideanMetricSpace<DefaultScalarType, 2>;
+        using MetricSpaceType = EuclideanMetricSpace<2>;
 
         static MetricSpaceType const SPACE;
         

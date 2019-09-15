@@ -32,7 +32,7 @@ namespace tbgal {
     }
 
     template<typename MetricSpaceType, typename SquareMatrixType>
-    std::ostream & operator <<(std::ostream &os, FactoredMultivector<GeometricProduct<MetricSpaceType>, SquareMatrixType> const &arg) noexcept {>
+    std::ostream & operator <<(std::ostream &os, FactoredMultivector<GeometricProduct<MetricSpaceType>, SquareMatrixType> const &arg) noexcept {
         os << "GP(";
         detail::write(os, arg);
         os << ")";
