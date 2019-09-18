@@ -7,7 +7,6 @@ namespace tbgal {
     class MetricSpace {
     public:
 
-        using ActualType = MetricSpaceType;
         using IndexType = DefaultIndexType;
 
         virtual std::string const & basis_vector_str(IndexType) const noexcept = 0;
@@ -30,6 +29,21 @@ namespace tbgal {
         struct is_metric_space<MetricSpace<MetricSpaceType> > :
             std::true_type {
         };
+
+        template<typename MetricSpaceType, typename MatrixType>
+        constexpr decltype(auto) from_actual_to_orthogonal_metric(MetricSpaceType const &space, MatrixType const &factors) noexcept {
+            return from_actual_to_orthogonal_metric_impl<MetricSpaceType>::eval(space, factors);
+        }
+
+        template<typename MetricSpaceType, typename MatrixType>
+        constexpr decltype(auto) from_orthogonal_to_actual_metric(MetricSpaceType const &space, MatrixType const &factors) noexcept {
+            return from_orthogonal_to_actual_metric_impl<MetricSpaceType>::eval(space, factors);
+        }
+
+        template<typename MetricSpaceType, typename MatrixType>
+        constexpr decltype(auto) orthogonal_metric_factor(MetricSpaceType const &space, MatrixType const &factors, DefaultIndexType factors_count) noexcept {
+            return orthogonal_metric_factor_impl<MetricSpaceType>::eval(space, factors, factors_count);
+        }
 
     }
 

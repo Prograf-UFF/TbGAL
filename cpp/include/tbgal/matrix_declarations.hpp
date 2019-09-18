@@ -1,5 +1,5 @@
-#ifndef __TBGAL_MATRIX_TRAITS_HPP__
-#define __TBGAL_MATRIX_TRAITS_HPP__
+#ifndef __TBGAL_MATRIX_DECLARATIONS_HPP__
+#define __TBGAL_MATRIX_DECLARATIONS_HPP__
 
 namespace tbgal {
     
@@ -99,4 +99,4 @@ namespace tbgal {
 
 }
 
-#endif // __TBGAL_MATRIX_TRAITS_HPP__
+#endif // __TBGAL_MATRIX_DECLARATIONS_HPP__

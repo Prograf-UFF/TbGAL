@@ -187,21 +187,22 @@ namespace tbgal {
             return result;
         }
 
-        template<typename MatrixType>
-        constexpr MatrixType& _fill_column_matrix_impl(MatrixType &target) noexcept {
-            return target;
+        template<typename MatrixType, typename ScalarType>
+        constexpr void _fill_column_matrix_impl(MatrixType &target, ScalarType &&arg) noexcept {
+            target(target.rows() - 1, 0) = std::move(arg);
         }
         
         template<typename MatrixType, typename FirstScalarType, typename... NextScalarTypes>
-        constexpr MatrixType& _fill_column_matrix_impl(MatrixType &target, FirstScalarType &&arg1, NextScalarTypes &&... args) noexcept {
+        constexpr void _fill_column_matrix_impl(MatrixType &target, FirstScalarType &&arg1, NextScalarTypes &&... args) noexcept {
             target(target.rows() - (1 + sizeof...(NextScalarTypes)), 0) = std::move(arg1);
-            return _fill_column_matrix_impl(target, std::move(args)...);
+            _fill_column_matrix_impl(target, std::move(args)...);
         }
         
         template<typename... ScalarTypes>
         constexpr decltype(auto) fill_column_matrix(ScalarTypes &&... args) noexcept {
             matrix_type_t<std::common_type_t<std::remove_cv_t<std::remove_reference_t<ScalarTypes> >...>, sizeof...(ScalarTypes), 1> result;
-            return _fill_column_matrix_impl(result, std::move(args)...);
+            _fill_column_matrix_impl(result, std::move(args)...);
+            return result;
         }
 
         template<typename MatrixType>
@@ -269,7 +270,7 @@ namespace tbgal {
 
         template<typename MatrixType>
         constexpr decltype(auto) qr_decomposition(MatrixType const &arg) noexcept {
-             return QRDecompositionResult<MatrixType>(arg);
+            return QRDecompositionResult<MatrixType>(arg);
         }
 
     }

@@ -14,7 +14,7 @@ namespace tbgal {
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
         return ResultingFactoredMultivectorType(
             arg.space(),
-            ((arg.factors_count() * (arg.space().dimensions() - 1)) & 1) ? -arg.scalar() : arg.scalar(),
+            (((arg.factors_count() * (arg.space().dimensions() - 1)) & 1) ? -arg.scalar() : arg.scalar()) * detail::orthogonal_metric_factor(arg.space(), arg.factors(), arg.factors_count()),
             detail::split_columns_and_swap(arg.factors(), arg.factors_count()),
             arg.space().dimensions() - arg.factors_count()
         );

@@ -34,7 +34,7 @@ namespace tbgal {
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
         static_assert(MetricSpaceType::DimensionsAtCompileTime == Dynamic || MetricSpaceType::DimensionsAtCompileTime == sizeof...(ScalarTypes), "Invalid number of coordinates.");
         assert(space.dimensions() == sizeof...(ScalarTypes));
-        auto qr = detail::qr_decomposition(detail::fill_column_matrix(std::move(coords)...));
+        auto qr = detail::qr_decomposition(detail::from_actual_to_orthogonal_metric(space, detail::fill_column_matrix(std::move(coords)...)));
         return ResultingFactoredMultivectorType(space, detail::determinant_triangular_matrix(qr.matrix_r(), 1), qr.matrix_q(), 1);
     }
 
@@ -45,7 +45,9 @@ namespace tbgal {
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
         assert(1 <= index && index <= space.dimensions());
         auto input = detail::make_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, 1>(space.dimensions(), 1);
-        auto qr = detail::qr_decomposition(detail::copy_columns(detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime>(space.dimensions()), index - 1, input, 0, 1));
+        auto xyz = detail::copy_columns(detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime>(space.dimensions()), index - 1, input, 0, 1);
+        auto test = detail::from_actual_to_orthogonal_metric(space, xyz);
+        auto qr = detail::qr_decomposition(test);
         return ResultingFactoredMultivectorType(space, detail::determinant_triangular_matrix(qr.matrix_r(), 1), qr.matrix_q(), 1);
     }
 

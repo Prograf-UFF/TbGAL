@@ -52,6 +52,7 @@ namespace tbgal {
     
     public:
 
+        using ScalarType = DefaultScalarType;
         using IndexType = typename Super::IndexType;
 
         constexpr static IndexType DimensionsAtCompileTime = Dynamic;
@@ -103,6 +104,31 @@ namespace tbgal {
         template<DefaultIndexType DimensionsAtCompileTime>
         struct is_metric_space<EuclideanMetricSpace<DimensionsAtCompileTime> > :
             std::true_type {
+        };
+
+        template<DefaultIndexType DimensionsAtCompileTime>
+        struct from_actual_to_orthogonal_metric_impl<EuclideanMetricSpace<DimensionsAtCompileTime> > {
+            template<typename MatrixType>
+            constexpr static MatrixType const & eval(EuclideanMetricSpace<DimensionsAtCompileTime> const &, MatrixType const &factors) noexcept {
+                return factors;
+            }
+        };
+
+        template<DefaultIndexType DimensionsAtCompileTime>
+        struct from_orthogonal_to_actual_metric_impl<EuclideanMetricSpace<DimensionsAtCompileTime> > {
+            template<typename MatrixType>
+            constexpr static MatrixType const & eval(EuclideanMetricSpace<DimensionsAtCompileTime> const &, MatrixType const &factors) noexcept {
+                return factors;
+            }
+        };
+
+        template<DefaultIndexType DimensionsAtCompileTime>
+        struct orthogonal_metric_factor_impl<EuclideanMetricSpace<DimensionsAtCompileTime> > {
+            template<typename MatrixType>
+            constexpr static decltype(auto) eval(EuclideanMetricSpace<DimensionsAtCompileTime> const &, MatrixType const &, DefaultIndexType) noexcept {
+                using ScalarType = typename EuclideanMetricSpace<DimensionsAtCompileTime>::ScalarType;
+                return ScalarType(1);
+            }
         };
 
     }

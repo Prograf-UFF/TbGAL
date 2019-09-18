@@ -13,6 +13,7 @@ namespace tbgal {
     
     public:
 
+        using ScalarType = DefaultScalarType;
         using IndexType = typename Super::IndexType;
 
         constexpr static IndexType BaseSpaceDimensionsAtCompileTime = BaseSpaceDimensionsAtCompileTime_;
@@ -116,6 +117,31 @@ namespace tbgal {
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime>
         struct is_metric_space<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > :
             std::true_type {
+        };
+
+        template<DefaultIndexType BaseSpaceDimensionsAtCompileTime>
+        struct from_actual_to_orthogonal_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > {
+            template<typename MatrixType>
+            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors) noexcept {
+                return factors;
+            }
+        };
+
+        template<DefaultIndexType BaseSpaceDimensionsAtCompileTime>
+        struct from_orthogonal_to_actual_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > {
+            template<typename MatrixType>
+            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors) noexcept {
+                return factors;
+            }
+        };
+
+        template<DefaultIndexType BaseSpaceDimensionsAtCompileTime>
+        struct orthogonal_metric_factor_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > {
+            template<typename MatrixType>
+            constexpr static decltype(auto) eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> const &, MatrixType const &, DefaultIndexType) noexcept {
+                using ScalarType = typename HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime>::ScalarType;
+                return ScalarType(1);
+            }
         };
 
     }

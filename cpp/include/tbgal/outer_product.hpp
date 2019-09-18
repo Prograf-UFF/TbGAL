@@ -100,7 +100,7 @@ namespace tbgal {
 
             template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename... NextTypes>
             constexpr static decltype(auto) multiply_scalars(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &arg1, NextTypes const &... args) noexcept {
-                return arg1.scalar() + multiply_scalars(args...);
+                return arg1.scalar() * multiply_scalars(args...);
             }
 
             template<typename Type>

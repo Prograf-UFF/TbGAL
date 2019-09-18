@@ -10,21 +10,21 @@ namespace tbgal {
             using IndexType = typename FactoredMultivector<FactoringProductType, SquareMatrixType>::IndexType;
             os << arg.scalar();
             if (arg.factors_count() > 0) {
-                os << ", (";
-                SquareMatrixType const &factors = arg.factors();
+                auto factors = from_orthogonal_to_actual_metric(arg.space(), arg.factors());
                 for (IndexType ind = 0; ind != arg.factors_count(); ++ind) {
+                    os << ", (";
                     for (IndexType dim = 0; dim != arg.space().dimensions(); ++dim) {
                         auto value = coeff(factors, dim, ind);
                         if (dim > 0) {
-                            os << ((value >= 0) ? " + " : " - ") << abs(value);
+                            os << (value >= 0 ? " + " : " - ") << std::abs(value);
                         }
                         else {
                             os << value;
                         }
                         os << " * " << arg.space().basis_vector_str(dim);
                     }
+                    os << ")";
                 }
-                os << ")";
             }
             return os;
         }
