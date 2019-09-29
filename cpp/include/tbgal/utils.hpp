@@ -19,7 +19,7 @@ namespace tbgal {
         return true;
     }
 
-    template<typename MetricSpaceType, typename ScalarType, typename = std::enable_if_t<!detail::is_multivector_v<std::remove_cv_t<std::remove_reference_t<ScalarType> > > > >
+    template<typename MetricSpaceType, typename ScalarType, typename = std::enable_if_t<!is_multivector_v<std::remove_cv_t<std::remove_reference_t<ScalarType> > > > >
     decltype(auto) scalar(MetricSpaceType const &space, ScalarType &&scalar) noexcept {
         using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
         using ResultingSquareMatrixType = detail::identity_matrix_type_t<std::remove_cv_t<std::remove_reference_t<ScalarType> >, MetricSpaceType::DimensionsAtCompileTime>;
@@ -34,8 +34,13 @@ namespace tbgal {
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
         static_assert(MetricSpaceType::DimensionsAtCompileTime == Dynamic || MetricSpaceType::DimensionsAtCompileTime == sizeof...(ScalarTypes), "Invalid number of coordinates.");
         assert(space.dimensions() == sizeof...(ScalarTypes));
-        auto qr = detail::qr_decomposition(detail::from_actual_to_orthogonal_metric(space, detail::fill_column_matrix(std::move(coords)...)));
-        return ResultingFactoredMultivectorType(space, detail::determinant_triangular_matrix(qr.matrix_r(), 1), qr.matrix_q(), 1);
+        auto input = detail::from_actual_to_orthogonal_metric(space, detail::fill_column_matrix(std::move(coords)...));
+        auto qr_tuple = detail::qr_decomposition(input);
+        if (std::get<2>(qr_tuple) == 1) {
+            auto const &matrix_q = std::get<0>(qr_tuple);
+            return ResultingFactoredMultivectorType(space, detail::determinant(detail::prod(detail::transpose(detail::left_columns(matrix_q, 1)), input)), matrix_q, 1);
+        }
+        return ResultingFactoredMultivectorType(space, 0);
     }
 
     template<typename ScalarType, typename MetricSpaceType>
@@ -44,11 +49,11 @@ namespace tbgal {
         using ResultingSquareMatrixType = detail::matrix_type_t<ScalarType, MetricSpaceType::DimensionsAtCompileTime, MetricSpaceType::DimensionsAtCompileTime>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
         assert(1 <= index && index <= space.dimensions());
-        auto input = detail::make_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, 1>(space.dimensions(), 1);
-        auto xyz = detail::copy_columns(detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime>(space.dimensions()), index - 1, input, 0, 1);
-        auto test = detail::from_actual_to_orthogonal_metric(space, xyz);
-        auto qr = detail::qr_decomposition(test);
-        return ResultingFactoredMultivectorType(space, detail::determinant_triangular_matrix(qr.matrix_r(), 1), qr.matrix_q(), 1);
+        auto aux = detail::make_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, 1>(space.dimensions(), 1);
+        auto input = detail::from_actual_to_orthogonal_metric(space, detail::copy_columns(detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime>(space.dimensions()), index - 1, aux, 0, 1));
+        auto qr_tuple = detail::qr_decomposition(input);
+        auto const &matrix_q = std::get<0>(qr_tuple);
+        return ResultingFactoredMultivectorType(space, detail::determinant(detail::prod(detail::transpose(detail::left_columns(matrix_q, 1)), input)), matrix_q, 1);
     }
 
 }

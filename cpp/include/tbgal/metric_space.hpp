@@ -23,12 +23,12 @@ namespace tbgal {
         constexpr MetricSpace & operator=(MetricSpace &&) = default;
     };
 
-    namespace detail {
+    template<typename MetricSpaceType>
+    struct is_metric_space<MetricSpace<MetricSpaceType> > :
+        std::true_type {
+    };
 
-        template<typename MetricSpaceType>
-        struct is_metric_space<MetricSpace<MetricSpaceType> > :
-            std::true_type {
-        };
+    namespace detail {
 
         template<typename MetricSpaceType, typename MatrixType>
         constexpr decltype(auto) from_actual_to_orthogonal_metric(MetricSpaceType const &space, MatrixType const &factors) noexcept {

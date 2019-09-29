@@ -7,10 +7,10 @@ namespace tbgal {
     class FactoredMultivector final {
     public:
 
-        static_assert(detail::is_factoring_product_v<FactoringProductType>, "Invalid FactoringProductType.");
+        static_assert(is_factoring_product_v<FactoringProductType>, "Invalid FactoringProductType.");
 
-        using ScalarType = detail::scalar_type_t<SquareMatrixType>;
         using IndexType = detail::index_type_t<SquareMatrixType>;
+        using ScalarType = detail::scalar_type_t<SquareMatrixType>;
 
         using MetricSpaceType = typename FactoringProductType::MetricSpaceType;
 
@@ -92,14 +92,10 @@ namespace tbgal {
         template<typename SomeFactoringProductType, typename SomeSquareMatrixType> friend constexpr FactoredMultivector<SomeFactoringProductType, SomeSquareMatrixType> UNARY_MINUS(FactoredMultivector<SomeFactoringProductType, SomeSquareMatrixType> const &) noexcept;
     };
 
-    namespace detail {
-
-        template<typename FactoringProductType, typename SquareMatrixType>
-        struct is_multivector<FactoredMultivector<FactoringProductType, SquareMatrixType> > :
-            std::true_type {
-        };
-
-    }
+    template<typename FactoringProductType, typename SquareMatrixType>
+    struct is_multivector<FactoredMultivector<FactoringProductType, SquareMatrixType> > :
+        std::true_type {
+    };
 
 }
 

@@ -171,9 +171,10 @@ namespace tbgal {
                     auto prod_scalar = multiply_scalars(arg1, args...);
                     if (prod_scalar != 0) {
                         auto input = make_matrix<ResultingScalarType, ResultingMetricSpaceType::DimensionsAtCompileTime, Dynamic>(space.dimensions(), factors_count);
-                        auto qr = qr_decomposition(std::get<0>(fill_input_matrix(input, arg1, args...)));
-                        if (factors_count == qr.rank()) {
-                            return ResultingFactoredMultivectorType(space, prod_scalar * determinant_triangular_matrix(qr.matrix_r(), factors_count), qr.matrix_q(), factors_count);
+                        auto qr_tuple = qr_decomposition(std::get<0>(fill_input_matrix(input, arg1, args...)));
+                        if (std::get<2>(qr_tuple) == factors_count) {
+                            auto const &matrix_q = std::get<0>(qr_tuple);
+                            return ResultingFactoredMultivectorType(space, prod_scalar * determinant(prod(transpose(left_columns(matrix_q, factors_count)), input)), matrix_q, factors_count);
                         }
                     }
                 }
@@ -189,9 +190,9 @@ namespace tbgal {
                 return arg1 * eval(args...);
             }
 
-            template<typename FirstScalarType, typename SecondScalarType>
-            constexpr static decltype(auto) eval(FirstScalarType const &arg1, SecondScalarType const &arg2) noexcept {
-                return arg1 * arg2;
+            template<typename ScalarType>
+            constexpr static decltype(auto) eval(ScalarType const &arg) noexcept {
+                return arg;
             }
         };
 
@@ -199,7 +200,7 @@ namespace tbgal {
 
     template<typename FirstType, typename... NextTypes>
     constexpr decltype(auto) OP(FirstType const &arg1, NextTypes const &... args) noexcept {
-        return detail::OP_impl<detail::is_any_v<std::true_type, detail::is_multivector_t<FirstType>, detail::is_multivector_t<NextTypes>...> >::eval(arg1, args...);
+        return detail::OP_impl<detail::is_any_v<std::true_type, is_multivector_t<FirstType>, is_multivector_t<NextTypes>...> >::eval(arg1, args...);
     }
 
     template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondFactoringProductType, typename SecondSquareMatrixType>
@@ -207,12 +208,12 @@ namespace tbgal {
         return OP(arg1, arg2);
     }
 
-    template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondScalarType, typename = std::enable_if_t<!detail::is_multivector_v<SecondScalarType> > >
+    template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
     constexpr decltype(auto) operator^(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &arg1, SecondScalarType const &arg2) noexcept {
         return OP(arg1, arg2);
     }
 
-    template<typename FirstType, typename SecondFactoringProductType, typename SecondSquareMatrixType, typename = std::enable_if_t<!detail::is_multivector_v<FirstType> > >
+    template<typename FirstType, typename SecondFactoringProductType, typename SecondSquareMatrixType, typename = std::enable_if_t<!is_multivector_v<FirstType> > >
     constexpr decltype(auto) operator^(FirstType const &arg1, FactoredMultivector<SecondFactoringProductType, SecondSquareMatrixType> const &arg2) noexcept {
         return OP(arg1, arg2);
     }

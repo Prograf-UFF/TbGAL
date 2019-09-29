@@ -7,7 +7,7 @@ namespace tbgal {
     struct GeometricProduct final {
     public:
 
-        static_assert(detail::is_metric_space_v<MetricSpaceType_>, "Invalid MetricSpaceType.");
+        static_assert(is_metric_space_v<MetricSpaceType_>, "Invalid MetricSpaceType.");
 
         using MetricSpaceType = MetricSpaceType_;
 
@@ -22,7 +22,7 @@ namespace tbgal {
     struct OuterProduct final {
     public:
 
-        static_assert(detail::is_metric_space_v<MetricSpaceType_>, "Invalid MetricSpaceType.");
+        static_assert(is_metric_space_v<MetricSpaceType_>, "Invalid MetricSpaceType.");
 
         using MetricSpaceType = MetricSpaceType_;
 
@@ -33,19 +33,15 @@ namespace tbgal {
         }
     };
 
-    namespace detail {
+    template<typename MetricSpaceType>
+    struct is_factoring_product<GeometricProduct<MetricSpaceType> > :
+        std::true_type {
+    };
 
-        template<typename MetricSpaceType>
-        struct is_factoring_product<GeometricProduct<MetricSpaceType> > :
-            std::true_type {
-        };
-
-        template<typename MetricSpaceType>
-        struct is_factoring_product<OuterProduct<MetricSpaceType> > :
-            std::true_type {
-        };
-
-    }
+    template<typename MetricSpaceType>
+    struct is_factoring_product<OuterProduct<MetricSpaceType> > :
+        std::true_type {
+    };
 
 }
 

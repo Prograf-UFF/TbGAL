@@ -14,6 +14,7 @@ namespace tbgal {
     public:
 
         using IndexType = typename Super::IndexType;
+        using ScalarType = DefaultScalarType;
 
         constexpr static IndexType DimensionsAtCompileTime = DimensionsAtCompileTime_;
 
@@ -52,8 +53,8 @@ namespace tbgal {
     
     public:
 
-        using ScalarType = DefaultScalarType;
         using IndexType = typename Super::IndexType;
+        using ScalarType = DefaultScalarType;
 
         constexpr static IndexType DimensionsAtCompileTime = Dynamic;
 
@@ -99,12 +100,12 @@ namespace tbgal {
         std::vector<std::string> basis_vectors_str_;
     };
 
-    namespace detail {
+    template<DefaultIndexType DimensionsAtCompileTime>
+    struct is_metric_space<EuclideanMetricSpace<DimensionsAtCompileTime> > :
+        std::true_type {
+    };
 
-        template<DefaultIndexType DimensionsAtCompileTime>
-        struct is_metric_space<EuclideanMetricSpace<DimensionsAtCompileTime> > :
-            std::true_type {
-        };
+    namespace detail {
 
         template<DefaultIndexType DimensionsAtCompileTime>
         struct from_actual_to_orthogonal_metric_impl<EuclideanMetricSpace<DimensionsAtCompileTime> > {

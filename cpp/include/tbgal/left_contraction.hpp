@@ -8,13 +8,13 @@ namespace tbgal {
         return UNDUAL(OP(arg1, DUAL(arg2)));
     }
 
-    template<typename FirstFactoringProduct, typename FirstSquareMatrixType, typename SecondScalarType, typename = std::enable_if_t<!detail::is_multivector_v<SecondScalarType> > >
+    template<typename FirstFactoringProduct, typename FirstSquareMatrixType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
     constexpr decltype(auto) LCONT(FactoredMultivector<FirstFactoringProduct, FirstSquareMatrixType> const &arg1, SecondScalarType const &arg2) noexcept {
         using ResultingType = std::common_type_t<typename FactoredMultivector<FirstFactoringProduct, FirstSquareMatrixType>::ScalarType, SecondScalarType>;
         return arg1.factors_count() == 0 ? arg1.scalar() * arg2 : ResultingType(0);
     }
 
-    template<typename FirstScalarType, typename SecondFactoringProduct, typename SecondSquareMatrixType, typename = std::enable_if_t<!detail::is_multivector_v<FirstScalarType> > >
+    template<typename FirstScalarType, typename SecondFactoringProduct, typename SecondSquareMatrixType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
     constexpr decltype(auto) LCONT(FirstScalarType const &arg1, FactoredMultivector<SecondFactoringProduct, SecondSquareMatrixType> const &arg2) noexcept {
         using ResultingFactoringProductType = SecondFactoringProduct;
         using ResultingSquareMatrixType = detail::common_type_t<FirstScalarType, SecondSquareMatrixType>;
@@ -28,7 +28,7 @@ namespace tbgal {
         }
     }
 
-    template<typename FirstScalarType, typename SecondScalarType, typename = std::enable_if_t<!(detail::is_multivector_v<FirstScalarType> || detail::is_multivector_v<SecondScalarType>)> >
+    template<typename FirstScalarType, typename SecondScalarType, typename = std::enable_if_t<!(is_multivector_v<FirstScalarType> || is_multivector_v<SecondScalarType>)> >
     constexpr decltype(auto) LCONT(FirstScalarType const &arg1, SecondScalarType const &arg2) noexcept {
         return arg1 * arg2;
     }

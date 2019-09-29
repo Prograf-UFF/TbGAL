@@ -22,8 +22,8 @@
 
 namespace tbgal {
 
-    using DefaultScalarType = TBGAL_DEFAULT_SCALAR_TYPE;
     using DefaultIndexType = TBGAL_DEFAULT_INDEX_TYPE;
+    using DefaultScalarType = TBGAL_DEFAULT_SCALAR_TYPE;
 
     template<typename MetricSpaceType> class MetricSpace;
     template<typename FactoringProductType, typename SquareMatrixType> class FactoredMultivector;
@@ -38,33 +38,6 @@ namespace tbgal {
         template<typename T, typename... Rest>
         constexpr bool is_any_v = std::disjunction_v<std::bool_constant<std::is_same_v<T, Rest> >...>;
 
-        template<typename Type>
-        struct is_factoring_product;
-
-        template<typename Type>
-        using is_factoring_product_t = typename is_factoring_product<Type>::type;
-
-        template<typename Type>
-        constexpr bool is_factoring_product_v = is_factoring_product<Type>::value;
-
-        template<typename Type>
-        struct is_metric_space;
-
-        template<typename Type>
-        using is_metric_space_t = typename is_metric_space<Type>::type;
-
-        template<typename Type>
-        constexpr bool is_metric_space_v = is_metric_space<Type>::value;
-
-        template<typename Type>
-        struct is_multivector;
-
-        template<typename Type>
-        using is_multivector_t = typename is_multivector<Type>::type;
-
-        template<typename Type>
-        constexpr bool is_multivector_v = is_multivector<Type>::value;
-
         template<bool AnyMultivectorType> struct OP_impl;
 
         template<typename MetricSpaceType> struct from_actual_to_orthogonal_metric_impl;
@@ -72,6 +45,39 @@ namespace tbgal {
         template<typename MetricSpaceType> struct orthogonal_metric_factor_impl;
 
     }
+
+    template<typename Type>
+    struct is_factoring_product :
+        std::false_type {
+    };
+
+    template<typename Type>
+    using is_factoring_product_t = typename is_factoring_product<Type>::type;
+
+    template<typename Type>
+    constexpr bool is_factoring_product_v = is_factoring_product<Type>::value;
+
+    template<typename Type>
+    struct is_metric_space :
+        std::false_type {
+    };
+
+    template<typename Type>
+    using is_metric_space_t = typename is_metric_space<Type>::type;
+
+    template<typename Type>
+    constexpr bool is_metric_space_v = is_metric_space<Type>::value;
+
+    template<typename Type>
+    struct is_multivector :
+        std::false_type {
+    };
+
+    template<typename Type>
+    using is_multivector_t = typename is_multivector<Type>::type;
+
+    template<typename Type>
+    constexpr bool is_multivector_v = is_multivector<Type>::value;
 
 }
 

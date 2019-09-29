@@ -23,7 +23,7 @@ namespace tbgal {
         throw NotSupportedError("The general case of summation of factored multivectors is not supported.");
     }
 
-    template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondScalarType, typename = std::enable_if_t<!detail::is_multivector_v<SecondScalarType> > >
+    template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
     constexpr decltype(auto) SUB(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &arg1, SecondScalarType const &arg2) noexcept {
         if (arg1.factors_count() == 0) {
             return scalar(arg1.space(), arg1.scalar() - arg2);
@@ -31,7 +31,7 @@ namespace tbgal {
         throw NotSupportedError("The general case of summation of factored multivectors is not supported.");
     }
 
-    template<typename FirstScalarType, typename SecondFactoringProductType, typename SecondSquareMatrixType, typename = std::enable_if_t<!detail::is_multivector_v<FirstScalarType> > >
+    template<typename FirstScalarType, typename SecondFactoringProductType, typename SecondSquareMatrixType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
     constexpr decltype(auto) SUB(FirstScalarType const &arg1, FactoredMultivector<SecondFactoringProductType, SecondSquareMatrixType> const &arg2) noexcept {
         if (arg2.factors_count() == 0) {
             return scalar(arg2.space(), arg1 - arg2.scalar());
@@ -39,7 +39,7 @@ namespace tbgal {
         throw NotSupportedError("The general case of summation of factored multivectors is not supported.");
     }
 
-    template<typename FirstScalarType, typename SecondScalarType, typename = std::enable_if_t<!(detail::is_multivector_v<FirstScalarType> || detail::is_multivector_v<SecondScalarType>)> >
+    template<typename FirstScalarType, typename SecondScalarType, typename = std::enable_if_t<!(is_multivector_v<FirstScalarType> || is_multivector_v<SecondScalarType>)> >
     constexpr decltype(auto) SUB(FirstScalarType const &arg1, SecondScalarType const &arg2) noexcept {
         return arg1 - arg2;
     }
@@ -49,12 +49,12 @@ namespace tbgal {
         return SUB(arg1, arg2);
     }
 
-    template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondScalarType, typename = std::enable_if_t<!detail::is_multivector_v<SecondScalarType> > >
+    template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
     constexpr decltype(auto) operator-(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &arg1, SecondScalarType const &arg2) noexcept {
         return SUB(arg1, arg2);
     }
 
-    template<typename FirstScalarType, typename SecondFactoringProductType, typename SecondSquareMatrixType, typename = std::enable_if_t<!detail::is_multivector_v<FirstScalarType> > >
+    template<typename FirstScalarType, typename SecondFactoringProductType, typename SecondSquareMatrixType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
     constexpr decltype(auto) operator-(FirstScalarType const &arg1, FactoredMultivector<SecondFactoringProductType, SecondSquareMatrixType> const &arg2) noexcept {
         return SUB(arg1, arg2);
     }

@@ -8,3 +8,4 @@ src/modules/test/.ipynb_checkpoints/*
 /cuda/modules/test/*.pyc
 /cpp/tools/example/build
 /cpp/tools/example/.vscode
+/cpp/tools/test/build

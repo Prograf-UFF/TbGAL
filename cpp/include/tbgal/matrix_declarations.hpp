@@ -66,34 +66,26 @@ namespace tbgal {
         template<typename SourceMatrixType, typename TargetMatrixType>
         constexpr TargetMatrixType& copy_columns(SourceMatrixType const &, DefaultIndexType, TargetMatrixType &, DefaultIndexType, DefaultIndexType) noexcept;
 
-        template<typename TriangularMatrixType>
-        constexpr decltype(auto) determinant_triangular_matrix(TriangularMatrixType const &, DefaultIndexType) noexcept;
-
+        template<typename MatrixType>
+        constexpr decltype(auto) determinant(MatrixType const &) noexcept;
+        
         template<typename... ScalarTypes>
         constexpr decltype(auto) fill_column_matrix(ScalarTypes &&... args) noexcept;
 
         template<typename MatrixType>
-        constexpr decltype(auto) split_columns_and_swap(MatrixType const &, DefaultIndexType) noexcept;
-
-        template<typename MatrixQType_, typename MatrixRType_>
-        class BaseQRDecompositionResult {
-        public:
-
-            using MatrixQType = MatrixQType_;
-            using MatrixRType = MatrixRType_;
-            using IndexType = index_type_t<MatrixQType>;
-
-            constexpr BaseQRDecompositionResult() = default;
-            constexpr BaseQRDecompositionResult(BaseQRDecompositionResult const &) = default;
-            constexpr BaseQRDecompositionResult(BaseQRDecompositionResult &&) = default;
-
-            virtual MatrixQType const & matrix_q() const noexcept = 0;
-            virtual MatrixRType const & matrix_r() const noexcept = 0;
-            virtual IndexType rank() const noexcept = 0;
-        };
-
+        constexpr decltype(auto) left_columns(MatrixType const &, DefaultIndexType) noexcept;
+        
+        template<typename FirstMatrixType, typename SecondMatrixType>
+        constexpr decltype(auto) prod(FirstMatrixType const &, SecondMatrixType const &) noexcept;
+        
         template<typename MatrixType>
         constexpr decltype(auto) qr_decomposition(MatrixType const &) noexcept;
+
+        template<typename MatrixType>
+        constexpr decltype(auto) split_columns_and_swap(MatrixType const &, DefaultIndexType) noexcept;
+
+        template<typename MatrixType>
+        constexpr decltype(auto) transpose(MatrixType const &) noexcept;
 
     }
 

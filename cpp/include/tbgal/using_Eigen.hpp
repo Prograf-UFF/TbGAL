@@ -177,16 +177,11 @@ namespace tbgal {
             return _copy_columns_impl<SourceMatrixType>::eval(source, first_source, target, first_target, count);
         }
 
-        template<typename TriangularMatrixType>
-        constexpr decltype(auto) determinant_triangular_matrix(TriangularMatrixType const &arg, DefaultIndexType size) noexcept {
-            using ScalarType = typename TriangularMatrixType::Scalar;
-            ScalarType result = 1;
-            for (DefaultIndexType ind = 0; ind != size; ++ind) {
-                result *= arg(ind, ind);
-            }
-            return result;
+        template<typename MatrixType>
+        constexpr decltype(auto) determinant(MatrixType const &arg) noexcept {
+            return arg.determinant();
         }
-
+        
         template<typename MatrixType, typename ScalarType>
         constexpr void _fill_column_matrix_impl(MatrixType &target, ScalarType &&arg) noexcept {
             target(target.rows() - 1, 0) = std::move(arg);
@@ -206,6 +201,24 @@ namespace tbgal {
         }
 
         template<typename MatrixType>
+        constexpr decltype(auto) left_columns(MatrixType const &arg, DefaultIndexType count) noexcept {
+            return arg.leftCols(count);
+        }
+
+        template<typename FirstMatrixType, typename SecondMatrixType>
+        constexpr decltype(auto) prod(FirstMatrixType const &arg1, SecondMatrixType const &arg2) noexcept {
+            return arg1 * arg2;
+        }
+        
+        template<typename MatrixType>
+        constexpr decltype(auto) qr_decomposition(MatrixType const &arg) noexcept {
+            using MatrixQType = Eigen::Matrix<typename MatrixType::Scalar, MatrixType::RowsAtCompileTime, MatrixType::RowsAtCompileTime>;
+            Eigen::ColPivHouseholderQR<MatrixType> qr(arg);
+            auto rank = qr.rank();
+            return std::make_tuple(MatrixQType(qr.householderQ()), qr.matrixR().topLeftCorner(rank, rank).template triangularView<Eigen::Upper>(), rank);
+        }
+
+        template<typename MatrixType>
         constexpr decltype(auto) split_columns_and_swap(MatrixType const &input, DefaultIndexType col) noexcept {
             using ResultingMatrixType = Eigen::Matrix<typename MatrixType::Scalar, MatrixType::RowsAtCompileTime, MatrixType::ColsAtCompileTime>;
             ResultingMatrixType result(input.rows(), input.cols());
@@ -222,55 +235,9 @@ namespace tbgal {
             return result;
         }
 
-        template<typename MatrixType_>
-        class QRDecompositionResult final : public BaseQRDecompositionResult<
-            typename Eigen::ColPivHouseholderQR<MatrixType_>::HouseholderSequenceType,
-            typename Eigen::ColPivHouseholderQR<MatrixType_>::MatrixType
-        > {
-        private:
-
-            using Super = BaseQRDecompositionResult<
-                typename Eigen::ColPivHouseholderQR<MatrixType_>::HouseholderSequenceType,
-                typename Eigen::ColPivHouseholderQR<MatrixType_>::MatrixType
-            >;
-
-        public:
-
-            using MatrixQType = typename Super::MatrixQType;
-            using MatrixRType = typename Super::MatrixRType;
-            using IndexType = typename Super::IndexType;
-
-            using MatrixType = MatrixType_;
-
-            constexpr QRDecompositionResult(QRDecompositionResult const &) = default;
-            constexpr QRDecompositionResult(QRDecompositionResult &&) = default;
-
-            constexpr QRDecompositionResult(MatrixType const &arg) :
-                qr_(arg),
-                matrix_q_(qr_.householderQ()) {
-            }
-
-            constexpr MatrixQType const & matrix_q() const noexcept override {
-                return matrix_q_;
-            }
-
-            constexpr MatrixRType const & matrix_r() const noexcept override {
-                return qr_.matrixR();
-            }
-
-            constexpr IndexType rank() const noexcept override {
-                return qr_.rank();
-            }
-
-        private:
-
-            Eigen::ColPivHouseholderQR<MatrixType> qr_;
-            MatrixQType matrix_q_;
-        };
-
         template<typename MatrixType>
-        constexpr decltype(auto) qr_decomposition(MatrixType const &arg) noexcept {
-            return QRDecompositionResult<MatrixType>(arg);
+        constexpr decltype(auto) transpose(MatrixType const &arg) noexcept {
+            return arg.transpose();
         }
 
     }

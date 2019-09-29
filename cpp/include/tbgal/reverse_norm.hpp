@@ -8,7 +8,7 @@ namespace tbgal {
         return LCONT(arg, REVERSE(arg)).scalar();
     }
 
-    template<typename Type, typename = std::enable_if_t<!detail::is_multivector_v<Type> > >
+    template<typename Type, typename = std::enable_if_t<!is_multivector_v<Type> > >
     constexpr decltype(auto) RNORM_SQR(Type const &arg) {
         return arg * arg;
     }
