@@ -20,11 +20,11 @@ namespace tbgal {
     }
 
     template<typename MetricSpaceType, typename ScalarType, typename = std::enable_if_t<!is_multivector_v<std::remove_cv_t<std::remove_reference_t<ScalarType> > > > >
-    decltype(auto) scalar(MetricSpaceType const &space, ScalarType &&scalar) noexcept {
+    decltype(auto) scalar(MetricSpaceType const &space, ScalarType &&value) noexcept {
         using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
         using ResultingSquareMatrixType = detail::identity_matrix_type_t<std::remove_cv_t<std::remove_reference_t<ScalarType> >, MetricSpaceType::DimensionsAtCompileTime>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
-        return ResultingFactoredMultivectorType(space, std::move(scalar));
+        return ResultingFactoredMultivectorType(space, std::move(value));
     }
 
     template<typename MetricSpaceType, typename... ScalarTypes>
@@ -38,7 +38,12 @@ namespace tbgal {
         auto qr_tuple = detail::qr_decomposition(input);
         if (std::get<2>(qr_tuple) == 1) {
             auto const &matrix_q = std::get<0>(qr_tuple);
-            return ResultingFactoredMultivectorType(space, detail::determinant(detail::prod(detail::transpose(detail::left_columns(matrix_q, 1)), input)), matrix_q, 1);
+            return ResultingFactoredMultivectorType(
+                space,
+                detail::determinant(detail::prod(detail::transpose(detail::left_columns(matrix_q, 1)), input)),
+                matrix_q,
+                1
+            );
         }
         return ResultingFactoredMultivectorType(space, 0);
     }
@@ -53,7 +58,12 @@ namespace tbgal {
         auto input = detail::from_actual_to_orthogonal_metric(space, detail::copy_columns(detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime>(space.dimensions()), index - 1, aux, 0, 1));
         auto qr_tuple = detail::qr_decomposition(input);
         auto const &matrix_q = std::get<0>(qr_tuple);
-        return ResultingFactoredMultivectorType(space, detail::determinant(detail::prod(detail::transpose(detail::left_columns(matrix_q, 1)), input)), matrix_q, 1);
+        return ResultingFactoredMultivectorType(
+            space,
+            detail::determinant(detail::prod(detail::transpose(detail::left_columns(matrix_q, 1)), input)),
+            matrix_q,
+            1
+        );
     }
 
 }

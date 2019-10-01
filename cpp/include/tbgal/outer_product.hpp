@@ -158,24 +158,32 @@ namespace tbgal {
 
         public:
 
-            template<typename FirstType, typename... NextTypes>
-            constexpr static decltype(auto) eval(FirstType const &arg1, NextTypes const &... args) noexcept {
-                using ResultingScalarType = common_scalar_type_t<FirstType, NextTypes...>;
-                using ResultingMetricSpaceType = metric_space_type_t<FirstType, NextTypes...>;
+            template<typename... Types>
+            constexpr static decltype(auto) eval(Types const &... args) noexcept {
+                using ResultingScalarType = common_scalar_type_t<Types...>;
+                using ResultingMetricSpaceType = metric_space_type_t<Types...>;
                 using ResultingFactoringProductType = OuterProduct<ResultingMetricSpaceType>;
                 using ResultingSquareMatrixType = matrix_type_t<ResultingScalarType, ResultingMetricSpaceType::DimensionsAtCompileTime, ResultingMetricSpaceType::DimensionsAtCompileTime>;
                 using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
-                auto& space = *space_ptr(arg1, args...);
-                auto factors_count = sum_factors_count(arg1, args...);
+                auto& space = *space_ptr(args...);
+                auto factors_count = sum_factors_count(args...);
                 if (factors_count <= space.dimensions()) {
-                    auto prod_scalar = multiply_scalars(arg1, args...);
-                    if (prod_scalar != 0) {
+                    auto prod_scalar = multiply_scalars(args...);
+                    if (factors_count > 0 && prod_scalar != 0) {
                         auto input = make_matrix<ResultingScalarType, ResultingMetricSpaceType::DimensionsAtCompileTime, Dynamic>(space.dimensions(), factors_count);
-                        auto qr_tuple = qr_decomposition(std::get<0>(fill_input_matrix(input, arg1, args...)));
+                        auto qr_tuple = qr_decomposition(std::get<0>(fill_input_matrix(input, args...)));
                         if (std::get<2>(qr_tuple) == factors_count) {
                             auto const &matrix_q = std::get<0>(qr_tuple);
-                            return ResultingFactoredMultivectorType(space, prod_scalar * determinant(prod(transpose(left_columns(matrix_q, factors_count)), input)), matrix_q, factors_count);
+                            return ResultingFactoredMultivectorType(
+                                space,
+                                prod_scalar * determinant(prod(transpose(left_columns(matrix_q, factors_count)), input)),
+                                matrix_q,
+                                factors_count
+                            );
                         }
+                    }
+                    else {
+                        return ResultingFactoredMultivectorType(space, prod_scalar);
                     }
                 }
                 return ResultingFactoredMultivectorType(space, 0);

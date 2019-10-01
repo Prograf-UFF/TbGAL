@@ -8,4 +8,3 @@
 #define TESTING_VECTOR_SPACE_DIMENSIONS 3
 
 #include "common.hpp"
-#include "calls.hpp"

@@ -145,11 +145,7 @@ namespace tbgal {
         struct _copy_columns_impl {
             template<typename TargetMatrixType>
             constexpr static TargetMatrixType& eval(SourceMatrixType const &source, DefaultIndexType first_source, TargetMatrixType &target, DefaultIndexType first_target, DefaultIndexType count) noexcept {
-                for (DefaultIndexType offset = 0, col_source = first_source, col_target = first_target; offset < count; ++offset, ++col_source, ++col_target) {
-                    for (DefaultIndexType row = 0; row != target.rows(); ++row) {
-                        target(row, col_target) = source(row, col_source);
-                    }
-                }
+                target.template block<TargetMatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, first_target, target.rows(), count) = source.template block<SourceMatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, first_source, source.rows(), count);
                 return target;
             }
         };
@@ -222,16 +218,8 @@ namespace tbgal {
         constexpr decltype(auto) split_columns_and_swap(MatrixType const &input, DefaultIndexType col) noexcept {
             using ResultingMatrixType = Eigen::Matrix<typename MatrixType::Scalar, MatrixType::RowsAtCompileTime, MatrixType::ColsAtCompileTime>;
             ResultingMatrixType result(input.rows(), input.cols());
-            for (DefaultIndexType offset = 0, end = input.cols() - col; offset != end; ++offset) {
-                for (Eigen::Index row = 0; row != input.rows(); ++row) {
-                    result(row, offset) = input(row, col + offset);
-                }
-            }
-            for (DefaultIndexType offset = 0, first = input.cols() - col; offset != col; ++offset) {
-                for (Eigen::Index row = 0; row != input.rows(); ++row) {
-                    result(row, first + offset) = input(row, offset);
-                }
-            }
+            result.template block<ResultingMatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, 0, result.rows(), input.cols() - col) = input.template block<MatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, col, input.rows(), input.cols() - col);
+            result.template block<ResultingMatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, input.cols() - col, result.rows(), col) = input.template block<MatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, 0, input.rows(), col);
             return result;
         }
 

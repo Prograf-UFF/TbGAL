@@ -8,7 +8,12 @@ namespace tbgal {
         using ResultingFactoringProductType = FactoringProductType;
         using ResultingSquareMatrixType = SquareMatrixType;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
-        return ResultingFactoredMultivectorType(arg.space(), (((arg.factors_count() * (arg.factors_count() - 1)) >> 1) & 1) ? -arg.scalar() : arg.scalar(), arg.factors(), arg.factors_count());
+        return ResultingFactoredMultivectorType(
+            arg.space(),
+            (((arg.factors_count() * (arg.factors_count() - 1)) >> 1) & 1) ? -arg.scalar() : arg.scalar(),
+            arg.factors(),
+            arg.factors_count()
+        );
     }
 
     template<typename Type, typename = std::enable_if_t<!is_multivector_v<Type> > >

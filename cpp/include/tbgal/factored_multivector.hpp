@@ -85,11 +85,12 @@ namespace tbgal {
         template<typename SomeMetricSpaceType, typename... ScalarTypes> friend decltype(auto) vector(SomeMetricSpaceType const &, ScalarTypes &&...) noexcept;
 
         template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondFactoringProductType, typename SecondSquareMatrixType> friend constexpr decltype(auto) ADD(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &, FactoredMultivector<SecondFactoringProductType, SecondSquareMatrixType> const &) noexcept;
-        template<typename SomeFactoringProductType, typename SomeSquareMatrixType> friend constexpr decltype(auto) DUAL(FactoredMultivector<SomeFactoringProductType, SomeSquareMatrixType> const &) noexcept;
+        template<typename SomeMetricSpaceType, typename SomeSquareMatrixType> friend constexpr decltype(auto) DUAL(FactoredMultivector<OuterProduct<SomeMetricSpaceType>, SomeSquareMatrixType> const &) noexcept;
         template<typename FirstScalarType, typename SecondFactoringProduct, typename SecondSquareMatrixType, typename> friend constexpr decltype(auto) LCONT(FirstScalarType const &, FactoredMultivector<SecondFactoringProduct, SecondSquareMatrixType> const &) noexcept;
         template<typename SomeFactoringProductType, typename SomeSquareMatrixType> friend constexpr decltype(auto) REVERSE(FactoredMultivector<SomeFactoringProductType, SomeSquareMatrixType> const &) noexcept;
         template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondFactoringProductType, typename SecondSquareMatrixType> friend constexpr decltype(auto) SUB(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &, FactoredMultivector<SecondFactoringProductType, SecondSquareMatrixType> const &) noexcept;
         template<typename SomeFactoringProductType, typename SomeSquareMatrixType> friend constexpr FactoredMultivector<SomeFactoringProductType, SomeSquareMatrixType> UNARY_MINUS(FactoredMultivector<SomeFactoringProductType, SomeSquareMatrixType> const &) noexcept;
+        template<typename SomeMetricSpaceType, typename SomeSquareMatrixType> friend constexpr decltype(auto) UNDUAL(FactoredMultivector<OuterProduct<SomeMetricSpaceType>, SomeSquareMatrixType> const &) noexcept;
     };
 
     template<typename FactoringProductType, typename SquareMatrixType>
