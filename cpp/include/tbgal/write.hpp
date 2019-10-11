@@ -10,7 +10,7 @@ namespace tbgal {
             using IndexType = typename FactoredMultivector<FactoringProductType, SquareMatrixType>::IndexType;
             os << arg.scalar();
             if (arg.factors_count() > 0) {
-                auto factors = from_orthogonal_to_actual_metric(arg.space(), arg.factors());
+                auto factors = arg.factors_in_actual_metric();
                 for (IndexType ind = 0; ind != arg.factors_count(); ++ind) {
                     os << ", (";
                     for (IndexType dim = 0; dim != arg.space().dimensions(); ++dim) {

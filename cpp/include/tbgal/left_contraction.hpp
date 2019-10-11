@@ -21,7 +21,7 @@ namespace tbgal {
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
         auto resulting_scalar = arg1 * arg2.scalar();
         if (resulting_scalar != 0) {
-            return ResultingFactoredMultivectorType(arg2.space(), resulting_scalar, arg2.factors(), arg2.factors_count());
+            return ResultingFactoredMultivectorType(arg2.space(), resulting_scalar, arg2.factors_in_signed_metric(), arg2.factors_count());
         }
         else {
             return ResultingFactoredMultivectorType(arg2.space(), 0);

@@ -79,7 +79,7 @@ namespace tbgal {
             constexpr static decltype(auto) fill_input_matrix(ResultingMatrixType &result, FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &arg1, NextTypes const &... args) noexcept {
                 assert(is_blade(arg1));
                 auto end_column_index = std::get<1>(fill_input_matrix(result, args...));
-                return std::make_tuple(copy_columns(arg1.factors(), 0, result, end_column_index - arg1.factors_count(), arg1.factors_count()), end_column_index - arg1.factors_count());
+                return std::make_tuple(copy_columns<Dynamic>(arg1.factors_in_signed_metric(), 0, result, end_column_index - arg1.factors_count(), arg1.factors_count()), end_column_index - arg1.factors_count());
             }
 
             template<typename ResultingMatrixType, typename Type>
@@ -90,7 +90,7 @@ namespace tbgal {
             template<typename ResultingMatrixType, typename FactoringProductType, typename SquareMatrixType>
             constexpr static decltype(auto) fill_input_matrix(ResultingMatrixType &result, FactoredMultivector<FactoringProductType, SquareMatrixType> const &arg) noexcept {
                 assert(is_blade(arg));
-                return std::make_tuple(copy_columns(arg.factors(), 0, result, cols(result) - arg.factors_count(), arg.factors_count()), cols(result) - arg.factors_count());
+                return std::make_tuple(copy_columns<Dynamic>(arg.factors_in_signed_metric(), 0, result, cols(result) - arg.factors_count(), arg.factors_count()), cols(result) - arg.factors_count());
             }
 
             template<typename FirstScalarType, typename... NextTypes>

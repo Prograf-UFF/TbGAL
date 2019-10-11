@@ -1,8 +1,25 @@
 #ifndef __TBGAL_MATRIX_DECLARATIONS_HPP__
 #define __TBGAL_MATRIX_DECLARATIONS_HPP__
 
+#include <cmath>
+#include <cstdint>
+#include <type_traits>
+
+#ifndef TBGAL_DEFAULT_SCALAR_TYPE
+    #define TBGAL_DEFAULT_SCALAR_TYPE std::double_t
+#endif // TBGAL_DEFAULT_SCALAR_TYPE
+
+#ifndef TBGAL_DEFAULT_INDEX_TYPE
+    #define TBGAL_DEFAULT_INDEX_TYPE std::int64_t
+#endif // TBGAL_DEFAULT_INDEX_TYPE
+
 namespace tbgal {
     
+    using DefaultIndexType = TBGAL_DEFAULT_INDEX_TYPE;
+    using DefaultScalarType = TBGAL_DEFAULT_SCALAR_TYPE;
+
+    constexpr static DefaultIndexType Dynamic = -1;
+
     namespace detail {
 
         template<typename FirstType, typename SecondType>
@@ -37,22 +54,13 @@ namespace tbgal {
         constexpr auto rows_at_compile_time_v = rows_at_compile_time<MatrixType>::value;
 
         template<typename MatrixType>
-        constexpr decltype(auto) coeff(MatrixType const &, DefaultIndexType, DefaultIndexType) noexcept;
+        constexpr decltype(auto) coeff(MatrixType &, DefaultIndexType, DefaultIndexType) noexcept;
 
         template<typename MatrixType>
         constexpr decltype(auto) cols(MatrixType const &) noexcept;
 
         template<typename MatrixType>
         constexpr decltype(auto) rows(MatrixType const &) noexcept;
-
-        template<typename ScalarType, DefaultIndexType SizeAtCompileTime>
-        struct identity_matrix_type;
-
-        template<typename ScalarType, DefaultIndexType SizeAtCompileTime>
-        using identity_matrix_type_t = typename identity_matrix_type<ScalarType, SizeAtCompileTime>::type;
-        
-        template<typename ScalarType, DefaultIndexType SizeAtCompileTime>
-        constexpr decltype(auto) make_identity_matrix(DefaultIndexType) noexcept;
 
         template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime>
         struct matrix_type;
@@ -63,8 +71,14 @@ namespace tbgal {
         template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime>
         constexpr decltype(auto) make_matrix(DefaultIndexType, DefaultIndexType) noexcept;
 
-        template<typename SourceMatrixType, typename TargetMatrixType>
+        template<typename ScalarType, DefaultIndexType SizeAtCompileTime>
+        constexpr decltype(auto) make_identity_matrix(DefaultIndexType) noexcept;
+
+        template<DefaultIndexType ColsAtCompileTime, typename SourceMatrixType, typename TargetMatrixType>
         constexpr TargetMatrixType& copy_columns(SourceMatrixType const &, DefaultIndexType, TargetMatrixType &, DefaultIndexType, DefaultIndexType) noexcept;
+
+        template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename SourceMatrixType, typename TargetMatrixType>
+        constexpr TargetMatrixType& copy_to_block(SourceMatrixType const &, TargetMatrixType &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
 
         template<typename MatrixType>
         constexpr decltype(auto) determinant(MatrixType const &) noexcept;

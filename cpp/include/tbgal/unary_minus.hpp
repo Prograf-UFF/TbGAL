@@ -8,7 +8,7 @@ namespace tbgal {
         using ResultingFactoringProductType = FactoringProductType;
         using ResultingSquareMatrixType = SquareMatrixType;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
-        return ResultingFactoredMultivectorType(arg.space(), -arg.scalar(), arg.factors(), arg.factors_count());
+        return ResultingFactoredMultivectorType(arg.space(), -arg.scalar(), arg.factors_in_signed_metric(), arg.factors_count());
     }
 
     template<typename FactoringProductType, typename SquareMatrixType>

@@ -22,7 +22,7 @@ namespace tbgal {
     template<typename MetricSpaceType, typename ScalarType, typename = std::enable_if_t<!is_multivector_v<std::remove_cv_t<std::remove_reference_t<ScalarType> > > > >
     decltype(auto) scalar(MetricSpaceType const &space, ScalarType &&value) noexcept {
         using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
-        using ResultingSquareMatrixType = detail::identity_matrix_type_t<std::remove_cv_t<std::remove_reference_t<ScalarType> >, MetricSpaceType::DimensionsAtCompileTime>;
+        using ResultingSquareMatrixType = detail::matrix_type_t<std::remove_cv_t<std::remove_reference_t<ScalarType> >, MetricSpaceType::DimensionsAtCompileTime, MetricSpaceType::DimensionsAtCompileTime>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
         return ResultingFactoredMultivectorType(space, std::move(value));
     }
@@ -34,7 +34,7 @@ namespace tbgal {
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
         static_assert(MetricSpaceType::DimensionsAtCompileTime == Dynamic || MetricSpaceType::DimensionsAtCompileTime == sizeof...(ScalarTypes), "Invalid number of coordinates.");
         assert(space.dimensions() == sizeof...(ScalarTypes));
-        auto input = detail::from_actual_to_orthogonal_metric(space, detail::fill_column_matrix(std::move(coords)...));
+        auto input = detail::from_actual_to_signed_metric(space, detail::fill_column_matrix(std::move(coords)...));
         auto qr_tuple = detail::qr_decomposition(input);
         if (std::get<2>(qr_tuple) == 1) {
             auto const &matrix_q = std::get<0>(qr_tuple);
@@ -55,7 +55,7 @@ namespace tbgal {
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
         assert(1 <= index && index <= space.dimensions());
         auto aux = detail::make_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, 1>(space.dimensions(), 1);
-        auto input = detail::from_actual_to_orthogonal_metric(space, detail::copy_columns(detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime>(space.dimensions()), index - 1, aux, 0, 1));
+        auto input = detail::from_actual_to_signed_metric(space, detail::copy_columns<1>(detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime>(space.dimensions()), index - 1, aux, 0, 1));
         auto qr_tuple = detail::qr_decomposition(input);
         auto const &matrix_q = std::get<0>(qr_tuple);
         return ResultingFactoredMultivectorType(

@@ -31,18 +31,18 @@ namespace tbgal {
     namespace detail {
 
         template<typename MetricSpaceType, typename MatrixType>
-        constexpr decltype(auto) from_actual_to_orthogonal_metric(MetricSpaceType const &space, MatrixType const &factors) noexcept {
-            return from_actual_to_orthogonal_metric_impl<MetricSpaceType>::eval(space, factors);
+        constexpr decltype(auto) apply_signed_metric(MetricSpaceType const &space, MatrixType const &factors_in_signed_metric) noexcept {
+            return apply_signed_metric_impl<MetricSpaceType>::eval(space, factors_in_signed_metric);
         }
 
         template<typename MetricSpaceType, typename MatrixType>
-        constexpr decltype(auto) from_orthogonal_to_actual_metric(MetricSpaceType const &space, MatrixType const &factors) noexcept {
-            return from_orthogonal_to_actual_metric_impl<MetricSpaceType>::eval(space, factors);
+        constexpr decltype(auto) from_actual_to_signed_metric(MetricSpaceType const &space, MatrixType const &factors_in_actual_metric) noexcept {
+            return from_actual_to_signed_metric_impl<MetricSpaceType>::eval(space, factors_in_actual_metric);
         }
 
         template<typename MetricSpaceType, typename MatrixType>
-        constexpr decltype(auto) orthogonal_metric_factor(MetricSpaceType const &space, MatrixType const &factors, DefaultIndexType factors_count) noexcept {
-            return orthogonal_metric_factor_impl<MetricSpaceType>::eval(space, factors, factors_count);
+        constexpr decltype(auto) from_signed_to_actual_metric(MetricSpaceType const &space, MatrixType const &factors_in_signed_metric) noexcept {
+            return from_signed_to_actual_metric_impl<MetricSpaceType>::eval(space, factors_in_signed_metric);
         }
 
     }

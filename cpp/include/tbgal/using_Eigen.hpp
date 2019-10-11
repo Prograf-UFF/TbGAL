@@ -1,8 +1,14 @@
 #ifndef __TBGAL_USING_EIGEN_HPP__
 #define __TBGAL_USING_EIGEN_HPP__
 
-#include "core.hpp"
 #include <Eigen/Dense>
+#include "matrix_declarations.hpp"
+
+#ifdef TBGAL_USING_MATRIX_DEFINITIONS
+    #error "Matrix definition already included by command '#include <using_{SomeMatrixAlgebraLibrary}.hpp>.'"
+#else
+    #define TBGAL_USING_MATRIX_DEFINITIONS
+#endif // TBGAL_USING_MATRIX_DEFINITIONS
 
 namespace tbgal {
 
@@ -19,55 +25,14 @@ namespace tbgal {
             >;
         };
 
-        template<typename FirstScalarType, int FirstRows, int FirstCols, int FirstOptions, int FirstMaxRows, int FirstMaxCols, typename SecondScalarType, int SecondSizeAtCompileTime, int SecondMaxSizeAtCompileTime>
-        struct common_type<Eigen::Matrix<FirstScalarType, FirstRows, FirstCols, FirstOptions, FirstMaxRows, FirstMaxCols>, Eigen::DiagonalMatrix<SecondScalarType, SecondSizeAtCompileTime, SecondMaxSizeAtCompileTime> > {
-            static_assert((FirstRows == Eigen::Dynamic) || (SecondSizeAtCompileTime == Eigen::Dynamic) || (FirstRows == SecondSizeAtCompileTime), "The given matrices have incompatible number of rows.");
-            static_assert((FirstCols == Eigen::Dynamic) || (SecondSizeAtCompileTime == Eigen::Dynamic) || (FirstCols == SecondSizeAtCompileTime), "The given matrices have incompatible number of cols.");
-            using type = Eigen::Matrix<
-                std::common_type_t<FirstScalarType, SecondScalarType>,
-                ((FirstRows == Eigen::Dynamic) || (SecondSizeAtCompileTime == Eigen::Dynamic)) ? Eigen::Dynamic : FirstRows,
-                ((FirstCols == Eigen::Dynamic) || (SecondSizeAtCompileTime == Eigen::Dynamic)) ? Eigen::Dynamic : FirstCols
-            >;
-        };
-
         template<typename FirstScalarType, int FirstRows, int FirstCols, int FirstOptions, int FirstMaxRows, int FirstMaxCols, typename SecondScalarType>
         struct common_type<Eigen::Matrix<FirstScalarType, FirstRows, FirstCols, FirstOptions, FirstMaxRows, FirstMaxCols>, SecondScalarType> {
             using type = Eigen::Matrix<std::common_type_t<FirstScalarType, SecondScalarType>, FirstRows, FirstCols, FirstOptions, FirstMaxRows, FirstMaxCols>;
         };
 
-        template<typename FirstScalarType, int FirstSizeAtCompileTime, int FirstMaxSizeAtCompileTime, typename SecondScalarType, int SecondSizeAtCompileTime, int SecondMaxSizeAtCompileTime>
-        struct common_type<Eigen::DiagonalMatrix<FirstScalarType, FirstSizeAtCompileTime, FirstMaxSizeAtCompileTime>, Eigen::DiagonalMatrix<SecondScalarType, SecondSizeAtCompileTime, SecondMaxSizeAtCompileTime> > {
-            static_assert((FirstSizeAtCompileTime == Eigen::Dynamic) || (SecondSizeAtCompileTime == Eigen::Dynamic) || (FirstSizeAtCompileTime == SecondSizeAtCompileTime), "The given matrices have incompatible sizes.");
-            using type = Eigen::DiagonalMatrix<
-                std::common_type_t<FirstScalarType, SecondScalarType>,
-                ((FirstSizeAtCompileTime == Eigen::Dynamic) || (SecondSizeAtCompileTime == Eigen::Dynamic)) ? Eigen::Dynamic : FirstSizeAtCompileTime
-            >;
-        };
-
-        template<typename FirstScalarType, int FirstSizeAtCompileTime, int FirstMaxSizeAtCompileTime, typename SecondScalarType, int SecondRows, int SecondCols, int SecondOptions, int SecondMaxRows, int SecondMaxCols>
-        struct common_type<Eigen::DiagonalMatrix<FirstScalarType, FirstSizeAtCompileTime, FirstMaxSizeAtCompileTime>, Eigen::Matrix<SecondScalarType, SecondRows, SecondCols, SecondOptions, SecondMaxRows, SecondMaxCols> > {
-            static_assert((FirstSizeAtCompileTime == Eigen::Dynamic) || (SecondRows == Eigen::Dynamic) || (FirstSizeAtCompileTime == SecondRows), "The given matrices have incompatible number of rows.");
-            static_assert((FirstSizeAtCompileTime == Eigen::Dynamic) || (SecondCols == Eigen::Dynamic) || (FirstSizeAtCompileTime == SecondCols), "The given matrices have incompatible number of cols.");
-            using type = Eigen::Matrix<
-                std::common_type_t<FirstScalarType, SecondScalarType>,
-                ((FirstSizeAtCompileTime == Eigen::Dynamic) || (SecondRows == Eigen::Dynamic)) ? Eigen::Dynamic : FirstSizeAtCompileTime,
-                ((FirstSizeAtCompileTime == Eigen::Dynamic) || (SecondCols == Eigen::Dynamic)) ? Eigen::Dynamic : FirstSizeAtCompileTime
-            >;
-        };
-
-        template<typename FirstScalarType, int FirstSizeAtCompileTime, int FirstMaxSizeAtCompileTime, typename SecondScalarType>
-        struct common_type<Eigen::DiagonalMatrix<FirstScalarType, FirstSizeAtCompileTime, FirstMaxSizeAtCompileTime>, SecondScalarType> {
-            using type = Eigen::DiagonalMatrix<std::common_type_t<FirstScalarType, SecondScalarType>, FirstSizeAtCompileTime, FirstMaxSizeAtCompileTime>;
-        };
-
         template<typename FirstScalarType, typename SecondScalarType, int SecondRows, int SecondCols, int SecondOptions, int SecondMaxRows, int SecondMaxCols>
         struct common_type<FirstScalarType, Eigen::Matrix<SecondScalarType, SecondRows, SecondCols, SecondOptions, SecondMaxRows, SecondMaxCols> > {
             using type = Eigen::Matrix<std::common_type_t<FirstScalarType, SecondScalarType>, SecondRows, SecondCols, SecondOptions, SecondMaxRows, SecondMaxCols>;
-        };
-
-        template<typename FirstScalarType, typename SecondScalarType, int SecondSizeAtCompileTime, int SecondMaxSizeAtCompileTime>
-        struct common_type<FirstScalarType, Eigen::DiagonalMatrix<SecondScalarType, SecondSizeAtCompileTime, SecondMaxSizeAtCompileTime> > {
-            using type = Eigen::DiagonalMatrix<std::common_type_t<FirstScalarType, SecondScalarType>, SecondSizeAtCompileTime, SecondMaxSizeAtCompileTime>;
         };
 
         template<typename MatrixType>
@@ -91,22 +56,8 @@ namespace tbgal {
         };
 
         template<typename MatrixType>
-        struct _coeff_impl {
-            constexpr static decltype(auto) eval(MatrixType const &arg, DefaultIndexType row, DefaultIndexType col) noexcept {
-                return arg(row, col);
-            }
-        };
-
-        template<typename SecondScalarType, int SecondSizeAtCompileTime, int SecondMaxSizeAtCompileTime>
-        struct _coeff_impl<Eigen::DiagonalMatrix<SecondScalarType, SecondSizeAtCompileTime, SecondMaxSizeAtCompileTime> > {
-            constexpr static decltype(auto) eval(Eigen::DiagonalMatrix<SecondScalarType, SecondSizeAtCompileTime, SecondMaxSizeAtCompileTime> const &arg, DefaultIndexType row, DefaultIndexType col) noexcept {
-                return (row == col) ? arg.diagonal()[row] : 0;
-            }
-        };
-
-        template<typename MatrixType>
-        constexpr decltype(auto) coeff(MatrixType const &arg, DefaultIndexType row, DefaultIndexType col) noexcept {
-            return _coeff_impl<MatrixType>::eval(arg, row, col);
+        constexpr decltype(auto) coeff(MatrixType &arg, DefaultIndexType row, DefaultIndexType col) noexcept {
+            return arg(row, col);
         }
 
         template<typename MatrixType>
@@ -119,18 +70,6 @@ namespace tbgal {
             return arg.rows();
         }
 
-        template<typename ScalarType, DefaultIndexType SizeAtCompileTime>
-        struct identity_matrix_type {
-            using type = Eigen::DiagonalMatrix<ScalarType, SizeAtCompileTime>;
-        };
-
-        template<typename ScalarType, DefaultIndexType SizeAtCompileTime>
-        constexpr decltype(auto) make_identity_matrix(DefaultIndexType size) noexcept {
-            identity_matrix_type_t<ScalarType, SizeAtCompileTime> result(size);
-            result.setIdentity();
-            return result;
-        }
-
         template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime>
         struct matrix_type {
             using type = Eigen::Matrix<ScalarType, RowsAtCompileTime, ColsAtCompileTime>;
@@ -141,36 +80,21 @@ namespace tbgal {
             return matrix_type_t<ScalarType, RowsAtCompileTime, ColsAtCompileTime>(rows, cols);
         }
         
-        template<typename SourceMatrixType>
-        struct _copy_columns_impl {
-            template<typename TargetMatrixType>
-            constexpr static TargetMatrixType& eval(SourceMatrixType const &source, DefaultIndexType first_source, TargetMatrixType &target, DefaultIndexType first_target, DefaultIndexType count) noexcept {
-                target.template block<TargetMatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, first_target, target.rows(), count) = source.template block<SourceMatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, first_source, source.rows(), count);
-                return target;
-            }
-        };
-        
-        template<typename SourceScalarType, int SourceSizeAtCompileTime, int SourceMaxSizeAtCompileTime>
-        struct _copy_columns_impl<Eigen::DiagonalMatrix<SourceScalarType, SourceSizeAtCompileTime, SourceMaxSizeAtCompileTime> > {
-            
-            template<typename TargetMatrixType>
-            constexpr static TargetMatrixType& eval(Eigen::DiagonalMatrix<SourceScalarType, SourceSizeAtCompileTime, SourceMaxSizeAtCompileTime> const &source, DefaultIndexType first_source, TargetMatrixType &target, DefaultIndexType first_target, DefaultIndexType count) noexcept {
-                for (DefaultIndexType offset = 0, col_source = first_source, col_target = first_target; offset < count; ++offset, ++col_source, ++col_target) {
-                    for (DefaultIndexType row = 0; row < col_source; ++row) {
-                        target(row, col_target) = 0;
-                    }
-                    target(col_source, col_target) = source.diagonal()[col_source];
-                    for (DefaultIndexType row = col_source + 1; row < target.rows(); ++row) {
-                        target(row, col_target) = 0;
-                    }
-                }
-                return target;
-            }
-        };
-        
-        template<typename SourceMatrixType, typename TargetMatrixType>
-        constexpr TargetMatrixType& copy_columns(SourceMatrixType const &source, DefaultIndexType first_source, TargetMatrixType &target, DefaultIndexType first_target, DefaultIndexType count) noexcept {
-            return _copy_columns_impl<SourceMatrixType>::eval(source, first_source, target, first_target, count);
+        template<typename ScalarType, DefaultIndexType SizeAtCompileTime>
+        constexpr decltype(auto) make_identity_matrix(DefaultIndexType size) noexcept {
+            return matrix_type_t<ScalarType, SizeAtCompileTime, SizeAtCompileTime>::Identity(size, size);
+        }
+
+        template<DefaultIndexType ColsAtCompileTime, typename SourceMatrixType, typename TargetMatrixType>
+        constexpr TargetMatrixType& copy_columns(SourceMatrixType const &source, DefaultIndexType start_col_source, TargetMatrixType &target, DefaultIndexType start_col_target, DefaultIndexType cols) noexcept {
+            target.template block<TargetMatrixType::RowsAtCompileTime, ColsAtCompileTime>(0, start_col_target, target.rows(), cols) = source.template block<SourceMatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, start_col_source, source.rows(), cols);
+            return target;
+        }
+
+        template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename SourceMatrixType, typename TargetMatrixType>
+        constexpr TargetMatrixType& copy_to_block(SourceMatrixType const &source, TargetMatrixType &target, DefaultIndexType start_row, DefaultIndexType start_col, DefaultIndexType block_rows, DefaultIndexType block_cols) noexcept {
+            target.template block<BlockRowsAtCompileTime, BlockColsAtCompileTime>(start_row, start_col, block_rows, block_cols) = source;
+            return target;
         }
 
         template<typename MatrixType>
@@ -203,12 +127,12 @@ namespace tbgal {
 
         template<typename FirstMatrixType, typename SecondMatrixType>
         constexpr decltype(auto) prod(FirstMatrixType const &arg1, SecondMatrixType const &arg2) noexcept {
-            return arg1 * arg2;
+            return (arg1 * arg2).eval();
         }
         
         template<typename MatrixType>
         constexpr decltype(auto) qr_decomposition(MatrixType const &arg) noexcept {
-            using MatrixQType = Eigen::Matrix<typename MatrixType::Scalar, MatrixType::RowsAtCompileTime, MatrixType::RowsAtCompileTime>;
+            using MatrixQType = matrix_type_t<typename MatrixType::Scalar, MatrixType::RowsAtCompileTime, MatrixType::RowsAtCompileTime>;
             Eigen::ColPivHouseholderQR<MatrixType> qr(arg);
             auto rank = qr.rank();
             return std::make_tuple(MatrixQType(qr.householderQ()), qr.matrixR().topLeftCorner(rank, rank).template triangularView<Eigen::Upper>(), rank);
@@ -216,7 +140,7 @@ namespace tbgal {
 
         template<typename MatrixType>
         constexpr decltype(auto) split_columns_and_swap(MatrixType const &input, DefaultIndexType col) noexcept {
-            using ResultingMatrixType = Eigen::Matrix<typename MatrixType::Scalar, MatrixType::RowsAtCompileTime, MatrixType::ColsAtCompileTime>;
+            using ResultingMatrixType = matrix_type_t<typename MatrixType::Scalar, MatrixType::RowsAtCompileTime, MatrixType::ColsAtCompileTime>;
             ResultingMatrixType result(input.rows(), input.cols());
             result.template block<ResultingMatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, 0, result.rows(), input.cols() - col) = input.template block<MatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, col, input.rows(), input.cols() - col);
             result.template block<ResultingMatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, input.cols() - col, result.rows(), col) = input.template block<MatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, 0, input.rows(), col);

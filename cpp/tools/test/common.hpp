@@ -181,10 +181,11 @@ decltype(auto) from_tbgal_to_gatl(tbgal::FactoredMultivector<tbgal::OuterProduct
     using IndexType = typename tbgal::FactoredMultivector<tbgal::OuterProduct<MetricSpaceType>, SquareMatrixType>::IndexType;
     ga::full_multivector_t<scalar_factor_t, std::tuple_size_v<vector_factor_t> > result;
     ga::trivial_copy(arg.scalar(), result);
+    auto factors = arg.factors_in_actual_metric();
     for (IndexType col = 0; col != arg.factors_count(); ++col) {
         vector_factor_t factor;
         for (std::size_t row = 0; row != std::tuple_size_v<vector_factor_t>; ++row) {
-            factor[row] = tbgal::detail::coeff(arg.factors(), row, col);
+            factor[row] = tbgal::detail::coeff(factors, row, col);
         }
         ga::trivial_copy(gatl_OuterProduct(result, make_gatl_vector(factor)), result);
     }
@@ -259,7 +260,6 @@ constexpr bool same_multivector(LeftType const &lhs, RightType const &rhs) noexc
 
 #define UNARY_OPERATION_TESTS(ARG_K) \
     UNARY_OPERATION_TESTS_FOR(Dualization, ARG_K) \
-    UNARY_OPERATION_TESTS_FOR(ReverseNorm, ARG_K) \
     UNARY_OPERATION_TESTS_FOR(Reversion, ARG_K) \
     UNARY_OPERATION_TESTS_FOR(SquaredReverseNorm, ARG_K) \
     UNARY_OPERATION_TESTS_FOR(UnaryMinus, ARG_K) \

@@ -1,5 +1,5 @@
-#ifndef __TBGAL_ASSUMING_HOMOGENEOUS2_HPP__
-#define __TBGAL_ASSUMING_HOMOGENEOUS2_HPP__
+#ifndef __TBGAL_ASSUMING_HOMOGENEOUS1_HPP__
+#define __TBGAL_ASSUMING_HOMOGENEOUS1_HPP__
 
 #include "core.hpp"
 
@@ -21,4 +21,4 @@ namespace tbgal {
 
 }
 
-#endif // __TBGAL_ASSUMING_HOMOGENEOUS2_HPP__
+#endif // __TBGAL_ASSUMING_HOMOGENEOUS1_HPP__

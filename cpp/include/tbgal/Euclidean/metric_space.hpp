@@ -108,27 +108,26 @@ namespace tbgal {
     namespace detail {
 
         template<DefaultIndexType DimensionsAtCompileTime>
-        struct from_actual_to_orthogonal_metric_impl<EuclideanMetricSpace<DimensionsAtCompileTime> > {
+        struct apply_signed_metric_impl<EuclideanMetricSpace<DimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static MatrixType const & eval(EuclideanMetricSpace<DimensionsAtCompileTime> const &, MatrixType const &factors) noexcept {
-                return factors;
+            constexpr static MatrixType const & eval(EuclideanMetricSpace<DimensionsAtCompileTime> const &, MatrixType const &factors_in_signed_metric) noexcept {
+                return factors_in_signed_metric;
             }
         };
 
         template<DefaultIndexType DimensionsAtCompileTime>
-        struct from_orthogonal_to_actual_metric_impl<EuclideanMetricSpace<DimensionsAtCompileTime> > {
+        struct from_actual_to_signed_metric_impl<EuclideanMetricSpace<DimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static MatrixType const & eval(EuclideanMetricSpace<DimensionsAtCompileTime> const &, MatrixType const &factors) noexcept {
-                return factors;
+            constexpr static MatrixType const & eval(EuclideanMetricSpace<DimensionsAtCompileTime> const &, MatrixType const &factors_in_actual_metric) noexcept {
+                return factors_in_actual_metric;
             }
         };
 
         template<DefaultIndexType DimensionsAtCompileTime>
-        struct orthogonal_metric_factor_impl<EuclideanMetricSpace<DimensionsAtCompileTime> > {
+        struct from_signed_to_actual_metric_impl<EuclideanMetricSpace<DimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static decltype(auto) eval(EuclideanMetricSpace<DimensionsAtCompileTime> const &, MatrixType const &, DefaultIndexType) noexcept {
-                using ScalarType = typename EuclideanMetricSpace<DimensionsAtCompileTime>::ScalarType;
-                return ScalarType(1);
+            constexpr static MatrixType const & eval(EuclideanMetricSpace<DimensionsAtCompileTime> const &, MatrixType const &factors_in_signed_metric) noexcept {
+                return factors_in_signed_metric;
             }
         };
 

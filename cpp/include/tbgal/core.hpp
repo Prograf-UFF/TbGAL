@@ -1,37 +1,27 @@
 #ifndef __TBGAL_CORE_HPP__
 #define __TBGAL_CORE_HPP__
 
+#ifndef TBGAL_USING_MATRIX_DEFINITIONS
+    #error "Before assuming some model of geometry you have to use some matrix definition by calling the command '#include <using_{SomeMatrixAlgebraLibrary}.hpp>.'"
+#endif // TBGAL_USING_MATRIX_DEFINITIONS
+
 #include <array>
 #include <cassert>
-#include <cmath>
-#include <cstdint>
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <type_traits>
 #include <tuple>
 #include <vector>
 
-#ifndef TBGAL_DEFAULT_SCALAR_TYPE
-    #define TBGAL_DEFAULT_SCALAR_TYPE std::double_t
-#endif // TBGAL_DEFAULT_SCALAR_TYPE
-
-#ifndef TBGAL_DEFAULT_INDEX_TYPE
-    #define TBGAL_DEFAULT_INDEX_TYPE std::int64_t
-#endif // TBGAL_DEFAULT_INDEX_TYPE
+#include "matrix_declarations.hpp"
 
 namespace tbgal {
-
-    using DefaultIndexType = TBGAL_DEFAULT_INDEX_TYPE;
-    using DefaultScalarType = TBGAL_DEFAULT_SCALAR_TYPE;
 
     template<typename MetricSpaceType> class MetricSpace;
     template<typename FactoringProductType, typename SquareMatrixType> class FactoredMultivector;
 
     template<typename MetricSpaceType> struct GeometricProduct;
     template<typename MetricSpaceType> struct OuterProduct;
-
-    constexpr static DefaultIndexType Dynamic = -1;
 
     namespace detail {
 
@@ -40,9 +30,9 @@ namespace tbgal {
 
         template<bool AnyMultivectorType> struct OP_impl;
 
-        template<typename MetricSpaceType> struct from_actual_to_orthogonal_metric_impl;
-        template<typename MetricSpaceType> struct from_orthogonal_to_actual_metric_impl;
-        template<typename MetricSpaceType> struct orthogonal_metric_factor_impl;
+        template<typename MetricSpaceType> struct apply_signed_metric_impl;
+        template<typename MetricSpaceType> struct from_actual_to_signed_metric_impl;
+        template<typename MetricSpaceType> struct from_signed_to_actual_metric_impl;
 
     }
 
@@ -83,8 +73,6 @@ namespace tbgal {
 
 #include "exception.hpp"
 
-#include "matrix_declarations.hpp"
-
 #include "metric_space.hpp"
 
 #include "factoring_product.hpp"
@@ -110,6 +98,9 @@ namespace tbgal {
 
 #include "write.hpp"
 #include "macro.hpp"
+
+#include "Conformal/metric_space.hpp"
+#include "Conformal/macro.hpp"
 
 #include "Euclidean/metric_space.hpp"
 #include "Euclidean/macro.hpp"

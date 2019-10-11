@@ -121,27 +121,26 @@ namespace tbgal {
     namespace detail {
 
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime>
-        struct from_actual_to_orthogonal_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > {
+        struct apply_signed_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors) noexcept {
-                return factors;
+            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors_in_signed_metric) noexcept {
+                return factors_in_signed_metric;
             }
         };
 
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime>
-        struct from_orthogonal_to_actual_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > {
+        struct from_actual_to_signed_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors) noexcept {
-                return factors;
+            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors_in_actual_metric) noexcept {
+                return factors_in_actual_metric;
             }
         };
 
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime>
-        struct orthogonal_metric_factor_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > {
+        struct from_signed_to_actual_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static decltype(auto) eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> const &, MatrixType const &, DefaultIndexType) noexcept {
-                using ScalarType = typename HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime>::ScalarType;
-                return ScalarType(1);
+            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors_in_signed_metric) noexcept {
+                return factors_in_signed_metric;
             }
         };
 

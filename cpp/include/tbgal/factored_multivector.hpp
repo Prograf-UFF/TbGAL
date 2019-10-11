@@ -20,7 +20,7 @@ namespace tbgal {
         constexpr FactoredMultivector(MetricSpaceType const &space) noexcept :
             space_(space),
             scalar_(0),
-            factors_(detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime>(space.dimensions())),
+            factors_in_signed_metric_(detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime>(space.dimensions())),
             factors_count_(0) {
         }
 
@@ -28,7 +28,7 @@ namespace tbgal {
         constexpr FactoredMultivector(MetricSpaceType const &space, OtherScalarType &&scalar) noexcept :
             space_(space),
             scalar_(std::move(scalar)),
-            factors_(detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime>(space.dimensions())),
+            factors_in_signed_metric_(detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime>(space.dimensions())),
             factors_count_(0) {
         }
 
@@ -51,8 +51,12 @@ namespace tbgal {
             return scalar_;
         }
 
-        constexpr SquareMatrixType const & factors() const noexcept {
-            return factors_;
+        constexpr decltype(auto) factors_in_actual_metric() const noexcept {
+            return detail::from_signed_to_actual_metric(space_, factors_in_signed_metric_);
+        }
+
+        constexpr SquareMatrixType const & factors_in_signed_metric() const noexcept {
+            return factors_in_signed_metric_;
         }
 
         constexpr IndexType const & factors_count() const noexcept {
@@ -62,10 +66,10 @@ namespace tbgal {
     private:
 
         template<typename OtherScalarType, typename OtherSquareMatrixType, typename OtherIndexType>
-        constexpr FactoredMultivector(MetricSpaceType const &space, OtherScalarType &&scalar, OtherSquareMatrixType &&factors, OtherIndexType &&factors_count) noexcept :
+        constexpr FactoredMultivector(MetricSpaceType const &space, OtherScalarType &&scalar, OtherSquareMatrixType &&factors_in_signed_metric, OtherIndexType &&factors_count) noexcept :
             space_(space),
             scalar_(std::move(scalar)),
-            factors_(std::move(factors)),
+            factors_in_signed_metric_(std::move(factors_in_signed_metric)),
             factors_count_(std::move(factors_count)) {
         }
 
@@ -75,7 +79,7 @@ namespace tbgal {
 
         ScalarType scalar_;
 
-        SquareMatrixType factors_;
+        SquareMatrixType factors_in_signed_metric_;
         IndexType factors_count_;
 
         template<bool AnyMultivectorType> friend struct detail::OP_impl;
