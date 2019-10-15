@@ -3,8 +3,8 @@
 
 namespace tbgal {
 
-    template<typename FactoringProductType, typename SquareMatrixType>
-    constexpr decltype(auto) RNORM_SQR(FactoredMultivector<FactoringProductType, SquareMatrixType> const &arg) {
+    template<typename ScalarType, typename FactoringProductType>
+    constexpr decltype(auto) RNORM_SQR(FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
         return LCONT(arg, REVERSE(arg)).scalar();
     }
 

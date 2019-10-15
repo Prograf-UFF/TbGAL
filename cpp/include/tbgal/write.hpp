@@ -5,9 +5,9 @@ namespace tbgal {
 
     namespace detail {
 
-        template<typename FactoringProductType, typename SquareMatrixType>
-        std::ostream & write(std::ostream &os, FactoredMultivector<FactoringProductType, SquareMatrixType> const &arg) noexcept {
-            using IndexType = typename FactoredMultivector<FactoringProductType, SquareMatrixType>::IndexType;
+        template<typename ScalarType, typename FactoringProductType>
+        std::ostream & write(std::ostream &os, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+            using IndexType = typename FactoredMultivector<ScalarType, FactoringProductType>::IndexType;
             os << arg.scalar();
             if (arg.factors_count() > 0) {
                 auto factors = arg.factors_in_actual_metric();
@@ -31,16 +31,16 @@ namespace tbgal {
 
     }
 
-    template<typename MetricSpaceType, typename SquareMatrixType>
-    std::ostream & operator <<(std::ostream &os, FactoredMultivector<GeometricProduct<MetricSpaceType>, SquareMatrixType> const &arg) noexcept {
+    template<typename ScalarType, typename MetricSpaceType>
+    std::ostream & operator <<(std::ostream &os, FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType>> const &arg) noexcept {
         os << "GP(";
         detail::write(os, arg);
         os << ")";
         return os;
     }
 
-    template<typename MetricSpaceType, typename SquareMatrixType>
-    std::ostream & operator <<(std::ostream &os, FactoredMultivector<OuterProduct<MetricSpaceType>, SquareMatrixType> const &arg) noexcept {
+    template<typename ScalarType, typename MetricSpaceType>
+    std::ostream & operator <<(std::ostream &os, FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType>> const &arg) noexcept {
         os << "OP(";
         detail::write(os, arg);
         os << ")";

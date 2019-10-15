@@ -176,9 +176,9 @@ constexpr decltype(auto) make_gatl_multivector_using_outer_product(ScalarFactorT
     return _make_gatl_multivector_using_outer_product_impl<K>::eval(scalar_factor, vector_factors);
 }
 
-template<typename MetricSpaceType, typename SquareMatrixType>
-decltype(auto) from_tbgal_to_gatl(tbgal::FactoredMultivector<tbgal::OuterProduct<MetricSpaceType>, SquareMatrixType> const &arg) noexcept {
-    using IndexType = typename tbgal::FactoredMultivector<tbgal::OuterProduct<MetricSpaceType>, SquareMatrixType>::IndexType;
+template<typename ScalarType, typename MetricSpaceType>
+decltype(auto) from_tbgal_to_gatl(tbgal::FactoredMultivector<ScalarType, tbgal::OuterProduct<MetricSpaceType>> const &arg) noexcept {
+    using IndexType = typename tbgal::FactoredMultivector<ScalarType, tbgal::OuterProduct<MetricSpaceType> >::IndexType;
     ga::full_multivector_t<scalar_factor_t, std::tuple_size_v<vector_factor_t> > result;
     ga::trivial_copy(arg.scalar(), result);
     auto factors = arg.factors_in_actual_metric();

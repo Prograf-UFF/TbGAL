@@ -22,24 +22,11 @@ namespace tbgal {
 
     namespace detail {
 
-        template<typename FirstType, typename SecondType>
-        struct common_type : std::common_type<FirstType, SecondType> {
-        };
-
-        template<typename FirstType, typename SecondType>
-        using common_type_t = typename common_type<FirstType, SecondType>::type;
-
         template<typename MatrixType>
         struct index_type;
 
         template<typename MatrixType>
         using index_type_t = typename MatrixType::Index;
-
-        template<typename MatrixType>
-        struct scalar_type;
-
-        template<typename MatrixType>
-        using scalar_type_t = typename MatrixType::Scalar;
 
         template<typename MatrixType>
         struct cols_at_compile_time;

@@ -3,16 +3,16 @@
 
 namespace tbgal {
 
-    template<typename FactoringProductType, typename SquareMatrixType>
-    constexpr FactoredMultivector<FactoringProductType, SquareMatrixType> UNARY_MINUS(FactoredMultivector<FactoringProductType, SquareMatrixType> const &arg) noexcept {
+    template<typename ScalarType, typename FactoringProductType>
+    constexpr FactoredMultivector<ScalarType, FactoringProductType> UNARY_MINUS(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+        using ResultingScalarType = ScalarType;
         using ResultingFactoringProductType = FactoringProductType;
-        using ResultingSquareMatrixType = SquareMatrixType;
-        using ResultingFactoredMultivectorType = FactoredMultivector<ResultingFactoringProductType, ResultingSquareMatrixType>;
+        using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
         return ResultingFactoredMultivectorType(arg.space(), -arg.scalar(), arg.factors_in_signed_metric(), arg.factors_count());
     }
 
-    template<typename FactoringProductType, typename SquareMatrixType>
-    constexpr decltype(auto) operator-(FactoredMultivector<FactoringProductType, SquareMatrixType> const &arg) noexcept {
+    template<typename ScalarType, typename FactoringProductType>
+    constexpr decltype(auto) operator-(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
         return UNARY_MINUS(arg);
     }
 

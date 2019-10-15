@@ -14,27 +14,6 @@ namespace tbgal {
 
     namespace detail {
 
-        template<typename FirstScalarType, int FirstRows, int FirstCols, int FirstOptions, int FirstMaxRows, int FirstMaxCols, typename SecondScalarType, int SecondRows, int SecondCols, int SecondOptions, int SecondMaxRows, int SecondMaxCols>
-        struct common_type<Eigen::Matrix<FirstScalarType, FirstRows, FirstCols, FirstOptions, FirstMaxRows, FirstMaxCols>, Eigen::Matrix<SecondScalarType, SecondRows, SecondCols, SecondOptions, SecondMaxRows, SecondMaxCols> > {
-            static_assert((FirstRows == Eigen::Dynamic) || (SecondRows == Eigen::Dynamic) || (FirstRows == SecondRows), "The given matrices have incompatible number of rows.");
-            static_assert((FirstCols == Eigen::Dynamic) || (SecondCols == Eigen::Dynamic) || (FirstCols == SecondCols), "The given matrices have incompatible number of cols.");
-            using type = Eigen::Matrix<
-                std::common_type_t<FirstScalarType, SecondScalarType>,
-                ((FirstRows == Eigen::Dynamic) || (SecondRows == Eigen::Dynamic)) ? Eigen::Dynamic : FirstRows,
-                ((FirstCols == Eigen::Dynamic) || (SecondCols == Eigen::Dynamic)) ? Eigen::Dynamic : FirstCols
-            >;
-        };
-
-        template<typename FirstScalarType, int FirstRows, int FirstCols, int FirstOptions, int FirstMaxRows, int FirstMaxCols, typename SecondScalarType>
-        struct common_type<Eigen::Matrix<FirstScalarType, FirstRows, FirstCols, FirstOptions, FirstMaxRows, FirstMaxCols>, SecondScalarType> {
-            using type = Eigen::Matrix<std::common_type_t<FirstScalarType, SecondScalarType>, FirstRows, FirstCols, FirstOptions, FirstMaxRows, FirstMaxCols>;
-        };
-
-        template<typename FirstScalarType, typename SecondScalarType, int SecondRows, int SecondCols, int SecondOptions, int SecondMaxRows, int SecondMaxCols>
-        struct common_type<FirstScalarType, Eigen::Matrix<SecondScalarType, SecondRows, SecondCols, SecondOptions, SecondMaxRows, SecondMaxCols> > {
-            using type = Eigen::Matrix<std::common_type_t<FirstScalarType, SecondScalarType>, SecondRows, SecondCols, SecondOptions, SecondMaxRows, SecondMaxCols>;
-        };
-
         template<typename MatrixType>
         struct index_type {
             using type = Eigen::Index;

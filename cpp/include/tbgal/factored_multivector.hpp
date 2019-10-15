@@ -3,16 +3,16 @@
 
 namespace tbgal {
 
-    template<typename FactoringProductType, typename SquareMatrixType>
-    class FactoredMultivector final {
+    template<typename ScalarType_, typename MetricSpaceType_>
+    class FactoredMultivector<ScalarType_, OuterProduct<MetricSpaceType_> > final {
     public:
 
-        static_assert(is_factoring_product_v<FactoringProductType>, "Invalid FactoringProductType.");
+        using MetricSpaceType = MetricSpaceType_;
+
+        using SquareMatrixType = detail::matrix_type_t<ScalarType_, MetricSpaceType::DimensionsAtCompileTime, MetricSpaceType::DimensionsAtCompileTime>;
 
         using IndexType = detail::index_type_t<SquareMatrixType>;
-        using ScalarType = detail::scalar_type_t<SquareMatrixType>;
-
-        using MetricSpaceType = typename FactoringProductType::MetricSpaceType;
+        using ScalarType = ScalarType_;
 
         constexpr FactoredMultivector(FactoredMultivector const &) = default;
         constexpr FactoredMultivector(FactoredMultivector &&) = default;
@@ -33,15 +33,15 @@ namespace tbgal {
         }
 
         //TODO [FUTURE] Specialization.
-        //template<typename OtherFactoringProductType, typename OtherSquareMatrixType>
-        //constexpr FactoredMultivector(FactoredMultivector<OtherFactoringProductType, OtherSquareMatrixType> const &other) noexcept;
+        //template<typename OtherScalarType, typename OtherFactoringProductType>
+        //constexpr FactoredMultivector(FactoredMultivector<OtherScalarType, OtherFactoringProductType> const &other) noexcept;
 
         constexpr FactoredMultivector & operator=(FactoredMultivector const &) = default;
         constexpr FactoredMultivector & operator=(FactoredMultivector &&) = default;
 
         //TODO [FUTURE] Specialization.
-        //template<typename OtherFactoringProductType, typename OtherSquareMatrixType>
-        //constexpr FactoredMultivector & operator=(FactoredMultivector<OtherFactoringProductType, OtherSquareMatrixType> const &) = default;
+        //template<typename OtherScalarType, typename OtherFactoringProductType>
+        //constexpr FactoredMultivector & operator=(FactoredMultivector<OtherScalarType, OtherFactoringProductType> const &) = default;
 
         constexpr MetricSpaceType const & space() const noexcept {
             return space_;
@@ -82,23 +82,24 @@ namespace tbgal {
         SquareMatrixType factors_in_signed_metric_;
         IndexType factors_count_;
 
+        template<bool AnyMultivectorType> friend struct detail::GP_impl;
         template<bool AnyMultivectorType> friend struct detail::OP_impl;
 
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend decltype(auto) e(SomeMetricSpaceType const &, DefaultIndexType) noexcept;
         template<typename SomeMetricSpaceType, typename SomeScalarType, typename> friend decltype(auto) scalar(SomeMetricSpaceType const &, SomeScalarType const &) noexcept;
         template<typename SomeMetricSpaceType, typename... ScalarTypes> friend decltype(auto) vector(SomeMetricSpaceType const &, ScalarTypes &&...) noexcept;
 
-        template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondFactoringProductType, typename SecondSquareMatrixType> friend constexpr decltype(auto) ADD(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &, FactoredMultivector<SecondFactoringProductType, SecondSquareMatrixType> const &) noexcept;
-        template<typename SomeMetricSpaceType, typename SomeSquareMatrixType> friend constexpr decltype(auto) DUAL(FactoredMultivector<OuterProduct<SomeMetricSpaceType>, SomeSquareMatrixType> const &) noexcept;
-        template<typename FirstScalarType, typename SecondFactoringProduct, typename SecondSquareMatrixType, typename> friend constexpr decltype(auto) LCONT(FirstScalarType const &, FactoredMultivector<SecondFactoringProduct, SecondSquareMatrixType> const &) noexcept;
-        template<typename SomeFactoringProductType, typename SomeSquareMatrixType> friend constexpr decltype(auto) REVERSE(FactoredMultivector<SomeFactoringProductType, SomeSquareMatrixType> const &) noexcept;
-        template<typename FirstFactoringProductType, typename FirstSquareMatrixType, typename SecondFactoringProductType, typename SecondSquareMatrixType> friend constexpr decltype(auto) SUB(FactoredMultivector<FirstFactoringProductType, FirstSquareMatrixType> const &, FactoredMultivector<SecondFactoringProductType, SecondSquareMatrixType> const &) noexcept;
-        template<typename SomeFactoringProductType, typename SomeSquareMatrixType> friend constexpr FactoredMultivector<SomeFactoringProductType, SomeSquareMatrixType> UNARY_MINUS(FactoredMultivector<SomeFactoringProductType, SomeSquareMatrixType> const &) noexcept;
-        template<typename SomeMetricSpaceType, typename SomeSquareMatrixType> friend constexpr decltype(auto) UNDUAL(FactoredMultivector<OuterProduct<SomeMetricSpaceType>, SomeSquareMatrixType> const &) noexcept;
+        template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType> friend constexpr decltype(auto) ADD(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &) noexcept;
+        template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) DUAL(FactoredMultivector<SomeScalarType,OuterProduct<SomeMetricSpaceType> > const &) noexcept;
+        template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProduct, typename> friend constexpr decltype(auto) LCONT(FirstScalarType const &, FactoredMultivector<SecondScalarType, SecondFactoringProduct> const &) noexcept;
+        template<typename SomeScalarType, typename SomeFactoringProductType> friend constexpr decltype(auto) REVERSE(FactoredMultivector<SomeScalarType, SomeFactoringProductType> const &) noexcept;
+        template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType> friend constexpr decltype(auto) SUB(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &) noexcept;
+        template<typename SomeScalarType, typename SomeFactoringProductType> friend constexpr FactoredMultivector<SomeScalarType, SomeFactoringProductType> UNARY_MINUS(FactoredMultivector<SomeScalarType, SomeFactoringProductType> const &) noexcept;
+        template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) UNDUAL(FactoredMultivector<SomeScalarType, OuterProduct<SomeMetricSpaceType> > const &) noexcept;
     };
 
-    template<typename FactoringProductType, typename SquareMatrixType>
-    struct is_multivector<FactoredMultivector<FactoringProductType, SquareMatrixType> > :
+    template<typename ScalarType, typename FactoringProductType>
+    struct is_multivector<FactoredMultivector<ScalarType, FactoringProductType> > :
         std::true_type {
     };
 
