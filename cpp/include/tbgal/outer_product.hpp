@@ -20,13 +20,13 @@ namespace tbgal {
                 if (factors_count <= space.dimensions()) {
                     auto prod_scalar = multiply_scalars(args...);
                     if (factors_count > 0 && prod_scalar != 0) {
-                        auto input = make_matrix<ResultingScalarType, ResultingMetricSpaceType::DimensionsAtCompileTime, Dynamic>(space.dimensions(), factors_count);
-                        auto qr_tuple = qr_decomposition(std::get<0>(fill_matrix_with_factors(input, args...)));
-                        if (std::get<2>(qr_tuple) == factors_count) {
+                        auto input = make_matrix<ResultingScalarType, ResultingMetricSpaceType::DimensionsAtCompileTime, Dynamic, ResultingMetricSpaceType::MaxDimensionsAtCompileTime, Dynamic>(space.dimensions(), factors_count);
+                        auto qr_tuple = qr_orthogonal_matrix(std::get<0>(fill_matrix_with_tail_factors(input, args...)));
+                        if (std::get<1>(qr_tuple) == factors_count) {
                             auto const &matrix_q = std::get<0>(qr_tuple);
                             return ResultingFactoredMultivectorType(
                                 space,
-                                prod_scalar * determinant(prod(transpose(left_columns(matrix_q, factors_count)), input)),
+                                prod_scalar * determinant(prod_block<Dynamic, ResultingMetricSpaceType::DimensionsAtCompileTime>(transpose(matrix_q), 0, 0, factors_count, space.dimensions(), input)),
                                 matrix_q,
                                 factors_count
                             );

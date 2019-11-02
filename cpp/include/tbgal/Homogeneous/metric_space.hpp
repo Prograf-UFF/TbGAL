@@ -3,13 +3,13 @@
 
 namespace tbgal {
 
-    template<DefaultIndexType BaseSpaceDimensionsAtCompileTime_>
-    class HomogeneousMetricSpace : public MetricSpace<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime_> > {
+    template<DefaultIndexType BaseSpaceDimensionsAtCompileTime_, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime_ = BaseSpaceDimensionsAtCompileTime_>
+    class HomogeneousMetricSpace : public MetricSpace<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime_, MaxBaseSpaceDimensionsAtCompileTime_> > {
     private:
 
-        static_assert(BaseSpaceDimensionsAtCompileTime_ >= 0, "Invalid number of base dimensions.");
+        static_assert(BaseSpaceDimensionsAtCompileTime_ == Dynamic || (BaseSpaceDimensionsAtCompileTime_ >= 0 && BaseSpaceDimensionsAtCompileTime_ == MaxBaseSpaceDimensionsAtCompileTime_), "Invalid number of base dimensions.");
 
-        using Super = MetricSpace<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime_> >;
+        using Super = MetricSpace<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime_, MaxBaseSpaceDimensionsAtCompileTime_> >;
     
     public:
 
@@ -17,59 +17,10 @@ namespace tbgal {
         using ScalarType = DefaultScalarType;
 
         constexpr static IndexType BaseSpaceDimensionsAtCompileTime = BaseSpaceDimensionsAtCompileTime_;
-        constexpr static IndexType DimensionsAtCompileTime = BaseSpaceDimensionsAtCompileTime + 1;
+        constexpr static IndexType MaxBaseSpaceDimensionsAtCompileTime = MaxBaseSpaceDimensionsAtCompileTime_;
 
-        constexpr HomogeneousMetricSpace() noexcept :
-            Super(),
-            basis_vectors_str_() {
-            for (IndexType ind = 0; ind != BaseSpaceDimensionsAtCompileTime; ++ind) {
-                basis_vectors_str_[ind] = "e" + std::to_string(ind + 1);
-            }
-            basis_vectors_str_[BaseSpaceDimensionsAtCompileTime] = "ep";
-        }
-
-        constexpr HomogeneousMetricSpace(HomogeneousMetricSpace const &) = default;
-        constexpr HomogeneousMetricSpace(HomogeneousMetricSpace &&) = default;
-
-        constexpr HomogeneousMetricSpace & operator=(HomogeneousMetricSpace const &) = default;
-        constexpr HomogeneousMetricSpace & operator=(HomogeneousMetricSpace &&) = default;
-
-        constexpr std::string const & basis_vector_str(IndexType index) const noexcept override {
-            return basis_vectors_str_[index];
-        }
-        
-        constexpr IndexType base_space_dimensions() const noexcept {
-            return BaseSpaceDimensionsAtCompileTime;
-        }
-
-        constexpr IndexType dimensions() const noexcept override {
-            return BaseSpaceDimensionsAtCompileTime + 1;
-        }
-
-    private:
-
-        std::array<std::string, BaseSpaceDimensionsAtCompileTime + 1> basis_vectors_str_;
-    };
-
-    template<>
-    class HomogeneousMetricSpace<Dynamic> : public MetricSpace<HomogeneousMetricSpace<Dynamic> > {
-    private:
-
-        using Super = MetricSpace<HomogeneousMetricSpace<Dynamic> >;
-    
-    public:
-
-        using IndexType = typename Super::IndexType;
-        using ScalarType = DefaultScalarType;
-
-        constexpr static IndexType BaseSpaceDimensionsAtCompileTime = Dynamic;
-        constexpr static IndexType DimensionsAtCompileTime = Dynamic;
-
-        inline HomogeneousMetricSpace() noexcept :
-            Super(),
-            basis_vectors_str_() {
-            update_basis_vectors_str(0);
-        }
+        constexpr static IndexType DimensionsAtCompileTime = (BaseSpaceDimensionsAtCompileTime != Dynamic) ? (BaseSpaceDimensionsAtCompileTime + 1) : Dynamic;
+        constexpr static IndexType MaxDimensionsAtCompileTime = (MaxBaseSpaceDimensionsAtCompileTime != Dynamic) ? (MaxBaseSpaceDimensionsAtCompileTime + 1) : Dynamic;
 
         inline HomogeneousMetricSpace(HomogeneousMetricSpace const &) = default;
         inline HomogeneousMetricSpace(HomogeneousMetricSpace &&) = default;
@@ -78,6 +29,10 @@ namespace tbgal {
             Super(),
             basis_vectors_str_() {
             update_basis_vectors_str(base_space_dimensions);
+        }
+
+        inline HomogeneousMetricSpace() noexcept :
+            HomogeneousMetricSpace((BaseSpaceDimensionsAtCompileTime != Dynamic) ? BaseSpaceDimensionsAtCompileTime : 0) {
         }
 
         inline HomogeneousMetricSpace & operator=(HomogeneousMetricSpace const &) = default;
@@ -102,7 +57,7 @@ namespace tbgal {
     private:
 
         inline void update_basis_vectors_str(IndexType base_space_dimensions) noexcept {
-            assert(base_space_dimensions >= 0);
+            assert(base_space_dimensions >= 0 && (BaseSpaceDimensionsAtCompileTime == Dynamic || base_space_dimensions == BaseSpaceDimensionsAtCompileTime) && (MaxBaseSpaceDimensionsAtCompileTime == Dynamic || base_space_dimensions <= MaxBaseSpaceDimensionsAtCompileTime));
             basis_vectors_str_.resize(base_space_dimensions + 1);
             for (IndexType ind = 0; ind != base_space_dimensions; ++ind) {
                 basis_vectors_str_[ind] = "e" + std::to_string(ind + 1);
@@ -113,33 +68,33 @@ namespace tbgal {
         std::vector<std::string> basis_vectors_str_;
     };
 
-    template<DefaultIndexType BaseSpaceDimensionsAtCompileTime>
-    struct is_metric_space<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > :
+    template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
+    struct is_metric_space<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > :
         std::true_type {
     };
 
     namespace detail {
 
-        template<DefaultIndexType BaseSpaceDimensionsAtCompileTime>
-        struct apply_signed_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > {
+        template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
+        struct apply_signed_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors_in_signed_metric) noexcept {
+            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors_in_signed_metric) noexcept {
                 return factors_in_signed_metric;
             }
         };
 
-        template<DefaultIndexType BaseSpaceDimensionsAtCompileTime>
-        struct from_actual_to_signed_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > {
+        template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
+        struct from_actual_to_signed_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors_in_actual_metric) noexcept {
+            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors_in_actual_metric) noexcept {
                 return factors_in_actual_metric;
             }
         };
 
-        template<DefaultIndexType BaseSpaceDimensionsAtCompileTime>
-        struct from_signed_to_actual_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> > {
+        template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
+        struct from_signed_to_actual_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors_in_signed_metric) noexcept {
+            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors_in_signed_metric) noexcept {
                 return factors_in_signed_metric;
             }
         };

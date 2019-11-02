@@ -18,4 +18,7 @@
         return tbgal::vector(METRIC_SPACE, std::move(coords)..., 1); \
     }
 
+//TODO [NEXT] Inclue other helpers.
+//TODO [NEXT] Inclue euclidean_vector with iterators.
+
 #endif // __TBGAL_HOMOGENEOUS_MACRO_HPP__

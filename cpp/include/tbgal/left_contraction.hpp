@@ -5,7 +5,11 @@ namespace tbgal {
 
     template<typename FirstScalarType, typename FirstFactoringProduct, typename SecondScalarType, typename SecondFactoringProduct>
     constexpr decltype(auto) LCONT(FactoredMultivector<FirstScalarType, FirstFactoringProduct> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProduct> const &arg2) noexcept {
-        return UNDUAL(OP(arg1, DUAL(arg2)));
+        using ResultingFactoredMultivectorType = decltype(UNDUAL(OP(arg1, DUAL(arg2))));
+        if (!is_blade(arg1) || !is_blade(arg2) || (arg1.factors_count() <= arg2.factors_count())) {
+            return UNDUAL(OP(arg1, DUAL(arg2)));
+        }
+        return ResultingFactoredMultivectorType(*detail::space_ptr(arg1, arg2), 0);
     }
 
     template<typename FirstScalarType, typename FirstFactoringProduct, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >

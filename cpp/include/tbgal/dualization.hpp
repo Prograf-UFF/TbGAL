@@ -29,7 +29,7 @@ namespace tbgal {
         using ResultingScalarType = ScalarType;
         using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
-        auto factors_in_signed_metric = detail::apply_signed_metric(arg.space(), arg.factors_in_signed_metric());
+        auto factors_in_signed_metric = detail::evaluate(detail::apply_signed_metric(arg.space(), arg.factors_in_signed_metric()));
         return ResultingFactoredMultivectorType(
             arg.space(),
             (((arg.factors_count() * (arg.factors_count() - 1)) & 2) ? -arg.scalar() : arg.scalar()) * detail::determinant(factors_in_signed_metric),

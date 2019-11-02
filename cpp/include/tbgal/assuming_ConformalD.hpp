@@ -3,11 +3,15 @@
 
 #include "core.hpp"
 
+#ifndef TBGAL_ConformalD_MaxBaseSpaceDimensions
+    #define TBGAL_ConformalD_MaxBaseSpaceDimensions Dynamic
+#endif // TBGAL_ConformalD_MaxBaseSpaceDimensions
+
 namespace tbgal {
 
     namespace ConformalD {
         
-        using MetricSpaceType = ConformalMetricSpace<Dynamic>;
+        using MetricSpaceType = ConformalMetricSpace<Dynamic, (TBGAL_ConformalD_MaxBaseSpaceDimensions)>;
 
         static MetricSpaceType SPACE;
         

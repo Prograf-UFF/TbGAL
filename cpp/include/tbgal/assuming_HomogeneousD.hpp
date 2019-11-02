@@ -3,11 +3,16 @@
 
 #include "core.hpp"
 
+#ifndef TBGAL_HomogeneousD_MaxBaseSpaceDimensions
+    #define TBGAL_HomogeneousD_MaxBaseSpaceDimensions Dynamic
+#endif // TBGAL_HomogeneousD_MaxBaseSpaceDimensions
+
+
 namespace tbgal {
 
     namespace HomogeneousD {
         
-        using MetricSpaceType = HomogeneousMetricSpace<Dynamic>;
+        using MetricSpaceType = HomogeneousMetricSpace<Dynamic, (TBGAL_HomogeneousD_MaxBaseSpaceDimensions)>;
 
         static MetricSpaceType SPACE;
         

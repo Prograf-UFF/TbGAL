@@ -5,9 +5,9 @@
     #error "Before assuming some model of geometry you have to use some matrix definition by calling the command '#include <using_{SomeMatrixAlgebraLibrary}.hpp>.'"
 #endif // TBGAL_USING_MATRIX_DEFINITIONS
 
-#include <array>
 #include <cassert>
 #include <iostream>
+#include <iterator>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -27,6 +27,17 @@ namespace tbgal {
 
         template<typename T, typename... Rest>
         constexpr bool is_any_v = std::disjunction_v<std::bool_constant<std::is_same_v<T, Rest> >...>;
+
+        template <typename T, typename = void>
+        struct is_iterator : std::false_type {
+        };
+
+        template <class T>
+        struct is_iterator<T, std::void_t<typename std::iterator_traits<T>::iterator_category> > : std::true_type {
+        };
+
+        template<typename T>
+        constexpr bool is_iterator_v = is_iterator<T>::value;
 
         template<bool AnyMultivectorType> struct GP_impl;
         template<bool AnyMultivectorType> struct OP_impl;
@@ -95,69 +106,177 @@ namespace tbgal {
         };
 
         template<typename ResultingMatrixType>
-        constexpr static decltype(auto) fill_matrix_with_factors(ResultingMatrixType &result) noexcept {
-            return std::make_tuple(result, cols(result));
+        constexpr void fill_matrix_with_first_factors(ResultingMatrixType &) noexcept {
+            // Nothing to be done.
+        }
+
+        template<typename ResultingMatrixType, typename ScalarType>
+        constexpr void fill_matrix_with_first_factors(ResultingMatrixType &, ScalarType const &) noexcept {
+            // Nothing to be done.
+        }
+
+        template<typename ResultingMatrixType, typename ScalarType, typename FactoringProductType>
+        constexpr void fill_matrix_with_first_factors(ResultingMatrixType &result, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+            if (arg.factors_count() > 0) {
+                assign_block<rows_at_compile_time_v<ResultingMatrixType>, Dynamic>(arg.factors_in_signed_metric(), 0, 0, result, 0, 0, rows(result), arg.factors_count());
+            }
         }
 
         template<typename ResultingMatrixType, typename FirstScalarType, typename... NextTypes>
-        constexpr static decltype(auto) fill_matrix_with_factors(ResultingMatrixType &result, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
-            return fill_matrix_with_factors(result, args...);
+        constexpr void fill_matrix_with_first_factors(ResultingMatrixType &result, FirstScalarType const &, NextTypes const &... args) noexcept {
+            fill_matrix_with_first_factors(result, args...);
         }
 
         template<typename ResultingMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-        constexpr static decltype(auto) fill_matrix_with_factors(ResultingMatrixType &result, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
-            assert(is_blade(arg1));
-            auto end_column_index = std::get<1>(fill_matrix_with_factors(result, args...));
-            return std::make_tuple(copy_columns<Dynamic>(arg1.factors_in_signed_metric(), 0, result, end_column_index - arg1.factors_count(), arg1.factors_count()), end_column_index - arg1.factors_count());
+        constexpr void fill_matrix_with_first_factors(ResultingMatrixType &result, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
+            if (arg1.factors_count() > 0) {
+                assign_block<rows_at_compile_time_v<ResultingMatrixType>, Dynamic>(arg1.factors_in_signed_metric(), 0, 0, result, 0, 0, rows(result), arg1.factors_count());
+            }
+            else {
+                fill_matrix_with_first_factors(result, args...);
+            }
         }
 
-        constexpr static decltype(auto) multiply_scalars() noexcept {
-            return 1;
+        template<typename ResultingMatrixType>
+        constexpr std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix_with_tail_factors(ResultingMatrixType &result) noexcept {
+            return std::tuple<ResultingMatrixType&, DefaultIndexType>(result, cols(result));
         }
 
-        template<typename FirstScalarType, typename... NextTypes>
-        constexpr static decltype(auto) multiply_scalars(FirstScalarType const &arg1, NextTypes const &... args) noexcept {
-            return arg1 * multiply_scalars(args...);
+        template<typename ResultingMatrixType, typename ScalarType>
+        constexpr std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix_with_tail_factors(ResultingMatrixType &result, ScalarType const &) noexcept {
+            return std::tuple<ResultingMatrixType&, DefaultIndexType>(result, cols(result));
+        }
+
+        template<typename ResultingMatrixType, typename ScalarType, typename FactoringProductType>
+        constexpr std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix_with_tail_factors(ResultingMatrixType &result, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+            if (arg.factors_count() > 0) {
+                auto end_column_index = cols(result);
+                if (end_column_index >= arg.factors_count()) {
+                    assign_block<rows_at_compile_time_v<ResultingMatrixType>, Dynamic>(arg.factors_in_signed_metric(), 0, 0, result, 0, end_column_index - arg.factors_count(), rows(result), arg.factors_count());
+                    return std::tuple<ResultingMatrixType&, DefaultIndexType>(result, end_column_index - arg.factors_count());
+                }
+                assert(end_column_index == 0);
+                return std::tuple<ResultingMatrixType&, DefaultIndexType>(result, 0);
+            }
+            return fill_matrix_with_tail_factors(result);
+        }
+
+        template<typename ResultingMatrixType, typename FirstScalarType, typename... NextTypes>
+        constexpr std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix_with_tail_factors(ResultingMatrixType &result, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
+            return fill_matrix_with_tail_factors(result, args...);
+        }
+
+        template<typename ResultingMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
+        constexpr std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix_with_tail_factors(ResultingMatrixType &result, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
+            if (arg1.factors_count() > 0) {
+                auto end_column_index = std::get<1>(fill_matrix_with_tail_factors(result, args...));
+                if (end_column_index >= arg1.factors_count()) {
+                    assign_block<rows_at_compile_time_v<ResultingMatrixType>, Dynamic>(arg1.factors_in_signed_metric(), 0, 0, result, 0, end_column_index - arg1.factors_count(), rows(result), arg1.factors_count());
+                    return std::tuple<ResultingMatrixType&, DefaultIndexType>(result, end_column_index - arg1.factors_count());
+                }
+                assert(end_column_index == 0);
+                return std::tuple<ResultingMatrixType&, DefaultIndexType>(result, 0);
+            }
+            return fill_matrix_with_tail_factors(result, args...);
+        }
+
+        constexpr decltype(auto) first_factors_count() noexcept {
+            return 0;
+        }
+
+        template<typename ScalarType, typename FactoringProductType>
+        constexpr decltype(auto) first_factors_count(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+            return arg.factors_count();
+        }
+
+        template<typename ScalarType>
+        constexpr decltype(auto) first_factors_count(ScalarType const &) noexcept {
+            return 0;
         }
 
         template<typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-        constexpr static decltype(auto) multiply_scalars(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
+        constexpr decltype(auto) first_factors_count(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
+            if (arg1.factors_count() > 0) {
+                return arg1.factors_count();
+            }
+            else {
+                return first_factors_count(args...);
+            }
+        }
+
+        template<typename FirstScalarType, typename... NextTypes>
+        constexpr decltype(auto) first_factors_count(FirstScalarType const &, NextTypes const &... args) noexcept {
+            return first_factors_count(args...);
+        }
+
+        constexpr decltype(auto) multiply_scalars() noexcept {
+            return 1;
+        }
+
+        template<typename ScalarType, typename FactoringProductType>
+        constexpr decltype(auto) multiply_scalars(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+            return arg.scalar();
+        }
+
+        template<typename ScalarType>
+        constexpr decltype(auto) multiply_scalars(ScalarType const &arg) noexcept {
+            return arg;
+        }
+
+        template<typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
+        constexpr decltype(auto) multiply_scalars(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
             return arg1.scalar() * multiply_scalars(args...);
         }
 
-        constexpr static decltype(auto) space_ptr() noexcept {
+        template<typename FirstScalarType, typename... NextTypes>
+        constexpr decltype(auto) multiply_scalars(FirstScalarType const &arg1, NextTypes const &... args) noexcept {
+            return arg1 * multiply_scalars(args...);
+        }
+
+        constexpr decltype(auto) space_ptr() noexcept {
             return nullptr;
         }
 
         template<typename ScalarType, typename FactoringProductType>
-        constexpr static decltype(auto) space_ptr(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+        constexpr decltype(auto) space_ptr(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
             return &arg.space();
         }
 
-        template<typename FirstScalarType, typename... NextTypes>
-        constexpr static decltype(auto) space_ptr(FirstScalarType const &, NextTypes const &... args) noexcept {
-            return space_ptr(args...);
-        }
-
         template<typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-        constexpr static decltype(auto) space_ptr(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
+        constexpr decltype(auto) space_ptr(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
             assert(space_ptr(args...) == &arg1.space() || space_ptr(args...) == nullptr);
             return &arg1.space();
         }
 
-        constexpr static decltype(auto) sum_factors_count() noexcept {
+        template<typename FirstScalarType, typename... NextTypes>
+        constexpr decltype(auto) space_ptr(FirstScalarType const &, NextTypes const &... args) noexcept {
+            return space_ptr(args...);
+        }
+
+        constexpr decltype(auto) sum_factors_count() noexcept {
             return 0;
         }
 
-        template<typename FirstScalarType, typename... NextTypes>
-        constexpr static decltype(auto) sum_factors_count(FirstScalarType const &, NextTypes const &... args) noexcept {
-            return sum_factors_count(args...);
+        template<typename ScalarType, typename FactoringProductType>
+        constexpr decltype(auto) sum_factors_count(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+            assert(is_blade(arg));
+            return arg.factors_count();
+        }
+
+        template<typename ScalarType>
+        constexpr decltype(auto) sum_factors_count(ScalarType const &) noexcept {
+            return 0;
         }
 
         template<typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-        constexpr static decltype(auto) sum_factors_count(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
+        constexpr decltype(auto) sum_factors_count(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
             assert(is_blade(arg1));
             return arg1.factors_count() + sum_factors_count(args...);
+        }
+
+        template<typename FirstScalarType, typename... NextTypes>
+        constexpr decltype(auto) sum_factors_count(FirstScalarType const &, NextTypes const &... args) noexcept {
+            return sum_factors_count(args...);
         }
 
     }

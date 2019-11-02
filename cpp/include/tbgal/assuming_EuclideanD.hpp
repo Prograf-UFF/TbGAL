@@ -3,11 +3,15 @@
 
 #include "core.hpp"
 
+#ifndef TBGAL_EuclideanD_MaxBaseSpaceDimensions
+    #define TBGAL_EuclideanD_MaxBaseSpaceDimensions Dynamic
+#endif // TBGAL_EuclideanD_MaxBaseSpaceDimensions
+
 namespace tbgal {
 
     namespace EuclideanD {
         
-        using MetricSpaceType = EuclideanMetricSpace<Dynamic>;
+        using MetricSpaceType = EuclideanMetricSpace<Dynamic, (TBGAL_EuclideanD_MaxBaseSpaceDimensions)>;
 
         static MetricSpaceType SPACE;
         
