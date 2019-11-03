@@ -10,104 +10,169 @@ using vector_factor_t = std::array<scalar_factor_t, TESTING_VECTOR_SPACE_DIMENSI
 std::default_random_engine random_engine{ static_cast<long unsigned int>(32) };
 std::uniform_real_distribution<scalar_factor_t> uniform_distribution(0, 1);
 
-auto tbgal_Dualization = [](auto const &arg) noexcept {
+template<typename FirstType, typename SecondType>
+constexpr decltype(auto) tbgal_DotProduct(FirstType const &arg1, SecondType const &arg2) noexcept {
+    return tbgal::DOT(arg1, arg2);
+}
+
+template<typename Type>
+constexpr decltype(auto) tbgal_Dualization(Type const &arg) noexcept {
     return tbgal::DUAL(arg);
-};
+}
 
-auto tbgal_GeometricProduct = [](auto const &lhs, auto const &rhs) noexcept {
-    return tbgal::GP(lhs, rhs);
-};
+template<typename FirstType, typename... NextTypes>
+constexpr decltype(auto) tbgal_GeometricProduct(FirstType const &arg1, NextTypes const &... args) noexcept {
+    return tbgal::GP(arg1, args...);
+}
 
-auto tbgal_Inversion = [](auto const &arg) noexcept {
+template<typename FirstType, typename SecondType>
+constexpr decltype(auto) tbgal_HestenesInnerProduct(FirstType const &arg1, SecondType const &arg2) noexcept {
+    return tbgal::HIP(arg1, arg2);
+}
+
+template<typename Type>
+constexpr decltype(auto) tbgal_Inversion(Type const &arg) noexcept {
     return tbgal::INVERSE(arg);
-};
+}
 
-auto tbgal_LeftContraction = [](auto const &lhs, auto const &rhs) noexcept {
-    return tbgal::LCONT(lhs, rhs);
-};
+template<typename FirstType, typename SecondType>
+constexpr decltype(auto) tbgal_LeftContraction(FirstType const &arg1, SecondType const &arg2) noexcept {
+    return tbgal::LCONT(arg1, arg2);
+}
 
-auto tbgal_OuterProduct = [](auto const &lhs, auto const &rhs) noexcept {
-    return tbgal::OP(lhs, rhs);
-};
+template<typename FirstType, typename... NextTypes>
+constexpr decltype(auto) tbgal_OuterProduct(FirstType const &arg1, NextTypes const &... args) noexcept {
+    return tbgal::OP(arg1, args...);
+}
 
-auto tbgal_ReverseNorm = [](auto const &arg) noexcept {
+template<typename Type>
+constexpr decltype(auto) tbgal_ReverseNorm(Type const &arg) noexcept {
     return tbgal::RNORM(arg);
-};
+}
 
-auto tbgal_Reversion = [](auto const &arg) noexcept {
+template<typename Type>
+constexpr decltype(auto) tbgal_Reversion(Type const &arg) noexcept {
     return tbgal::REVERSE(arg);
-};
+}
 
-auto tbgal_SquaredReverseNorm = [](auto const &arg) noexcept {
+template<typename FirstType, typename SecondType>
+constexpr decltype(auto) tbgal_RightContraction(FirstType const &arg1, SecondType const &arg2) noexcept {
+    return tbgal::RCONT(arg1, arg2);
+}
+
+template<typename Type>
+constexpr decltype(auto) tbgal_SquaredReverseNorm(Type const &arg) noexcept {
     return tbgal::RNORM_SQR(arg);
-};
+}
 
-auto tbgal_UnaryMinus = [](auto const &arg) noexcept {
+template<typename Type>
+constexpr decltype(auto) tbgal_UnaryMinus(Type const &arg) noexcept {
     return -arg;
-};
+}
 
-auto tbgal_UnaryPlus = [](auto const &arg) noexcept {
+template<typename Type>
+constexpr decltype(auto) tbgal_UnaryPlus(Type const &arg) noexcept {
     return +arg;
-};
+}
 
-auto tbgal_Undualization = [](auto const &arg) noexcept {
+template<typename Type>
+constexpr decltype(auto) tbgal_Undualization(Type const &arg) noexcept {
     return tbgal::UNDUAL(arg);
-};
+}
 
-auto gatl_Dualization = [](auto const &arg) noexcept {
+template<typename FirstType, typename SecondType>
+constexpr decltype(auto) gatl_DotProduct(FirstType const &arg1, SecondType const &arg2) noexcept {
+    using namespace TESTING_GATL_MODEL_NAMESPACE;
+    return dot(arg1, arg2);
+}
+
+template<typename Type>
+constexpr decltype(auto) gatl_Dualization(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
     return dual(arg);
-};
+}
 
-auto gatl_GeometricProduct = [&](auto const &lhs, auto const &rhs) noexcept {
+template<typename Type>
+constexpr decltype(auto) gatl_GeometricProduct(Type const &arg) noexcept {
+    return arg;
+}
+
+template<typename FirstType, typename... NextTypes>
+constexpr decltype(auto) gatl_GeometricProduct(FirstType const &arg1, NextTypes const &... args) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
-    return gp(lhs, rhs);
-};
+    return gp(arg1, gatl_GeometricProduct(args...));
+}
 
-auto gatl_Inversion = [](auto const &arg) noexcept {
+template<typename FirstType, typename SecondType>
+constexpr decltype(auto) gatl_HestenesInnerProduct(FirstType const &arg1, SecondType const &arg2) noexcept {
+    using namespace TESTING_GATL_MODEL_NAMESPACE;
+    return hip(arg1, arg2);
+}
+
+template<typename Type>
+constexpr decltype(auto) gatl_Inversion(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
     return inv(arg);
-};
+}
 
-auto gatl_LeftContraction = [&](auto const &lhs, auto const &rhs) noexcept {
+template<typename FirstType, typename SecondType>
+constexpr decltype(auto) gatl_LeftContraction(FirstType const &arg1, SecondType const &arg2) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
-    return lcont(lhs, rhs);
-};
+    return lcont(arg1, arg2);
+}
 
-auto gatl_OuterProduct = [&](auto const &lhs, auto const &rhs) noexcept {
+template<typename Type>
+constexpr decltype(auto) gatl_OuterProduct(Type const &arg) noexcept {
+    return arg;
+}
+
+template<typename FirstType, typename... NextTypes>
+constexpr decltype(auto) gatl_OuterProduct(FirstType const &arg1, NextTypes const &... args) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
-    return op(lhs, rhs);
-};
+    return op(arg1, gatl_OuterProduct(args...));
+}
 
-auto gatl_ReverseNorm = [](auto const &arg) noexcept {
+template<typename Type>
+constexpr decltype(auto) gatl_ReverseNorm(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
     return rnorm(arg);
-};
+}
 
-auto gatl_Reversion = [](auto const &arg) noexcept {
+template<typename Type>
+constexpr decltype(auto) gatl_Reversion(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
     return reversion(arg);
-};
+}
 
-auto gatl_SquaredReverseNorm = [](auto const &arg) noexcept {
+template<typename FirstType, typename SecondType>
+constexpr decltype(auto) gatl_RightContraction(FirstType const &arg1, SecondType const &arg2) noexcept {
+    using namespace TESTING_GATL_MODEL_NAMESPACE;
+    return rcont(arg1, arg2);
+}
+
+template<typename Type>
+constexpr decltype(auto) gatl_SquaredReverseNorm(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
     return rnorm_sqr(arg);
-};
+}
 
-auto gatl_UnaryMinus = [](auto const &arg) noexcept {
+template<typename Type>
+constexpr decltype(auto) gatl_UnaryMinus(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
     return -arg;
-};
+}
 
-auto gatl_UnaryPlus = [](auto const &arg) noexcept {
+template<typename Type>
+constexpr decltype(auto) gatl_UnaryPlus(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
     return +arg;
-};
+}
 
-auto gatl_Undualization = [](auto const &arg) noexcept {
+template<typename Type>
+constexpr decltype(auto) gatl_Undualization(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
     return undual(arg);
-};
+}
 
 decltype(auto) make_tbgal_vector(vector_factor_t const &arg) noexcept {
     using namespace TESTING_TBGAL_MODEL_NAMESPACE;
@@ -232,39 +297,65 @@ std::tuple<scalar_factor_t, std::array<vector_factor_t, K> > make_random_factors
 }
 
 template<typename LeftCoefficientType, typename LeftExpression, typename RightCoefficientType, typename RightExpression>
-constexpr bool same_multivector(ga::clifford_expression<LeftCoefficientType, LeftExpression> const &lhs, ga::clifford_expression<RightCoefficientType, RightExpression> const &rhs) noexcept {
-    return ga::is_zero(lhs - rhs);
+constexpr bool same_multivector(ga::clifford_expression<LeftCoefficientType, LeftExpression> const &arg1, ga::clifford_expression<RightCoefficientType, RightExpression> const &arg2) noexcept {
+    return ga::is_zero(arg1 - arg2);
 }
 
 template<typename LeftType, typename RightCoefficientType, typename RightExpression, typename = std::enable_if_t<!ga::is_clifford_expression_v<LeftType> > >
-constexpr bool same_multivector(LeftType const &lhs, ga::clifford_expression<RightCoefficientType, RightExpression> const &rhs) noexcept {
-    return same_multivector(ga::scalar(lhs), rhs);
+constexpr bool same_multivector(LeftType const &arg1, ga::clifford_expression<RightCoefficientType, RightExpression> const &arg2) noexcept {
+    return same_multivector(ga::scalar(arg1), arg2);
 }
 
 template<typename LeftCoefficientType, typename LeftExpression, typename RightType, typename = std::enable_if_t<!ga::is_clifford_expression_v<RightType> > >
-constexpr bool same_multivector(ga::clifford_expression<LeftCoefficientType, LeftExpression> const &lhs, RightType const &rhs) noexcept {
-    return same_multivector(lhs, ga::scalar(rhs));
+constexpr bool same_multivector(ga::clifford_expression<LeftCoefficientType, LeftExpression> const &arg1, RightType const &arg2) noexcept {
+    return same_multivector(arg1, ga::scalar(arg2));
 }
 
 template<typename LeftType, typename RightType, typename = std::enable_if_t<!(ga::is_clifford_expression_v<LeftType> || ga::is_clifford_expression_v<RightType>)> >
-constexpr bool same_multivector(LeftType const &lhs, RightType const &rhs) noexcept {
-    return same_multivector(ga::scalar(lhs), ga::scalar(rhs));
+constexpr bool same_multivector(LeftType const &arg1, RightType const &arg2) noexcept {
+    return same_multivector(ga::scalar(arg1), ga::scalar(arg2));
 }
 
-#define BINARY_OPERATION_TESTS_FOR(OPERATION, LHS_K, RHS_K) \
-    TEST(OPERATION##Test, Outer##LHS_K##_Outer##RHS_K) { \
-        scalar_factor_t lhs_scalar_factor, rhs_scalar_factor; \
-        std::array<vector_factor_t, LHS_K> lhs_vector_factors; \
-        std::array<vector_factor_t, RHS_K> rhs_vector_factors; \
-        std::tie(lhs_scalar_factor, lhs_vector_factors) = make_random_factors<LHS_K>(); \
-        std::tie(rhs_scalar_factor, rhs_vector_factors) = make_random_factors<RHS_K>(); \
-        EXPECT_TRUE(same_multivector(from_tbgal_to_gatl(tbgal_##OPERATION(make_tbgal_multivector_using_outer_product(lhs_scalar_factor, lhs_vector_factors), make_tbgal_multivector_using_outer_product(rhs_scalar_factor, rhs_vector_factors))), gatl_##OPERATION(make_gatl_multivector_using_outer_product(lhs_scalar_factor, lhs_vector_factors), make_gatl_multivector_using_outer_product(rhs_scalar_factor, rhs_vector_factors)))); \
+#define BINARY_OPERATION_TESTS_FOR(OPERATION, ARG1_K, ARG2_K) \
+    TEST(OPERATION##Test, Outer##ARG1_K##_Outer##ARG2_K) { \
+        scalar_factor_t arg1_scalar_factor, arg2_scalar_factor; \
+        std::array<vector_factor_t, ARG1_K> arg1_vector_factors; \
+        std::array<vector_factor_t, ARG2_K> arg2_vector_factors; \
+        std::tie(arg1_scalar_factor, arg1_vector_factors) = make_random_factors<ARG1_K>(); \
+        std::tie(arg2_scalar_factor, arg2_vector_factors) = make_random_factors<ARG2_K>(); \
+        auto tbgal_result = from_tbgal_to_gatl(tbgal_##OPERATION(make_tbgal_multivector_using_outer_product(arg1_scalar_factor, arg1_vector_factors), make_tbgal_multivector_using_outer_product(arg2_scalar_factor, arg2_vector_factors))); \
+        auto gatl_result = gatl_##OPERATION(make_gatl_multivector_using_outer_product(arg1_scalar_factor, arg1_vector_factors), make_gatl_multivector_using_outer_product(arg2_scalar_factor, arg2_vector_factors)); \
+        EXPECT_TRUE(same_multivector(tbgal_result, gatl_result)); \
     }
 
-#define BINARY_OPERATION_TESTS(LHS_K, RHS_K) \
-    BINARY_OPERATION_TESTS_FOR(GeometricProduct, LHS_K, RHS_K) \
-    BINARY_OPERATION_TESTS_FOR(LeftContraction, LHS_K, RHS_K) \
-    BINARY_OPERATION_TESTS_FOR(OuterProduct, LHS_K, RHS_K)
+#define BINARY_OPERATION_TESTS(ARG1_K, ARG2_K) \
+    BINARY_OPERATION_TESTS_FOR(DotProduct, ARG1_K, ARG2_K) \
+    /*TODO {DEBUG} BINARY_OPERATION_TESTS_FOR(GeometricProduct, ARG1_K, ARG2_K)*/ \
+    BINARY_OPERATION_TESTS_FOR(HestenesInnerProduct, ARG1_K, ARG2_K) \
+    BINARY_OPERATION_TESTS_FOR(LeftContraction, ARG1_K, ARG2_K) \
+    BINARY_OPERATION_TESTS_FOR(OuterProduct, ARG1_K, ARG2_K) \
+    BINARY_OPERATION_TESTS_FOR(RightContraction, ARG1_K, ARG2_K)
+
+    //TODO [TEST] Addition
+    //TODO [TEST] Subtraction
+
+#define TERNARY_OPERATION_TESTS_FOR(OPERATION, ARG1_K, ARG2_K, ARG3_K) \
+    TEST(OPERATION##Test, Outer##ARG1_K##_Outer##ARG2_K##_Outer##ARG3_K) { \
+        scalar_factor_t arg1_scalar_factor, arg2_scalar_factor, arg3_scalar_factor; \
+        std::array<vector_factor_t, ARG1_K> arg1_vector_factors; \
+        std::array<vector_factor_t, ARG2_K> arg2_vector_factors; \
+        std::array<vector_factor_t, ARG3_K> arg3_vector_factors; \
+        std::tie(arg1_scalar_factor, arg1_vector_factors) = make_random_factors<ARG1_K>(); \
+        std::tie(arg2_scalar_factor, arg2_vector_factors) = make_random_factors<ARG2_K>(); \
+        std::tie(arg3_scalar_factor, arg3_vector_factors) = make_random_factors<ARG3_K>(); \
+        auto tbgal_result = from_tbgal_to_gatl(tbgal_##OPERATION(make_tbgal_multivector_using_outer_product(arg1_scalar_factor, arg1_vector_factors), make_tbgal_multivector_using_outer_product(arg2_scalar_factor, arg2_vector_factors), make_tbgal_multivector_using_outer_product(arg3_scalar_factor, arg3_vector_factors))); \
+        auto gatl_result = gatl_##OPERATION(make_gatl_multivector_using_outer_product(arg1_scalar_factor, arg1_vector_factors), make_gatl_multivector_using_outer_product(arg2_scalar_factor, arg2_vector_factors), make_gatl_multivector_using_outer_product(arg3_scalar_factor, arg3_vector_factors)); \
+        EXPECT_TRUE(same_multivector(tbgal_result, gatl_result)); \
+    }
+
+#define TERNARY_OPERATION_TESTS(ARG1_K, ARG2_K, ARG3_K) \
+    /*TODO {DEBUG} TERNARY_OPERATION_TESTS_FOR(GeometricProduct, ARG1_K, ARG2_K, ARG3_K)*/ \
+    TERNARY_OPERATION_TESTS_FOR(OuterProduct, ARG1_K, ARG2_K, ARG3_K)
 
     //TODO [TEST] Addition
     //TODO [TEST] Subtraction
@@ -274,7 +365,9 @@ constexpr bool same_multivector(LeftType const &lhs, RightType const &rhs) noexc
         scalar_factor_t scalar_factor; \
         std::array<vector_factor_t, ARG_K> vector_factors; \
         std::tie(scalar_factor, vector_factors) = make_random_factors<ARG_K>(); \
-        EXPECT_TRUE(same_multivector(from_tbgal_to_gatl(tbgal_##OPERATION(make_tbgal_multivector_using_outer_product(scalar_factor, vector_factors))), gatl_##OPERATION(make_gatl_multivector_using_outer_product(scalar_factor, vector_factors)))); \
+        auto tbgal_result = from_tbgal_to_gatl(tbgal_##OPERATION(make_tbgal_multivector_using_outer_product(scalar_factor, vector_factors))); \
+        auto gatl_result = gatl_##OPERATION(make_gatl_multivector_using_outer_product(scalar_factor, vector_factors)); \
+        EXPECT_TRUE(same_multivector(tbgal_result, gatl_result)); \
     }
 
 #define UNARY_OPERATION_TESTS(ARG_K) \
@@ -288,11 +381,19 @@ constexpr bool same_multivector(LeftType const &lhs, RightType const &rhs) noexc
 
 #if TESTING_VECTOR_SPACE_DIMENSIONS >= 0
     BINARY_OPERATION_TESTS(0, 0)
+    TERNARY_OPERATION_TESTS(0, 0, 0)
     UNARY_OPERATION_TESTS(0)
 #if TESTING_VECTOR_SPACE_DIMENSIONS >= 1
     BINARY_OPERATION_TESTS(0, 1)
     BINARY_OPERATION_TESTS(1, 0)
     BINARY_OPERATION_TESTS(1, 1)
+    TERNARY_OPERATION_TESTS(0, 0, 1)
+    TERNARY_OPERATION_TESTS(0, 1, 0)
+    TERNARY_OPERATION_TESTS(0, 1, 1)
+    TERNARY_OPERATION_TESTS(1, 0, 0)
+    TERNARY_OPERATION_TESTS(1, 0, 1)
+    TERNARY_OPERATION_TESTS(1, 1, 0)
+    TERNARY_OPERATION_TESTS(1, 1, 1)
     UNARY_OPERATION_TESTS(1)
 #if TESTING_VECTOR_SPACE_DIMENSIONS >= 2
     BINARY_OPERATION_TESTS(0, 2)
@@ -300,6 +401,25 @@ constexpr bool same_multivector(LeftType const &lhs, RightType const &rhs) noexc
     BINARY_OPERATION_TESTS(2, 0)
     BINARY_OPERATION_TESTS(2, 1)
     BINARY_OPERATION_TESTS(2, 2)
+    TERNARY_OPERATION_TESTS(0, 0, 2)
+    TERNARY_OPERATION_TESTS(0, 1, 2)
+    TERNARY_OPERATION_TESTS(0, 2, 0)
+    TERNARY_OPERATION_TESTS(0, 2, 1)
+    TERNARY_OPERATION_TESTS(0, 2, 2)
+    TERNARY_OPERATION_TESTS(1, 0, 2)
+    TERNARY_OPERATION_TESTS(1, 1, 2)
+    TERNARY_OPERATION_TESTS(1, 2, 0)
+    TERNARY_OPERATION_TESTS(1, 2, 1)
+    TERNARY_OPERATION_TESTS(1, 2, 2)
+    TERNARY_OPERATION_TESTS(2, 0, 0)
+    TERNARY_OPERATION_TESTS(2, 0, 1)
+    TERNARY_OPERATION_TESTS(2, 0, 2)
+    TERNARY_OPERATION_TESTS(2, 1, 0)
+    TERNARY_OPERATION_TESTS(2, 1, 1)
+    TERNARY_OPERATION_TESTS(2, 1, 2)
+    TERNARY_OPERATION_TESTS(2, 2, 0)
+    TERNARY_OPERATION_TESTS(2, 2, 1)
+    TERNARY_OPERATION_TESTS(2, 2, 2)
     UNARY_OPERATION_TESTS(2)
 #if TESTING_VECTOR_SPACE_DIMENSIONS >= 3
     BINARY_OPERATION_TESTS(0, 3)
@@ -309,6 +429,43 @@ constexpr bool same_multivector(LeftType const &lhs, RightType const &rhs) noexc
     BINARY_OPERATION_TESTS(3, 1)
     BINARY_OPERATION_TESTS(3, 2)
     BINARY_OPERATION_TESTS(3, 3)
+    TERNARY_OPERATION_TESTS(0, 0, 3)
+    TERNARY_OPERATION_TESTS(0, 1, 3)
+    TERNARY_OPERATION_TESTS(0, 2, 3)
+    TERNARY_OPERATION_TESTS(0, 3, 0)
+    TERNARY_OPERATION_TESTS(0, 3, 1)
+    TERNARY_OPERATION_TESTS(0, 3, 2)
+    TERNARY_OPERATION_TESTS(0, 3, 3)
+    TERNARY_OPERATION_TESTS(1, 0, 3)
+    TERNARY_OPERATION_TESTS(1, 1, 3)
+    TERNARY_OPERATION_TESTS(1, 2, 3)
+    TERNARY_OPERATION_TESTS(1, 3, 0)
+    TERNARY_OPERATION_TESTS(1, 3, 1)
+    TERNARY_OPERATION_TESTS(1, 3, 2)
+    TERNARY_OPERATION_TESTS(1, 3, 3)
+    TERNARY_OPERATION_TESTS(2, 0, 3)
+    TERNARY_OPERATION_TESTS(2, 1, 3)
+    TERNARY_OPERATION_TESTS(2, 2, 3)
+    TERNARY_OPERATION_TESTS(2, 3, 0)
+    TERNARY_OPERATION_TESTS(2, 3, 1)
+    TERNARY_OPERATION_TESTS(2, 3, 2)
+    TERNARY_OPERATION_TESTS(2, 3, 3)
+    TERNARY_OPERATION_TESTS(3, 0, 0)
+    TERNARY_OPERATION_TESTS(3, 0, 1)
+    TERNARY_OPERATION_TESTS(3, 0, 2)
+    TERNARY_OPERATION_TESTS(3, 0, 3)
+    TERNARY_OPERATION_TESTS(3, 1, 0)
+    TERNARY_OPERATION_TESTS(3, 1, 1)
+    TERNARY_OPERATION_TESTS(3, 1, 2)
+    TERNARY_OPERATION_TESTS(3, 1, 3)
+    TERNARY_OPERATION_TESTS(3, 2, 0)
+    TERNARY_OPERATION_TESTS(3, 2, 1)
+    TERNARY_OPERATION_TESTS(3, 2, 2)
+    TERNARY_OPERATION_TESTS(3, 2, 3)
+    TERNARY_OPERATION_TESTS(3, 3, 0)
+    TERNARY_OPERATION_TESTS(3, 3, 1)
+    TERNARY_OPERATION_TESTS(3, 3, 2)
+    TERNARY_OPERATION_TESTS(3, 3, 3)
     UNARY_OPERATION_TESTS(3)
 #if TESTING_VECTOR_SPACE_DIMENSIONS >= 4
     BINARY_OPERATION_TESTS(0, 4)
@@ -320,6 +477,67 @@ constexpr bool same_multivector(LeftType const &lhs, RightType const &rhs) noexc
     BINARY_OPERATION_TESTS(4, 2)
     BINARY_OPERATION_TESTS(4, 3)
     BINARY_OPERATION_TESTS(4, 4)
+    TERNARY_OPERATION_TESTS(0, 0, 4)
+    TERNARY_OPERATION_TESTS(0, 1, 4)
+    TERNARY_OPERATION_TESTS(0, 2, 4)
+    TERNARY_OPERATION_TESTS(0, 3, 4)
+    TERNARY_OPERATION_TESTS(0, 4, 0)
+    TERNARY_OPERATION_TESTS(0, 4, 1)
+    TERNARY_OPERATION_TESTS(0, 4, 2)
+    TERNARY_OPERATION_TESTS(0, 4, 3)
+    TERNARY_OPERATION_TESTS(0, 4, 4)
+    TERNARY_OPERATION_TESTS(1, 0, 4)
+    TERNARY_OPERATION_TESTS(1, 1, 4)
+    TERNARY_OPERATION_TESTS(1, 2, 4)
+    TERNARY_OPERATION_TESTS(1, 3, 4)
+    TERNARY_OPERATION_TESTS(1, 4, 0)
+    TERNARY_OPERATION_TESTS(1, 4, 1)
+    TERNARY_OPERATION_TESTS(1, 4, 2)
+    TERNARY_OPERATION_TESTS(1, 4, 3)
+    TERNARY_OPERATION_TESTS(1, 4, 4)
+    TERNARY_OPERATION_TESTS(2, 0, 4)
+    TERNARY_OPERATION_TESTS(2, 1, 4)
+    TERNARY_OPERATION_TESTS(2, 2, 4)
+    TERNARY_OPERATION_TESTS(2, 3, 4)
+    TERNARY_OPERATION_TESTS(2, 4, 0)
+    TERNARY_OPERATION_TESTS(2, 4, 1)
+    TERNARY_OPERATION_TESTS(2, 4, 2)
+    TERNARY_OPERATION_TESTS(2, 4, 3)
+    TERNARY_OPERATION_TESTS(2, 4, 4)
+    TERNARY_OPERATION_TESTS(3, 0, 4)
+    TERNARY_OPERATION_TESTS(3, 1, 4)
+    TERNARY_OPERATION_TESTS(3, 2, 4)
+    TERNARY_OPERATION_TESTS(3, 3, 4)
+    TERNARY_OPERATION_TESTS(3, 4, 0)
+    TERNARY_OPERATION_TESTS(3, 4, 1)
+    TERNARY_OPERATION_TESTS(3, 4, 2)
+    TERNARY_OPERATION_TESTS(3, 4, 3)
+    TERNARY_OPERATION_TESTS(3, 4, 4)
+    TERNARY_OPERATION_TESTS(4, 0, 0)
+    TERNARY_OPERATION_TESTS(4, 0, 1)
+    TERNARY_OPERATION_TESTS(4, 0, 2)
+    TERNARY_OPERATION_TESTS(4, 0, 3)
+    TERNARY_OPERATION_TESTS(4, 0, 4)
+    TERNARY_OPERATION_TESTS(4, 1, 0)
+    TERNARY_OPERATION_TESTS(4, 1, 1)
+    TERNARY_OPERATION_TESTS(4, 1, 2)
+    TERNARY_OPERATION_TESTS(4, 1, 3)
+    TERNARY_OPERATION_TESTS(4, 1, 4)
+    TERNARY_OPERATION_TESTS(4, 2, 0)
+    TERNARY_OPERATION_TESTS(4, 2, 1)
+    TERNARY_OPERATION_TESTS(4, 2, 2)
+    TERNARY_OPERATION_TESTS(4, 2, 3)
+    TERNARY_OPERATION_TESTS(4, 2, 4)
+    TERNARY_OPERATION_TESTS(4, 3, 0)
+    TERNARY_OPERATION_TESTS(4, 3, 1)
+    TERNARY_OPERATION_TESTS(4, 3, 2)
+    TERNARY_OPERATION_TESTS(4, 3, 3)
+    TERNARY_OPERATION_TESTS(4, 3, 4)
+    TERNARY_OPERATION_TESTS(4, 4, 0)
+    TERNARY_OPERATION_TESTS(4, 4, 1)
+    TERNARY_OPERATION_TESTS(4, 4, 2)
+    TERNARY_OPERATION_TESTS(4, 4, 3)
+    TERNARY_OPERATION_TESTS(4, 4, 4)
     UNARY_OPERATION_TESTS(4)
 #if TESTING_VECTOR_SPACE_DIMENSIONS >= 5
     BINARY_OPERATION_TESTS(0, 5)
@@ -333,6 +551,97 @@ constexpr bool same_multivector(LeftType const &lhs, RightType const &rhs) noexc
     BINARY_OPERATION_TESTS(5, 3)
     BINARY_OPERATION_TESTS(5, 4)
     BINARY_OPERATION_TESTS(5, 5)
+    TERNARY_OPERATION_TESTS(0, 0, 5)
+    TERNARY_OPERATION_TESTS(0, 1, 5)
+    TERNARY_OPERATION_TESTS(0, 2, 5)
+    TERNARY_OPERATION_TESTS(0, 3, 5)
+    TERNARY_OPERATION_TESTS(0, 4, 5)
+    TERNARY_OPERATION_TESTS(0, 5, 0)
+    TERNARY_OPERATION_TESTS(0, 5, 1)
+    TERNARY_OPERATION_TESTS(0, 5, 2)
+    TERNARY_OPERATION_TESTS(0, 5, 3)
+    TERNARY_OPERATION_TESTS(0, 5, 4)
+    TERNARY_OPERATION_TESTS(0, 5, 5)
+    TERNARY_OPERATION_TESTS(1, 0, 5)
+    TERNARY_OPERATION_TESTS(1, 1, 5)
+    TERNARY_OPERATION_TESTS(1, 2, 5)
+    TERNARY_OPERATION_TESTS(1, 3, 5)
+    TERNARY_OPERATION_TESTS(1, 4, 5)
+    TERNARY_OPERATION_TESTS(1, 5, 0)
+    TERNARY_OPERATION_TESTS(1, 5, 1)
+    TERNARY_OPERATION_TESTS(1, 5, 2)
+    TERNARY_OPERATION_TESTS(1, 5, 3)
+    TERNARY_OPERATION_TESTS(1, 5, 4)
+    TERNARY_OPERATION_TESTS(1, 5, 5)
+    TERNARY_OPERATION_TESTS(2, 0, 5)
+    TERNARY_OPERATION_TESTS(2, 1, 5)
+    TERNARY_OPERATION_TESTS(2, 2, 5)
+    TERNARY_OPERATION_TESTS(2, 3, 5)
+    TERNARY_OPERATION_TESTS(2, 4, 5)
+    TERNARY_OPERATION_TESTS(2, 5, 0)
+    TERNARY_OPERATION_TESTS(2, 5, 1)
+    TERNARY_OPERATION_TESTS(2, 5, 2)
+    TERNARY_OPERATION_TESTS(2, 5, 3)
+    TERNARY_OPERATION_TESTS(2, 5, 4)
+    TERNARY_OPERATION_TESTS(2, 5, 5)
+    TERNARY_OPERATION_TESTS(3, 0, 5)
+    TERNARY_OPERATION_TESTS(3, 1, 5)
+    TERNARY_OPERATION_TESTS(3, 2, 5)
+    TERNARY_OPERATION_TESTS(3, 3, 5)
+    TERNARY_OPERATION_TESTS(3, 4, 5)
+    TERNARY_OPERATION_TESTS(3, 5, 0)
+    TERNARY_OPERATION_TESTS(3, 5, 1)
+    TERNARY_OPERATION_TESTS(3, 5, 2)
+    TERNARY_OPERATION_TESTS(3, 5, 3)
+    TERNARY_OPERATION_TESTS(3, 5, 4)
+    TERNARY_OPERATION_TESTS(3, 5, 5)
+    TERNARY_OPERATION_TESTS(4, 0, 5)
+    TERNARY_OPERATION_TESTS(4, 1, 5)
+    TERNARY_OPERATION_TESTS(4, 2, 5)
+    TERNARY_OPERATION_TESTS(4, 3, 5)
+    TERNARY_OPERATION_TESTS(4, 4, 5)
+    TERNARY_OPERATION_TESTS(4, 5, 0)
+    TERNARY_OPERATION_TESTS(4, 5, 1)
+    TERNARY_OPERATION_TESTS(4, 5, 2)
+    TERNARY_OPERATION_TESTS(4, 5, 3)
+    TERNARY_OPERATION_TESTS(4, 5, 4)
+    TERNARY_OPERATION_TESTS(4, 5, 5)
+    TERNARY_OPERATION_TESTS(5, 0, 0)
+    TERNARY_OPERATION_TESTS(5, 0, 1)
+    TERNARY_OPERATION_TESTS(5, 0, 2)
+    TERNARY_OPERATION_TESTS(5, 0, 3)
+    TERNARY_OPERATION_TESTS(5, 0, 4)
+    TERNARY_OPERATION_TESTS(5, 0, 5)
+    TERNARY_OPERATION_TESTS(5, 1, 0)
+    TERNARY_OPERATION_TESTS(5, 1, 1)
+    TERNARY_OPERATION_TESTS(5, 1, 2)
+    TERNARY_OPERATION_TESTS(5, 1, 3)
+    TERNARY_OPERATION_TESTS(5, 1, 4)
+    TERNARY_OPERATION_TESTS(5, 1, 5)
+    TERNARY_OPERATION_TESTS(5, 2, 0)
+    TERNARY_OPERATION_TESTS(5, 2, 1)
+    TERNARY_OPERATION_TESTS(5, 2, 2)
+    TERNARY_OPERATION_TESTS(5, 2, 3)
+    TERNARY_OPERATION_TESTS(5, 2, 4)
+    TERNARY_OPERATION_TESTS(5, 2, 5)
+    TERNARY_OPERATION_TESTS(5, 3, 0)
+    TERNARY_OPERATION_TESTS(5, 3, 1)
+    TERNARY_OPERATION_TESTS(5, 3, 2)
+    TERNARY_OPERATION_TESTS(5, 3, 3)
+    TERNARY_OPERATION_TESTS(5, 3, 4)
+    TERNARY_OPERATION_TESTS(5, 3, 5)
+    TERNARY_OPERATION_TESTS(5, 4, 0)
+    TERNARY_OPERATION_TESTS(5, 4, 1)
+    TERNARY_OPERATION_TESTS(5, 4, 2)
+    TERNARY_OPERATION_TESTS(5, 4, 3)
+    TERNARY_OPERATION_TESTS(5, 4, 4)
+    TERNARY_OPERATION_TESTS(5, 4, 5)
+    TERNARY_OPERATION_TESTS(5, 5, 0)
+    TERNARY_OPERATION_TESTS(5, 5, 1)
+    TERNARY_OPERATION_TESTS(5, 5, 2)
+    TERNARY_OPERATION_TESTS(5, 5, 3)
+    TERNARY_OPERATION_TESTS(5, 5, 4)
+    TERNARY_OPERATION_TESTS(5, 5, 5)
     UNARY_OPERATION_TESTS(5)
 #if TESTING_VECTOR_SPACE_DIMENSIONS >= 6
     #error "The testing tool is not prepared for too many dimensions."

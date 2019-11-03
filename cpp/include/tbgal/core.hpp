@@ -334,6 +334,9 @@ namespace tbgal {
 #include "geometric_product.hpp"
 #include "outer_product.hpp"
 #include "left_contraction.hpp"
+#include "right_contraction.hpp"
+#include "dot_product.hpp"
+#include "hestenes_inner_product.hpp"
 
 #include "reversion.hpp"
 

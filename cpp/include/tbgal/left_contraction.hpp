@@ -27,9 +27,7 @@ namespace tbgal {
         if (resulting_scalar != 0) {
             return ResultingFactoredMultivectorType(arg2.space(), resulting_scalar, arg2.factors_in_signed_metric(), arg2.factors_count());
         }
-        else {
-            return ResultingFactoredMultivectorType(arg2.space(), 0);
-        }
+        return ResultingFactoredMultivectorType(arg2.space(), 0);
     }
 
     template<typename FirstScalarType, typename SecondScalarType, typename = std::enable_if_t<!(is_multivector_v<FirstScalarType> || is_multivector_v<SecondScalarType>)> >
