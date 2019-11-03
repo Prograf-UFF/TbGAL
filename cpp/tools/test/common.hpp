@@ -228,25 +228,6 @@ std::tuple<scalar_factor_t, std::array<vector_factor_t, K> > make_random_factors
         }
     }
 
-    //TODO {DEBUG}
-    /**
-    if (TESTING_VECTOR_SPACE_DIMENSIONS == 2) {
-        if (K == 1) {
-            scalar_factor = 1;
-            vector_factors[0][0] = 1;
-            vector_factors[0][1] = 1;
-        }
-        else if (K == 2) {
-            scalar_factor = 1;
-            vector_factors[0][0] = 1;
-            vector_factors[0][1] = 0;
-
-            vector_factors[1][0] = 0;
-            vector_factors[1][1] = 1;
-        }
-    }
-    /**/
-
     return std::tuple<scalar_factor_t, std::array<vector_factor_t, K> >(scalar_factor, vector_factors);
 }
 
@@ -277,23 +258,11 @@ constexpr bool same_multivector(LeftType const &lhs, RightType const &rhs) noexc
         std::array<vector_factor_t, RHS_K> rhs_vector_factors; \
         std::tie(lhs_scalar_factor, lhs_vector_factors) = make_random_factors<LHS_K>(); \
         std::tie(rhs_scalar_factor, rhs_vector_factors) = make_random_factors<RHS_K>(); \
-        /*TODO {DEBUG}*/ \
-        using namespace TESTING_GATL_MODEL_NAMESPACE; \
-        auto lhs = make_tbgal_multivector_using_outer_product(lhs_scalar_factor, lhs_vector_factors); \
-        auto rhs = make_tbgal_multivector_using_outer_product(rhs_scalar_factor, rhs_vector_factors); \
-        auto xxx = from_tbgal_to_gatl(tbgal_##OPERATION(lhs, rhs)); \
-        auto yyy = gatl_##OPERATION(make_gatl_multivector_using_outer_product(lhs_scalar_factor, lhs_vector_factors), make_gatl_multivector_using_outer_product(rhs_scalar_factor, rhs_vector_factors)); \
-        std::cout << std::endl; \
-        std::cout << "lhs = " << lhs << std::endl; \
-        std::cout << "rhs = " << rhs << std::endl; \
-        std::cout << "TbGAL = " << xxx << std::endl; \
-        std::cout << " GATL = " << yyy << std::endl; \
-        std::cout << std::endl; \
-        EXPECT_TRUE(same_multivector(xxx, yyy)); \
+        EXPECT_TRUE(same_multivector(from_tbgal_to_gatl(tbgal_##OPERATION(make_tbgal_multivector_using_outer_product(lhs_scalar_factor, lhs_vector_factors), make_tbgal_multivector_using_outer_product(rhs_scalar_factor, rhs_vector_factors))), gatl_##OPERATION(make_gatl_multivector_using_outer_product(lhs_scalar_factor, lhs_vector_factors), make_gatl_multivector_using_outer_product(rhs_scalar_factor, rhs_vector_factors)))); \
     }
 
 #define BINARY_OPERATION_TESTS(LHS_K, RHS_K) \
-    /*BINARY_OPERATION_TESTS_FOR(GeometricProduct, LHS_K, RHS_K)*/ \
+    BINARY_OPERATION_TESTS_FOR(GeometricProduct, LHS_K, RHS_K) \
     BINARY_OPERATION_TESTS_FOR(LeftContraction, LHS_K, RHS_K) \
     BINARY_OPERATION_TESTS_FOR(OuterProduct, LHS_K, RHS_K)
 

@@ -96,6 +96,24 @@ namespace tbgal {
             return arg.determinant();
         }
         
+        template<typename FirstMatrixType, typename SecondMatrixType>
+        constexpr decltype(auto) dot_product_column(FirstMatrixType const &arg1, DefaultIndexType col1, SecondMatrixType const &arg2, DefaultIndexType col2) noexcept {
+            using ResultingScalarType = std::common_type_t<typename FirstMatrixType::Scalar, typename SecondMatrixType::Scalar>;
+            assert(arg1.rows() == arg2.rows());
+            ResultingScalarType result = 0;
+            for (Eigen::Index row = 0, rows = arg1.rows(); row != rows; ++row) {
+                result += arg1(row, col1) * arg2(row, col2);
+            }
+            return result;
+        }
+
+        template<typename MatrixType>
+        constexpr decltype(auto) eigen_eigenvectors(MatrixType const &arg) noexcept {
+            using EigenSolverType = Eigen::SelfAdjointEigenSolver<MatrixType>;
+            using EigenvectorsMatrixType = typename EigenSolverType::EigenvectorsType;
+            return EigenvectorsMatrixType(EigenSolverType(arg, Eigen::ComputeEigenvectors).eigenvectors());
+        }
+
         template<typename MatrixType>
         constexpr decltype(auto) evaluate(MatrixType const &arg) noexcept {
             return arg;
@@ -124,10 +142,10 @@ namespace tbgal {
             return result;
         }
 
-        template<DefaultIndexType SizeAtCompileTime, DefaultIndexType MaxSizeAtCompileTime, typename IteratorType>
+        template<DefaultIndexType RowsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, typename IteratorType>
         constexpr decltype(auto) fill_column_matrix_using_iterators(IteratorType begin, IteratorType end) noexcept {
-            assert(SizeAtCompileTime == Eigen::Dynamic || SizeAtCompileTime == std::distance(begin, end));
-            matrix_type_t<std::remove_cv_t<std::remove_reference_t<typename std::iterator_traits<IteratorType>::value_type> >, SizeAtCompileTime, 1, MaxSizeAtCompileTime, 1> result(std::distance(begin, end), 1);
+            assert(RowsAtCompileTime == Eigen::Dynamic || RowsAtCompileTime == std::distance(begin, end));
+            matrix_type_t<std::remove_cv_t<std::remove_reference_t<typename std::iterator_traits<IteratorType>::value_type> >, RowsAtCompileTime, 1, MaxRowsAtCompileTime, 1> result(std::distance(begin, end), 1);
             for (Eigen::Index ind = 0; begin != end; ++ind, ++begin) {
                 result(ind, 0) = *begin;
             }
@@ -162,6 +180,7 @@ namespace tbgal {
             return std::make_tuple(MatrixQType(qr.householderQ()), rank);
         }
 
+        //TODO Passar para dentro do código de DUAL e UNDUAL.
         template<typename MatrixType>
         constexpr decltype(auto) split_columns_and_swap(MatrixType const &input, DefaultIndexType col) noexcept {
             using ResultingMatrixType = matrix_type_t<typename MatrixType::Scalar, MatrixType::RowsAtCompileTime, MatrixType::ColsAtCompileTime, MatrixType::MaxRowsAtCompileTime, MatrixType::MaxColsAtCompileTime>;
@@ -174,18 +193,6 @@ namespace tbgal {
         template<typename FirstMatrixType, typename SecondMatrixType>
         constexpr decltype(auto) sub(FirstMatrixType const &arg1, SecondMatrixType const &arg2) noexcept {
             return arg1 - arg2;
-        }
-
-        template<typename MatrixType>
-        constexpr decltype(auto) svd_left_eigenvectors(MatrixType const &arg) noexcept {
-            if (std::max(arg.rows(), arg.cols()) <= 16) {
-                Eigen::JacobiSVD<MatrixType> svd(arg, Eigen::ComputeFullU | Eigen::ComputeFullV);
-                return svd.matrixU();
-            }
-            else {
-                Eigen::BDCSVD<MatrixType> svd(arg, Eigen::ComputeFullU | Eigen::ComputeFullV);
-                return svd.matrixU();
-            }
         }
 
         template<typename MatrixType>

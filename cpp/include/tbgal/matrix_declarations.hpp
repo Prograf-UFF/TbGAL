@@ -82,13 +82,19 @@ namespace tbgal {
         template<typename MatrixType>
         constexpr decltype(auto) determinant(MatrixType const &) noexcept;
         
+        template<typename FirstMatrixType, typename SecondMatrixType>
+        constexpr decltype(auto) dot_product_column(FirstMatrixType const &, DefaultIndexType, SecondMatrixType const &, DefaultIndexType) noexcept;
+        
+        template<typename MatrixType>
+        constexpr decltype(auto) eigen_eigenvectors(MatrixType const &) noexcept;
+
         template<typename MatrixType>
         constexpr decltype(auto) evaluate(MatrixType const &arg) noexcept;
 
         template<typename... ScalarTypes>
         constexpr decltype(auto) fill_column_matrix(ScalarTypes &&...) noexcept;
 
-        template<DefaultIndexType SizeAtCompileTime, DefaultIndexType MaxSizeAtCompileTime, typename IteratorType>
+        template<DefaultIndexType RowsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, typename IteratorType>
         constexpr decltype(auto) fill_column_matrix_using_iterators(IteratorType, IteratorType) noexcept;
 
         template<typename MatrixType>
@@ -111,9 +117,6 @@ namespace tbgal {
 
         template<typename FirstMatrixType, typename SecondMatrixType>
         constexpr decltype(auto) sub(FirstMatrixType const &, SecondMatrixType const &) noexcept;
-
-        template<typename MatrixType>
-        constexpr decltype(auto) svd_left_eigenvectors(MatrixType const &) noexcept;
 
         template<typename MatrixType>
         constexpr decltype(auto) transpose(MatrixType const &) noexcept;
