@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <iostream>
 #include <type_traits>
 
 #ifndef TBGAL_DEFAULT_SCALAR_TYPE
@@ -70,11 +71,17 @@ namespace tbgal {
         template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, DefaultIndexType MaxColsAtCompileTime>
         constexpr decltype(auto) make_zero_matrix(DefaultIndexType, DefaultIndexType) noexcept;
 
+        template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename SourceMatrixType, typename TargetMatrixType>
+        constexpr void assign_block(SourceMatrixType const &, DefaultIndexType, DefaultIndexType, TargetMatrixType &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
+
+        template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename SourceMatrixType, typename TargetMatrixType>
+        constexpr void assign_block(SourceMatrixType const &, DefaultIndexType, DefaultIndexType, TargetMatrixType &, DefaultIndexType, DefaultIndexType) noexcept;
+
         template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename SourceType, typename TargetMatrixType>
         constexpr void assign_block(SourceType const &, TargetMatrixType &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
 
-        template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename SourceMatrixType, typename TargetMatrixType>
-        constexpr void assign_block(SourceMatrixType const &, DefaultIndexType, DefaultIndexType, TargetMatrixType &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
+        template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename MatrixType>
+        constexpr decltype(auto) block_view(MatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
 
         template<typename MatrixType>
         constexpr void conservative_resize(MatrixType &, DefaultIndexType, DefaultIndexType) noexcept;
@@ -102,6 +109,9 @@ namespace tbgal {
 
         template<typename FirstMatrixType, typename SecondMatrixType>
         constexpr decltype(auto) prod(FirstMatrixType const &, SecondMatrixType const &) noexcept;
+
+        template<DefaultIndexType FirstBlockRowsAtCompileTime, DefaultIndexType SecondBlockRowsAtCompileTime, DefaultIndexType SecondBlockColsAtCompileTime, typename FirstMatrixType, typename SecondMatrixType>
+        constexpr decltype(auto) prod_block(FirstMatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, SecondMatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
 
         template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename FirstMatrixType, typename SecondMatrixType>
         constexpr decltype(auto) prod_block(FirstMatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType, SecondMatrixType const &) noexcept;

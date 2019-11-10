@@ -3,26 +3,26 @@
 
 namespace tbgal {
 
-    template<typename FirstScalarType, typename FirstFactoringProduct, typename SecondScalarType, typename SecondFactoringProduct>
-    constexpr decltype(auto) DOT(FactoredMultivector<FirstScalarType, FirstFactoringProduct> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProduct> const &arg2) noexcept {
+    template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType>
+    constexpr decltype(auto) dot(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
         if (arg1.factors_count() <= arg2.factors_count()) {
-            return LCONT(arg1, arg2);
+            return lcont(arg1, arg2);
         }
-        return RCONT(arg1, arg2);
+        return rcont(arg1, arg2);
     }
 
-    template<typename FirstScalarType, typename FirstFactoringProduct, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
-    constexpr decltype(auto) DOT(FactoredMultivector<FirstScalarType, FirstFactoringProduct> const &arg1, SecondScalarType const &arg2) noexcept {
-        return RCONT(arg1, arg2);
+    template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
+    constexpr decltype(auto) dot(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) noexcept {
+        return rcont(arg1, arg2);
     }
 
-    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProduct, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
-    constexpr decltype(auto) DOT(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProduct> const &arg2) noexcept {
-        return LCONT(arg1, arg2);
+    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
+    constexpr decltype(auto) dot(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
+        return lcont(arg1, arg2);
     }
 
     template<typename FirstScalarType, typename SecondScalarType, typename = std::enable_if_t<!(is_multivector_v<FirstScalarType> || is_multivector_v<SecondScalarType>)> >
-    constexpr decltype(auto) DOT(FirstScalarType const &arg1, SecondScalarType const &arg2) noexcept {
+    constexpr decltype(auto) dot(FirstScalarType const &arg1, SecondScalarType const &arg2) noexcept {
         return arg1 * arg2;
     }
 

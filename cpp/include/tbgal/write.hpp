@@ -33,7 +33,7 @@ namespace tbgal {
 
     template<typename ScalarType, typename MetricSpaceType>
     std::ostream & operator <<(std::ostream &os, FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType>> const &arg) noexcept {
-        os << "GP(";
+        os << "gp(";
         detail::write(os, arg);
         os << ")";
         return os;
@@ -41,7 +41,7 @@ namespace tbgal {
 
     template<typename ScalarType, typename MetricSpaceType>
     std::ostream & operator <<(std::ostream &os, FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType>> const &arg) noexcept {
-        os << "OP(";
+        os << "op(";
         detail::write(os, arg);
         os << ")";
         return os;

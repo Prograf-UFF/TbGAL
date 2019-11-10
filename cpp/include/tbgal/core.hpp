@@ -39,12 +39,13 @@ namespace tbgal {
         template<typename T>
         constexpr bool is_iterator_v = is_iterator<T>::value;
 
-        template<bool AnyMultivectorType> struct GP_impl;
-        template<bool AnyMultivectorType> struct OP_impl;
+        struct gp_impl;
+        template<bool AnyFactoredMultivector> struct op_impl;
 
         template<typename MetricSpaceType> struct apply_signed_metric_impl;
         template<typename MetricSpaceType> struct from_actual_to_signed_metric_impl;
         template<typename MetricSpaceType> struct from_signed_to_actual_metric_impl;
+        template<typename MetricSpaceType> struct metric_factor_impl;
 
         template<typename FirstType, typename... NextTypes>
         struct common_scalar_type;
@@ -118,7 +119,7 @@ namespace tbgal {
         template<typename ResultingMatrixType, typename ScalarType, typename FactoringProductType>
         constexpr void fill_matrix_with_first_factors(ResultingMatrixType &result, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
             if (arg.factors_count() > 0) {
-                assign_block<rows_at_compile_time_v<ResultingMatrixType>, Dynamic>(arg.factors_in_signed_metric(), 0, 0, result, 0, 0, rows(result), arg.factors_count());
+                assign_block<rows_at_compile_time_v<ResultingMatrixType>, Dynamic>(arg.factors_in_signed_metric(), result, 0, 0, rows(result), arg.factors_count());
             }
         }
 
@@ -130,7 +131,7 @@ namespace tbgal {
         template<typename ResultingMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
         constexpr void fill_matrix_with_first_factors(ResultingMatrixType &result, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
             if (arg1.factors_count() > 0) {
-                assign_block<rows_at_compile_time_v<ResultingMatrixType>, Dynamic>(arg1.factors_in_signed_metric(), 0, 0, result, 0, 0, rows(result), arg1.factors_count());
+                assign_block<rows_at_compile_time_v<ResultingMatrixType>, Dynamic>(arg1.factors_in_signed_metric(), result, 0, 0, rows(result), arg1.factors_count());
             }
             else {
                 fill_matrix_with_first_factors(result, args...);
@@ -152,7 +153,7 @@ namespace tbgal {
             if (arg.factors_count() > 0) {
                 auto end_column_index = cols(result);
                 if (end_column_index >= arg.factors_count()) {
-                    assign_block<rows_at_compile_time_v<ResultingMatrixType>, Dynamic>(arg.factors_in_signed_metric(), 0, 0, result, 0, end_column_index - arg.factors_count(), rows(result), arg.factors_count());
+                    assign_block<rows_at_compile_time_v<ResultingMatrixType>, Dynamic>(arg.factors_in_signed_metric(), result, 0, end_column_index - arg.factors_count(), rows(result), arg.factors_count());
                     return std::tuple<ResultingMatrixType&, DefaultIndexType>(result, end_column_index - arg.factors_count());
                 }
                 assert(end_column_index == 0);
@@ -171,7 +172,7 @@ namespace tbgal {
             if (arg1.factors_count() > 0) {
                 auto end_column_index = std::get<1>(fill_matrix_with_tail_factors(result, args...));
                 if (end_column_index >= arg1.factors_count()) {
-                    assign_block<rows_at_compile_time_v<ResultingMatrixType>, Dynamic>(arg1.factors_in_signed_metric(), 0, 0, result, 0, end_column_index - arg1.factors_count(), rows(result), arg1.factors_count());
+                    assign_block<rows_at_compile_time_v<ResultingMatrixType>, Dynamic>(arg1.factors_in_signed_metric(), result, 0, end_column_index - arg1.factors_count(), rows(result), arg1.factors_count());
                     return std::tuple<ResultingMatrixType&, DefaultIndexType>(result, end_column_index - arg1.factors_count());
                 }
                 assert(end_column_index == 0);
@@ -331,12 +332,13 @@ namespace tbgal {
 #include "addition.hpp"
 #include "subtraction.hpp"
 
-#include "geometric_product.hpp"
 #include "outer_product.hpp"
+#include "geometric_product.hpp"
 #include "left_contraction.hpp"
 #include "right_contraction.hpp"
 #include "dot_product.hpp"
 #include "hestenes_inner_product.hpp"
+#include "scalar_product.hpp"
 
 #include "reversion.hpp"
 

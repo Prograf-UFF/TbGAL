@@ -76,14 +76,24 @@ namespace tbgal {
             return matrix_type_t<ScalarType, RowsAtCompileTime, ColsAtCompileTime, MaxRowsAtCompileTime, MaxColsAtCompileTime>::Zero(rows, cols);
         }
 
+        template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename SourceMatrixType, typename TargetMatrixType>
+        constexpr void assign_block(SourceMatrixType const &source, DefaultIndexType start_row_source, DefaultIndexType start_col_source, TargetMatrixType &target, DefaultIndexType start_row_target, DefaultIndexType start_col_target, DefaultIndexType block_rows, DefaultIndexType block_cols) noexcept {
+            target.template block<BlockRowsAtCompileTime, BlockColsAtCompileTime>(start_row_target, start_col_target, block_rows, block_cols) = source.template block<BlockRowsAtCompileTime, BlockColsAtCompileTime>(start_row_source, start_col_source, block_rows, block_cols);
+        }
+
+        template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename SourceMatrixType, typename TargetMatrixType>
+        constexpr void assign_block(SourceMatrixType const &source, DefaultIndexType start_row_source, DefaultIndexType start_col_source, TargetMatrixType &target, DefaultIndexType block_rows, DefaultIndexType block_cols) noexcept {
+            target = source.template block<BlockRowsAtCompileTime, BlockColsAtCompileTime>(start_row_source, start_col_source, block_rows, block_cols);
+        }
+
         template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename SourceType, typename TargetMatrixType>
         constexpr void assign_block(SourceType const &source, TargetMatrixType &target, DefaultIndexType start_row_target, DefaultIndexType start_col_target, DefaultIndexType block_rows, DefaultIndexType block_cols) noexcept {
             target.template block<BlockRowsAtCompileTime, BlockColsAtCompileTime>(start_row_target, start_col_target, block_rows, block_cols) = source;
         }
 
-        template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename SourceMatrixType, typename TargetMatrixType>
-        constexpr void assign_block(SourceMatrixType const &source, DefaultIndexType start_row_source, DefaultIndexType start_col_source, TargetMatrixType &target, DefaultIndexType start_row_target, DefaultIndexType start_col_target, DefaultIndexType block_rows, DefaultIndexType block_cols) noexcept {
-            target.template block<BlockRowsAtCompileTime, BlockColsAtCompileTime>(start_row_target, start_col_target, block_rows, block_cols) = source.template block<BlockRowsAtCompileTime, BlockColsAtCompileTime>(start_row_source, start_col_source, block_rows, block_cols);
+        template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename MatrixType>
+        constexpr decltype(auto) block_view(MatrixType const &arg, DefaultIndexType start_row, DefaultIndexType start_col, DefaultIndexType block_rows, DefaultIndexType block_cols) noexcept {
+            return arg.template block<BlockRowsAtCompileTime, BlockColsAtCompileTime>(start_row, start_col, block_rows, block_cols);
         }
 
         template<typename MatrixType>
@@ -107,20 +117,25 @@ namespace tbgal {
             return result;
         }
 
-        template<typename MatrixType>
-        constexpr decltype(auto) eigen_eigenvectors(MatrixType const &arg) noexcept {
-            using EigenSolverType = Eigen::SelfAdjointEigenSolver<MatrixType>;
+        template<typename SelfAdjointMatrixType>
+        constexpr decltype(auto) eigen_eigenvectors(SelfAdjointMatrixType const &arg) noexcept {
+            using EigenSolverType = Eigen::SelfAdjointEigenSolver<SelfAdjointMatrixType>;
             using EigenvectorsMatrixType = typename EigenSolverType::EigenvectorsType;
             return EigenvectorsMatrixType(EigenSolverType(arg, Eigen::ComputeEigenvectors).eigenvectors());
         }
 
-        template<typename MatrixType>
-        constexpr decltype(auto) evaluate(MatrixType const &arg) noexcept {
+        template<typename MatrixType, int BlockRowsAtCompileTime, int BlockColsAtCompileTime, bool InnerPanel>
+        constexpr decltype(auto) evaluate(Eigen::Block<MatrixType, BlockRowsAtCompileTime, BlockColsAtCompileTime, InnerPanel> const &arg) noexcept {
+            return arg.eval();
+        }
+
+        template<typename ScalarType, int RowsAtCompileTime, int ColsAtCompileTime, int Options, int MaxRowsAtCompileTime, int MaxColsAtCompileTime>
+        constexpr decltype(auto) evaluate(Eigen::Matrix<ScalarType, RowsAtCompileTime, ColsAtCompileTime, Options, MaxRowsAtCompileTime, MaxColsAtCompileTime> const &arg) noexcept {
             return arg;
         }
 
-        template<typename FirstMatrixType, typename SecondMatrixType, int Options>
-        constexpr decltype(auto) evaluate(Eigen::Product<FirstMatrixType, SecondMatrixType, Options> const &arg) noexcept {
+        template<typename FirstMatrixType, typename SecondMatrixType, int Option>
+        constexpr decltype(auto) evaluate(Eigen::Product<FirstMatrixType, SecondMatrixType, Option> const &arg) noexcept {
             return arg.eval();
         }
 
@@ -162,6 +177,11 @@ namespace tbgal {
             return arg1 * arg2;
         }
         
+        template<DefaultIndexType FirstBlockRowsAtCompileTime, DefaultIndexType SecondBlockRowsAtCompileTime, DefaultIndexType SecondBlockColsAtCompileTime, typename FirstMatrixType, typename SecondMatrixType>
+        constexpr decltype(auto) prod_block(FirstMatrixType const &arg1, DefaultIndexType start_row1, DefaultIndexType start_col1, DefaultIndexType block_rows1, SecondMatrixType const &arg2, DefaultIndexType start_row2, DefaultIndexType start_col2, DefaultIndexType block_rows2, DefaultIndexType block_cols2) noexcept {
+            return arg1.template block<FirstBlockRowsAtCompileTime, SecondBlockRowsAtCompileTime>(start_row1, start_col1, block_rows1, block_rows2) * arg2.template block<SecondBlockRowsAtCompileTime, SecondBlockColsAtCompileTime>(start_row2, start_col2, block_rows2, block_cols2);
+        }
+
         template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename FirstMatrixType, typename SecondMatrixType>
         constexpr decltype(auto) prod_block(FirstMatrixType const &arg1, DefaultIndexType start_row1, DefaultIndexType start_col1, DefaultIndexType block_rows1, DefaultIndexType block_cols1, SecondMatrixType const &arg2) noexcept {
             return arg1.template block<BlockRowsAtCompileTime, BlockColsAtCompileTime>(start_row1, start_col1, block_rows1, block_cols1) * arg2;
@@ -180,7 +200,7 @@ namespace tbgal {
             return std::make_tuple(MatrixQType(qr.householderQ()), rank);
         }
 
-        //TODO Passar para dentro do código de DUAL e UNDUAL.
+        //TODO Passar para dentro do código de dual e undual.
         template<typename MatrixType>
         constexpr decltype(auto) split_columns_and_swap(MatrixType const &input, DefaultIndexType col) noexcept {
             using ResultingMatrixType = matrix_type_t<typename MatrixType::Scalar, MatrixType::RowsAtCompileTime, MatrixType::ColsAtCompileTime, MatrixType::MaxRowsAtCompileTime, MatrixType::MaxColsAtCompileTime>;

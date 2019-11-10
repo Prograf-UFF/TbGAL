@@ -5,63 +5,120 @@ namespace tbgal {
 
     namespace detail {
 
-        template<bool AnyMultivectorType>
-        struct GP_impl {
+        struct gp_impl {
+        private:
+
+            template<typename MetricSpaceType, typename ResultingScalarType, typename NxKMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
+            constexpr static void update_factors(MetricSpaceType const &, ResultingScalarType const &, NxKMatrixType const &) noexcept {
+            }
+
+            template<typename MetricSpaceType, typename ResultingScalarType, typename NxKMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
+            constexpr static void update_factors(MetricSpaceType const &space, ResultingScalarType &alpha, NxKMatrixType &A, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
+                alpha *= arg1.scalar();
+                
+                if (cols(A) != 0) {
+                    if (arg1.factors_count() != 0) {
+                        auto B = arg1.factors_in_signed_metric();
+                        //TODO [Parei aqui!] prod(transpose(B), B);
+                    }
+                }
+                else {
+                    A = arg1.factors_in_signed_metric();
+                }
+
+                if (alpha != 0) {
+                    update_factors(space, alpha, A, args...);
+                }
+            }
+
+            template<typename MetricSpaceType, typename ResultingScalarType, typename NxKMatrixType, typename FirstScalarType, typename... NextTypes>
+            constexpr static void update_factors(MetricSpaceType const &space, ResultingScalarType &alpha, NxKMatrixType &A, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
+                alpha *= arg1;
+                if (alpha != 0) {
+                    update_factors(space, alpha, A, args...);
+                }
+            }
+
+        public:
+
             template<typename... Types>
             constexpr static decltype(auto) eval(Types const &... args) noexcept {
+                /**
+                using ResultingScalarType = common_scalar_type_t<Types...>;
+                using ResultingMetricSpaceType = metric_space_type_t<Types...>;
+                using ResultingFactoringProductType = GeometricProduct<ResultingMetricSpaceType>;
+                using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
+
+                constexpr DefaultIndexType DimensionsAtCompileTime = ResultingMetricSpaceType::DimensionsAtCompileTime;
+                constexpr DefaultIndexType MaxDimensionsAtCompileTime = ResultingMetricSpaceType::MaxDimensionsAtCompileTime;
+
+                using MatrixNxKType = matrix_type_t<ResultingScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
+
+                auto const &space = *space_ptr(args...);
+                ScalarType alpha = 1;
+                MatrixNxKType A = make_matrix<ResultingScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), 0);
+
+                update_factors(space, alpha, A, args...);
+
+                return ResultingFactoredMultivectorType(space, alpha, A);
+                //TODO Remover funções criadas para serem utilizadas na implementação antiga.
+                /*/
                 using ScalarType = common_scalar_type_t<Types...>;
-                
+
                 using ResultingScalarType = ScalarType;
                 using ResultingMetricSpaceType = metric_space_type_t<Types...>;
                 using ResultingFactoringProductType = GeometricProduct<ResultingMetricSpaceType>;
                 using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
-                
+
                 constexpr ScalarType ZeroTolerance = std::numeric_limits<ScalarType>::epsilon();
                 constexpr DefaultIndexType DimensionsAtCompileTime = ResultingMetricSpaceType::DimensionsAtCompileTime;
                 constexpr DefaultIndexType MaxDimensionsAtCompileTime = ResultingMetricSpaceType::MaxDimensionsAtCompileTime;
 
-                using TxT_MatrixType = matrix_type_t<ScalarType, 2, 2, 2, 2>;
-                using NxK_MatrixType = matrix_type_t<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
-                using NxD_MatrixType = matrix_type_t<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, Dynamic>;
-                using KxK_MatrixType = matrix_type_t<ScalarType, Dynamic, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
-                using Nx1_MatrixType = matrix_type_t<ScalarType, DimensionsAtCompileTime, 1, MaxDimensionsAtCompileTime, 1>;
-                using Kx1_MatrixType = matrix_type_t<ScalarType, Dynamic, 1, MaxDimensionsAtCompileTime, 1>;
+                using MatrixNxKType = matrix_type_t<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
+                using MatrixNxDType = matrix_type_t<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, Dynamic>;
+                using MatrixKxKType = matrix_type_t<ScalarType, Dynamic, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
+                using MatrixNx1Type = matrix_type_t<ScalarType, DimensionsAtCompileTime, 1, MaxDimensionsAtCompileTime, 1>;
+                using Matrix1xNType = matrix_type_t<ScalarType, 1, DimensionsAtCompileTime, 1, MaxDimensionsAtCompileTime>;
+                using MatrixKx1Type = matrix_type_t<ScalarType, Dynamic, 1, MaxDimensionsAtCompileTime, 1>;
+                using Matrix2x2Type = matrix_type_t<ScalarType, 2, 2, 2, 2>;
                 
-                using IndexType = index_type_t<NxK_MatrixType>;
+                using IndexType = index_type_t<MatrixNxKType>;
 
                 auto& space = *space_ptr(args...);
                 IndexType factors_count = sum_factors_count(args...);
 
                 IndexType F_cols = first_factors_count(args...);
-                NxK_MatrixType F = make_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), F_cols);
+                MatrixNxKType F = make_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), F_cols);
                 fill_matrix_with_first_factors(F, args...);
 
                 ScalarType scalar = multiply_scalars(args...);
 
                 if (factors_count != F_cols) {
-                    KxK_MatrixType M = prod(transpose(F), F);
-                    KxK_MatrixType W = eigen_eigenvectors(M);
-                    NxK_MatrixType O = prod(F, W);
+                    MatrixKxKType M = prod(transpose(F), F);
+                    MatrixKxKType W = eigen_eigenvectors(M);
+                    MatrixNxKType O = prod(F, W);
 
                     IndexType A_cols = factors_count - F_cols;
-                    NxD_MatrixType A = make_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, Dynamic>(space.dimensions(), A_cols);
+                    MatrixNxDType A = make_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, Dynamic>(space.dimensions(), A_cols);
                     fill_matrix_with_tail_factors(A, args...);
 
-                    TxT_MatrixType R;
-                    Kx1_MatrixType c, t;
-                    Nx1_MatrixType r, a = make_matrix<ScalarType, DimensionsAtCompileTime, 1, MaxDimensionsAtCompileTime, 1>(space.dimensions(), 1);
-                    
+                    MatrixKx1Type c, t;
+                    Matrix2x2Type R = make_matrix<ScalarType, 2, 2, 2, 2>(2, 2);
+                    MatrixNx1Type r, a = make_matrix<ScalarType, DimensionsAtCompileTime, 1, MaxDimensionsAtCompileTime, 1>(space.dimensions(), 1);
+
                     for (IndexType i = 0; i != A_cols; ++i) {
-                        assign_block<DimensionsAtCompileTime, 1>(A, 0, i, a, 0, 0, space.dimensions(), 1);
+                        // Take the current vector factor a and compute c as a in the coordinate system defines by the column of F, and r as the residual vector.
+                        assign_block<DimensionsAtCompileTime, 1>(A, 0, i, a, space.dimensions(), 1);
                         c = prod(prod(W, transpose(O)), a);
                         r = sub(a, prod(F, c));
 
                         ScalarType r_sqr_norm = dot_product_column(r, 0, r, 0);
 
+                        // Check whether a is included in the subspace spanned by the column of F.
                         if (r_sqr_norm <= ZeroTolerance) {
                             for (IndexType j = 0; j != (F_cols - 1); ++j) {
                                 if (abs(coeff(c, j, 0)) > ZeroTolerance) {
-                                    /**/
+                                    // R^{curr} = [phi * alpha, gamma * c_{j}; -phi * beta, gamma * c_{j+1}]  ---  R^{curr} is in the block diagonal matrix Q^{curr} at row j and column j. The other portions of Q^{curr} define an identity matrix.
                                     ScalarType delta = dot_product_column(F, j, F, j + 1);
                                     ScalarType gamma = 1 / sqrt(coeff(c, j, 0) * coeff(c, j, 0) + 2 * coeff(c, j, 0) * coeff(c, j + 1, 0) * delta + coeff(c, j + 1, 0) * coeff(c, j + 1, 0));
                                     ScalarType rho = sqrt(1 / (1 - delta * delta));
@@ -73,22 +130,6 @@ namespace tbgal {
                                     coeff(R, 0, 1) = gamma * coeff(c, j, 0);
                                     coeff(R, 1, 0) = -phi * beta;
                                     coeff(R, 1, 1) = gamma * coeff(c, j + 1, 0);
-                                    /*/
-                                    // R^{curr} = [alpha c_{[j]}^{curr}; beta c_{[j+1]}^{curr}]
-                                    // Q^{curr} = [I_{j-1} 0 0; 0 R^{curr} 0; 0 0 I_{k - j - 1}] --- Q does not matter, since only two columns or rows of each affected matrix are modied
-                                    // inv(Q^{curr}) = [I_{j-1} 0 0; 0 inv(R^{curr}) 0; 0 0 I_{k - j - 1}]
-                                    ScalarType gamma = dot_product_column(F, j, F, j + 1);
-                                    ScalarType delta = sqrt(-1 / (gamma * gamma - 1));
-                                    ScalarType epsilon = 1 / (coeff(c, j, 0) * coeff(c, j, 0) + 2 * coeff(c, j, 0) * coeff(c, j + 1, 0) * gamma + coeff(c, j + 1, 0) * coeff(c, j + 1, 0));
-
-                                    ScalarType alpha = (coeff(c, j, 0) * (1 + delta) * gamma + coeff(c, j + 1, 0)) * epsilon;
-                                    ScalarType beta = (-coeff(c, j, 0) * delta) * epsilon;
-
-                                    coeff(R, 0, 0) = alpha;
-                                    coeff(R, 0, 1) = coeff(c, j, 0);
-                                    coeff(R, 1, 0) = beta;
-                                    coeff(R, 1, 1) = coeff(c, j + 1, 0);
-                                    /**/
 
                                     // F^{next} = F^{curr} . Q^{curr}
                                     assign_block<DimensionsAtCompileTime, 2>(prod_block<DimensionsAtCompileTime, 2>(F, 0, j, space.dimensions(), 2, R), F, 0, j, space.dimensions(), 2);
@@ -105,11 +146,20 @@ namespace tbgal {
                                 }
                             }
 
+                            // Update the resulting scalar factor.
                             scalar *= dot_product_column(F, F_cols - 1, a, 0);
                             
+                            // Remove the rightmost last column of F and update matrices M, O, and W accordingly.
                             conservative_resize(F, space.dimensions(), F_cols - 1);
                             conservative_resize(M, F_cols - 1, F_cols - 1);
                             if (F_cols > 1) {
+                                //TODO Posso simplificar as contas para obter a última linha ou coluna desejada.
+                                //auto O_ = evaluate(prod(compute_reflection_matrix_from_rows(O, F_cols - 1, prod(W, transpose(O)), F_cols - 1), O));
+                                //conservative_resize(O_, space.dimensions(), F_cols - 1);
+                                //
+                                //auto W_ = evaluate(prod(compute_reflection_matrix_from_cols(transpose(W), F_cols - 1, prod(W, transpose(W)), F_cols - 1), W));
+                                //conservative_resize(W_, F_cols - 1, F_cols - 1);
+                                
                                 W = eigen_eigenvectors(M); //TODO [FUTURE] It could be faster (see Fontijine's Thesis, Section 5.4.4).
                                 O = prod(F, W);            //TODO [FUTURE] It could be faster (see Fontijine's Thesis, Section 5.4.4).
                             }
@@ -118,7 +168,6 @@ namespace tbgal {
                                 O = make_zero_matrix<ScalarType, DimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime, 0>(space.dimensions(), 0);
                             }
                             --F_cols;
-
                         }
                         else {
                             ScalarType inv_r_norm = 1 / sqrt(r_sqr_norm);
@@ -142,7 +191,7 @@ namespace tbgal {
 
                             conservative_resize(O, space.dimensions(), F_cols + 1);
                             assign_block<DimensionsAtCompileTime, 1>(r, O, 0, F_cols, space.dimensions(), 1);
-
+                            
                             // W = [W -c/r_norm; 0 1/r_norm]
                             for (IndexType k = 0; k != F_cols; ++k) {
                                 coeff(c, k, 0) *= -inv_r_norm;
@@ -159,43 +208,56 @@ namespace tbgal {
                 }
 
                 return ResultingFactoredMultivectorType(space, scalar, F);
+                /**/
             }
         };
 
+        template<typename... Types>
+        struct gp_impl_reduces_to_op_impl;
+
+        template<typename... Types>
+        constexpr bool gp_impl_reduces_to_op_impl_v = gp_impl_reduces_to_op_impl<Types...>::value;
+
         template<>
-        struct GP_impl<false> {
+        struct gp_impl_reduces_to_op_impl<> {
+            constexpr static bool value = true;
+        };
 
-            template<typename FirstScalarType, typename... NextScalarTypes>
-            constexpr static decltype(auto) eval(FirstScalarType const &arg1, NextScalarTypes const &... args) noexcept {
-                return arg1 * eval(args...);
-            }
+        template<typename FirstScalarType, typename... NextTypes>
+        struct gp_impl_reduces_to_op_impl<FirstScalarType, NextTypes...> :
+            gp_impl_reduces_to_op_impl<NextTypes...> {
+        };
 
-            template<typename ScalarType>
-            constexpr static decltype(auto) eval(ScalarType const &arg) noexcept {
-                return arg;
-            }
+        template<typename FirstScalarType, typename FirstMetricSpaceType, typename... NextTypes>
+        struct gp_impl_reduces_to_op_impl<FactoredMultivector<FirstScalarType, GeometricProduct<FirstMetricSpaceType> >, NextTypes...> {
+            constexpr static bool value = false;
+        };
+
+        template<typename FirstScalarType, typename FirstMetricSpaceType, typename... NextTypes>
+        struct gp_impl_reduces_to_op_impl<FactoredMultivector<FirstScalarType, OuterProduct<FirstMetricSpaceType> >, NextTypes...> {
+            constexpr static bool value = !is_any_v<std::true_type, is_multivector_t<NextTypes>...>;
         };
 
     }
 
     template<typename FirstType, typename... NextTypes>
-    constexpr decltype(auto) GP(FirstType const &arg1, NextTypes const &... args) noexcept {
-        return detail::GP_impl<detail::is_any_v<std::true_type, is_multivector_t<FirstType>, is_multivector_t<NextTypes>...> >::eval(arg1, args...);
+    constexpr decltype(auto) gp(FirstType const &arg1, NextTypes const &... args) noexcept {
+        return std::conditional_t<detail::gp_impl_reduces_to_op_impl_v<FirstType, NextTypes...>, detail::op_impl<detail::is_any_v<std::true_type, is_multivector_t<FirstType>, is_multivector_t<NextTypes>...> >, detail::gp_impl>::eval(arg1, args...);
     }
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType>
     constexpr decltype(auto) operator*(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
-        return GP(arg1, arg2);
+        return gp(arg1, arg2);
     }
 
     template<typename FirstScsalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
     constexpr decltype(auto) operator*(FactoredMultivector<FirstScsalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) noexcept {
-        return GP(arg1, arg2);
+        return gp(arg1, arg2);
     }
 
     template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
     constexpr decltype(auto) operator*(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
-        return GP(arg1, arg2);
+        return gp(arg1, arg2);
     }
 
 }

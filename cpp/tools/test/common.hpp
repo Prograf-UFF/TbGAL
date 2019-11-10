@@ -12,57 +12,62 @@ std::uniform_real_distribution<scalar_factor_t> uniform_distribution(0, 1);
 
 template<typename FirstType, typename SecondType>
 constexpr decltype(auto) tbgal_DotProduct(FirstType const &arg1, SecondType const &arg2) noexcept {
-    return tbgal::DOT(arg1, arg2);
+    return tbgal::dot(arg1, arg2);
 }
 
 template<typename Type>
 constexpr decltype(auto) tbgal_Dualization(Type const &arg) noexcept {
-    return tbgal::DUAL(arg);
+    return tbgal::dual(arg);
 }
 
 template<typename FirstType, typename... NextTypes>
 constexpr decltype(auto) tbgal_GeometricProduct(FirstType const &arg1, NextTypes const &... args) noexcept {
-    return tbgal::GP(arg1, args...);
+    return tbgal::gp(arg1, args...);
 }
 
 template<typename FirstType, typename SecondType>
 constexpr decltype(auto) tbgal_HestenesInnerProduct(FirstType const &arg1, SecondType const &arg2) noexcept {
-    return tbgal::HIP(arg1, arg2);
+    return tbgal::hip(arg1, arg2);
 }
 
 template<typename Type>
 constexpr decltype(auto) tbgal_Inversion(Type const &arg) noexcept {
-    return tbgal::INVERSE(arg);
+    return tbgal::inverse(arg);
 }
 
 template<typename FirstType, typename SecondType>
 constexpr decltype(auto) tbgal_LeftContraction(FirstType const &arg1, SecondType const &arg2) noexcept {
-    return tbgal::LCONT(arg1, arg2);
+    return tbgal::lcont(arg1, arg2);
 }
 
 template<typename FirstType, typename... NextTypes>
 constexpr decltype(auto) tbgal_OuterProduct(FirstType const &arg1, NextTypes const &... args) noexcept {
-    return tbgal::OP(arg1, args...);
+    return tbgal::op(arg1, args...);
 }
 
 template<typename Type>
 constexpr decltype(auto) tbgal_ReverseNorm(Type const &arg) noexcept {
-    return tbgal::RNORM(arg);
+    return tbgal::rnorm(arg);
 }
 
 template<typename Type>
 constexpr decltype(auto) tbgal_Reversion(Type const &arg) noexcept {
-    return tbgal::REVERSE(arg);
+    return tbgal::reverse(arg);
 }
 
 template<typename FirstType, typename SecondType>
 constexpr decltype(auto) tbgal_RightContraction(FirstType const &arg1, SecondType const &arg2) noexcept {
-    return tbgal::RCONT(arg1, arg2);
+    return tbgal::rcont(arg1, arg2);
+}
+
+template<typename FirstType, typename SecondType>
+constexpr decltype(auto) tbgal_ScalarProduct(FirstType const &arg1, SecondType const &arg2) noexcept {
+    return tbgal::sp(arg1, arg2);
 }
 
 template<typename Type>
 constexpr decltype(auto) tbgal_SquaredReverseNorm(Type const &arg) noexcept {
-    return tbgal::RNORM_SQR(arg);
+    return tbgal::rnorm_sqr(arg);
 }
 
 template<typename Type>
@@ -77,7 +82,7 @@ constexpr decltype(auto) tbgal_UnaryPlus(Type const &arg) noexcept {
 
 template<typename Type>
 constexpr decltype(auto) tbgal_Undualization(Type const &arg) noexcept {
-    return tbgal::UNDUAL(arg);
+    return tbgal::undual(arg);
 }
 
 template<typename FirstType, typename SecondType>
@@ -150,6 +155,12 @@ constexpr decltype(auto) gatl_RightContraction(FirstType const &arg1, SecondType
     return rcont(arg1, arg2);
 }
 
+template<typename FirstType, typename SecondType>
+constexpr decltype(auto) gatl_ScalarProduct(FirstType const &arg1, SecondType const &arg2) noexcept {
+    using namespace TESTING_GATL_MODEL_NAMESPACE;
+    return sp(arg1, arg2);
+}
+
 template<typename Type>
 constexpr decltype(auto) gatl_SquaredReverseNorm(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
@@ -201,6 +212,28 @@ constexpr decltype(auto) make_gatl_vector(vector_factor_t const &arg) noexcept {
 }
 
 template<std::size_t EndIndex>
+struct _make_tbgal_multivector_using_geometric_product_impl {
+    template<typename VectorFactorType, std::size_t K, typename... Types>
+    constexpr static decltype(auto) eval(std::array<VectorFactorType, K> const &vector_factors, Types const &... factors) noexcept {
+        return _make_tbgal_multivector_using_geometric_product_impl<EndIndex - 1>::eval(vector_factors, make_tbgal_vector(vector_factors[EndIndex - 1]), factors...);
+    }
+};
+
+template<>
+struct _make_tbgal_multivector_using_geometric_product_impl<0> {
+    template<typename VectorFactorType, std::size_t K, typename... Types>
+    constexpr static decltype(auto) eval(std::array<VectorFactorType, K> const &, Types const &... factors) noexcept {
+        return tbgal::gp(factors...);
+    }
+};
+
+template<typename ScalarFactorType, typename VectorFactorType, std::size_t K>
+constexpr decltype(auto) make_tbgal_multivector_using_geometric_product(ScalarFactorType const &scalar_factor, std::array<VectorFactorType, K> const &vector_factors) noexcept {
+    using namespace TESTING_TBGAL_MODEL_NAMESPACE;
+    return _make_tbgal_multivector_using_geometric_product_impl<K>::eval(vector_factors, scalar(scalar_factor));
+}
+
+template<std::size_t EndIndex>
 struct _make_tbgal_multivector_using_outer_product_impl {
     template<typename VectorFactorType, std::size_t K, typename... Types>
     constexpr static decltype(auto) eval(std::array<VectorFactorType, K> const &vector_factors, Types const &... factors) noexcept {
@@ -212,7 +245,7 @@ template<>
 struct _make_tbgal_multivector_using_outer_product_impl<0> {
     template<typename VectorFactorType, std::size_t K, typename... Types>
     constexpr static decltype(auto) eval(std::array<VectorFactorType, K> const &, Types const &... factors) noexcept {
-        return tbgal::OP(factors...);
+        return tbgal::op(factors...);
     }
 };
 
@@ -220,6 +253,27 @@ template<typename ScalarFactorType, typename VectorFactorType, std::size_t K>
 constexpr decltype(auto) make_tbgal_multivector_using_outer_product(ScalarFactorType const &scalar_factor, std::array<VectorFactorType, K> const &vector_factors) noexcept {
     using namespace TESTING_TBGAL_MODEL_NAMESPACE;
     return _make_tbgal_multivector_using_outer_product_impl<K>::eval(vector_factors, scalar(scalar_factor));
+}
+
+template<std::size_t EndIndex>
+struct _make_gatl_multivector_using_geometric_product_impl {
+    template<typename ScalarFactorType, typename VectorFactorType, std::size_t K>
+    constexpr static decltype(auto) eval(ScalarFactorType const &scalar_factor, std::array<VectorFactorType, K> const &vector_factors) noexcept {
+        return gatl_GeometricProduct(_make_gatl_multivector_using_geometric_product_impl<EndIndex - 1>::eval(scalar_factor, vector_factors), make_gatl_vector(vector_factors[EndIndex - 1]));
+    }
+};
+
+template<>
+struct _make_gatl_multivector_using_geometric_product_impl<0> {
+    template<typename ScalarFactorType, typename VectorFactorType, std::size_t K>
+    constexpr static decltype(auto) eval(ScalarFactorType const &scalar_factor, std::array<VectorFactorType, K> const &) noexcept {
+        return scalar_factor;
+    }
+};
+
+template<typename ScalarFactorType, typename VectorFactorType, std::size_t K>
+constexpr decltype(auto) make_gatl_multivector_using_geometric_product(ScalarFactorType const &scalar_factor, std::array<VectorFactorType, K> const &vector_factors) noexcept {
+    return _make_gatl_multivector_using_geometric_product_impl<K>::eval(scalar_factor, vector_factors);
 }
 
 template<std::size_t EndIndex>
@@ -325,15 +379,22 @@ constexpr bool same_multivector(LeftType const &arg1, RightType const &arg2) noe
         std::tie(arg2_scalar_factor, arg2_vector_factors) = make_random_factors<ARG2_K>(); \
         auto tbgal_result = from_tbgal_to_gatl(tbgal_##OPERATION(make_tbgal_multivector_using_outer_product(arg1_scalar_factor, arg1_vector_factors), make_tbgal_multivector_using_outer_product(arg2_scalar_factor, arg2_vector_factors))); \
         auto gatl_result = gatl_##OPERATION(make_gatl_multivector_using_outer_product(arg1_scalar_factor, arg1_vector_factors), make_gatl_multivector_using_outer_product(arg2_scalar_factor, arg2_vector_factors)); \
-        EXPECT_TRUE(same_multivector(tbgal_result, gatl_result)); \
+        bool is_same = same_multivector(tbgal_result, gatl_result); \
+        if (!is_same) { \
+            using namespace TESTING_GATL_MODEL_NAMESPACE; \
+            std::cout << "  TbGAL = " << tbgal_result << std::endl; \
+            std::cout << "   GATL = " << gatl_result << std::endl; \
+        } \
+        EXPECT_TRUE(is_same); \
     }
 
 #define BINARY_OPERATION_TESTS(ARG1_K, ARG2_K) \
     BINARY_OPERATION_TESTS_FOR(DotProduct, ARG1_K, ARG2_K) \
-    /*TODO {DEBUG} BINARY_OPERATION_TESTS_FOR(GeometricProduct, ARG1_K, ARG2_K)*/ \
+    BINARY_OPERATION_TESTS_FOR(GeometricProduct, ARG1_K, ARG2_K) \
     BINARY_OPERATION_TESTS_FOR(HestenesInnerProduct, ARG1_K, ARG2_K) \
     BINARY_OPERATION_TESTS_FOR(LeftContraction, ARG1_K, ARG2_K) \
     BINARY_OPERATION_TESTS_FOR(OuterProduct, ARG1_K, ARG2_K) \
+    BINARY_OPERATION_TESTS_FOR(ScalarProduct, ARG1_K, ARG2_K) \
     BINARY_OPERATION_TESTS_FOR(RightContraction, ARG1_K, ARG2_K)
 
     //TODO [TEST] Addition
@@ -350,24 +411,52 @@ constexpr bool same_multivector(LeftType const &arg1, RightType const &arg2) noe
         std::tie(arg3_scalar_factor, arg3_vector_factors) = make_random_factors<ARG3_K>(); \
         auto tbgal_result = from_tbgal_to_gatl(tbgal_##OPERATION(make_tbgal_multivector_using_outer_product(arg1_scalar_factor, arg1_vector_factors), make_tbgal_multivector_using_outer_product(arg2_scalar_factor, arg2_vector_factors), make_tbgal_multivector_using_outer_product(arg3_scalar_factor, arg3_vector_factors))); \
         auto gatl_result = gatl_##OPERATION(make_gatl_multivector_using_outer_product(arg1_scalar_factor, arg1_vector_factors), make_gatl_multivector_using_outer_product(arg2_scalar_factor, arg2_vector_factors), make_gatl_multivector_using_outer_product(arg3_scalar_factor, arg3_vector_factors)); \
-        EXPECT_TRUE(same_multivector(tbgal_result, gatl_result)); \
+        bool is_same = same_multivector(tbgal_result, gatl_result); \
+        if (!is_same) { \
+            using namespace TESTING_GATL_MODEL_NAMESPACE; \
+            std::cout << "  TbGAL = " << tbgal_result << std::endl; \
+            std::cout << "   GATL = " << gatl_result << std::endl; \
+        } \
+        EXPECT_TRUE(is_same); \
     }
 
 #define TERNARY_OPERATION_TESTS(ARG1_K, ARG2_K, ARG3_K) \
-    /*TODO {DEBUG} TERNARY_OPERATION_TESTS_FOR(GeometricProduct, ARG1_K, ARG2_K, ARG3_K)*/ \
+    /*TODO TERNARY_OPERATION_TESTS_FOR(GeometricProduct, ARG1_K, ARG2_K, ARG3_K)*/ \
     TERNARY_OPERATION_TESTS_FOR(OuterProduct, ARG1_K, ARG2_K, ARG3_K)
 
     //TODO [TEST] Addition
     //TODO [TEST] Subtraction
 
 #define UNARY_OPERATION_TESTS_FOR(OPERATION, ARG_K) \
+    /*TODO [TEST] Someday*/ \
+    /*TEST(OPERATION##Test, Geometric##ARG_K) {*/ \
+    /*    scalar_factor_t scalar_factor;*/ \
+    /*    std::array<vector_factor_t, ARG_K> vector_factors;*/ \
+    /*    std::tie(scalar_factor, vector_factors) = make_random_factors<ARG_K>();*/ \
+    /*   auto tbgal_result = from_tbgal_to_gatl(tbgal_##OPERATION(make_tbgal_multivector_using_geometric_product(scalar_factor, vector_factors)));*/ \
+    /*    auto gatl_result = gatl_##OPERATION(make_gatl_multivector_using_geometric_product(scalar_factor, vector_factors));*/ \
+    /*    bool is_same = same_multivector(tbgal_result, gatl_result);*/ \
+    /*    if (!is_same) {*/ \
+    /*        using namespace TESTING_GATL_MODEL_NAMESPACE;*/ \
+    /*        std::cout << "  TbGAL = " << tbgal_result << std::endl;*/ \
+    /*        std::cout << "   GATL = " << gatl_result << std::endl;*/ \
+    /*    }*/ \
+    /*    EXPECT_TRUE(is_same);*/ \
+    /*}*/ \
+    \
     TEST(OPERATION##Test, Outer##ARG_K) { \
         scalar_factor_t scalar_factor; \
         std::array<vector_factor_t, ARG_K> vector_factors; \
         std::tie(scalar_factor, vector_factors) = make_random_factors<ARG_K>(); \
         auto tbgal_result = from_tbgal_to_gatl(tbgal_##OPERATION(make_tbgal_multivector_using_outer_product(scalar_factor, vector_factors))); \
         auto gatl_result = gatl_##OPERATION(make_gatl_multivector_using_outer_product(scalar_factor, vector_factors)); \
-        EXPECT_TRUE(same_multivector(tbgal_result, gatl_result)); \
+        bool is_same = same_multivector(tbgal_result, gatl_result); \
+        if (!is_same) { \
+            using namespace TESTING_GATL_MODEL_NAMESPACE; \
+            std::cout << "  TbGAL = " << tbgal_result << std::endl; \
+            std::cout << "   GATL = " << gatl_result << std::endl; \
+        } \
+        EXPECT_TRUE(is_same); \
     }
 
 #define UNARY_OPERATION_TESTS(ARG_K) \

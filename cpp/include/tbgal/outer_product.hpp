@@ -7,8 +7,8 @@ namespace tbgal {
 
     namespace detail {
 
-        template<bool AnyMultivectorType>
-        struct OP_impl {
+        template<bool AnyFactoredMultivector>
+        struct op_impl {
             template<typename... Types>
             constexpr static decltype(auto) eval(Types const &... args) noexcept {
                 using ResultingScalarType = common_scalar_type_t<Types...>;
@@ -41,39 +41,33 @@ namespace tbgal {
         };
 
         template<>
-        struct OP_impl<false> {
-
-            template<typename FirstScalarType, typename... NextScalarTypes>
-            constexpr static decltype(auto) eval(FirstScalarType const &arg1, NextScalarTypes const &... args) noexcept {
-                return arg1 * eval(args...);
-            }
-
-            template<typename ScalarType>
-            constexpr static decltype(auto) eval(ScalarType const &arg) noexcept {
-                return arg;
+        struct op_impl<false> {
+            template<typename... ScalarTypes>
+            constexpr static decltype(auto) eval(ScalarTypes const &... args) noexcept {
+                return multiply_scalars(args...);
             }
         };
 
     }
 
     template<typename FirstType, typename... NextTypes>
-    constexpr decltype(auto) OP(FirstType const &arg1, NextTypes const &... args) noexcept {
-        return detail::OP_impl<detail::is_any_v<std::true_type, is_multivector_t<FirstType>, is_multivector_t<NextTypes>...> >::eval(arg1, args...);
+    constexpr decltype(auto) op(FirstType const &arg1, NextTypes const &... args) noexcept {
+        return detail::op_impl<detail::is_any_v<std::true_type, is_multivector_t<FirstType>, is_multivector_t<NextTypes>...> >::eval(arg1, args...);
     }
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType>
     constexpr decltype(auto) operator^(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
-        return OP(arg1, arg2);
+        return op(arg1, arg2);
     }
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
     constexpr decltype(auto) operator^(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) noexcept {
-        return OP(arg1, arg2);
+        return op(arg1, arg2);
     }
 
     template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
     constexpr decltype(auto) operator^(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
-        return OP(arg1, arg2);
+        return op(arg1, arg2);
     }
 
 }

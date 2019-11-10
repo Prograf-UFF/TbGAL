@@ -70,24 +70,33 @@ namespace tbgal {
         template<DefaultIndexType DimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime>
         struct apply_signed_metric_impl<EuclideanMetricSpace<DimensionsAtCompileTime, MaxDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static MatrixType const & eval(EuclideanMetricSpace<DimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &, MatrixType const &factors_in_signed_metric) noexcept {
-                return factors_in_signed_metric;
+            constexpr static decltype(auto) eval(EuclideanMetricSpace<DimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &, MatrixType &&factors_in_signed_metric) noexcept {
+                return std::move(factors_in_signed_metric);
             }
         };
 
         template<DefaultIndexType DimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime>
         struct from_actual_to_signed_metric_impl<EuclideanMetricSpace<DimensionsAtCompileTime, MaxDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static MatrixType const & eval(EuclideanMetricSpace<DimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &, MatrixType const &factors_in_actual_metric) noexcept {
-                return factors_in_actual_metric;
+            constexpr static decltype(auto) eval(EuclideanMetricSpace<DimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &, MatrixType &&factors_in_actual_metric) noexcept {
+                return std::move(factors_in_actual_metric);
             }
         };
 
         template<DefaultIndexType DimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime>
         struct from_signed_to_actual_metric_impl<EuclideanMetricSpace<DimensionsAtCompileTime, MaxDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static MatrixType const & eval(EuclideanMetricSpace<DimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &, MatrixType const &factors_in_signed_metric) noexcept {
-                return factors_in_signed_metric;
+            constexpr static decltype(auto) eval(EuclideanMetricSpace<DimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &, MatrixType &&factors_in_signed_metric) noexcept {
+                return std::move(factors_in_signed_metric);
+            }
+        };
+
+        template<DefaultIndexType DimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime>
+        struct metric_factor_impl<EuclideanMetricSpace<DimensionsAtCompileTime, MaxDimensionsAtCompileTime> > {
+            template<typename MatrixType>
+            constexpr static decltype(auto) eval(EuclideanMetricSpace<DimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &, MatrixType const &) noexcept {
+                using ResultingScalarType = std::common_type_t<scalar_type_t<MatrixType>, typename EuclideanMetricSpace<DimensionsAtCompileTime, MaxDimensionsAtCompileTime>::ScalarType>;
+                return ResultingScalarType(1);
             }
         };
 

@@ -4,7 +4,7 @@
 namespace tbgal {
 
     template<typename ScalarType, typename FactoringProductType>
-    constexpr FactoredMultivector<ScalarType, FactoringProductType> UNARY_PLUS(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+    constexpr FactoredMultivector<ScalarType, FactoringProductType> unary_plus(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
         return arg;
     }
 

@@ -86,16 +86,25 @@ namespace tbgal {
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
         struct from_actual_to_signed_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors_in_actual_metric) noexcept {
-                return factors_in_actual_metric;
+            constexpr static decltype(auto) eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &, MatrixType &&factors_in_actual_metric) noexcept {
+                return std::move(factors_in_actual_metric);
             }
         };
 
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
         struct from_signed_to_actual_metric_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static MatrixType const & eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors_in_signed_metric) noexcept {
-                return factors_in_signed_metric;
+            constexpr static decltype(auto) eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &, MatrixType &&factors_in_signed_metric) noexcept {
+                return std::move(factors_in_signed_metric);
+            }
+        };
+
+        template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
+        struct metric_factor_impl<HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
+            template<typename MatrixType>
+            constexpr static decltype(auto) eval(HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &space, MatrixType const &) noexcept {
+                using ResultingScalarType = std::common_type_t<scalar_type_t<MatrixType>, typename HomogeneousMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime>::ScalarType>;
+                return ResultingScalarType(1);
             }
         };
 

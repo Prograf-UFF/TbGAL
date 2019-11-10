@@ -96,8 +96,9 @@ namespace tbgal {
         struct apply_signed_metric_impl<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
             constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors_in_signed_metric) noexcept {
+                //TODO Resolver com block
                 using IndexType = index_type_t<MatrixType>;
-                MatrixType result = factors_in_signed_metric;
+                auto result = evaluate(factors_in_signed_metric);
                 for (IndexType col = 0, col_end = cols(result), last_row = rows(result) - 1; col != col_end; ++col) {
                     coeff(result, last_row, col) *= -1;
                 }
@@ -108,16 +109,25 @@ namespace tbgal {
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
         struct from_actual_to_signed_metric_impl<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &space, MatrixType const &factors_in_actual_metric) noexcept {
-                return detail::prod(space.from_actual_to_signed_metric_, factors_in_actual_metric);
+            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &space, MatrixType &&factors_in_actual_metric) noexcept {
+                return detail::prod(space.from_actual_to_signed_metric_, std::move(factors_in_actual_metric));
             }
         };
 
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
         struct from_signed_to_actual_metric_impl<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
+            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &space, MatrixType &&factors_in_signed_metric) noexcept {
+                return detail::prod(space.from_signed_to_actual_metric_, std::move(factors_in_signed_metric));
+            }
+        };
+
+        template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
+        struct metric_factor_impl<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
+            template<typename MatrixType>
             constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &space, MatrixType const &factors_in_signed_metric) noexcept {
-                return detail::prod(space.from_signed_to_actual_metric_, factors_in_signed_metric);
+                //TODO How to implement it faster?
+                return determinant(prod(transpose(factors_in_signed_metric), apply_signed_metric(space, factors_in_signed_metric)));
             }
         };
 

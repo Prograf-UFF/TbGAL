@@ -6,6 +6,10 @@ using namespace tbgal;
 int main(int argc, char *argv[]) {
     double x, y, z;
 
+    auto func = [](auto a, auto b) {
+        return a + b;
+    };
+
     std::cout << "-- Input" << std::endl;
     std::cout << std::endl;
     std::cout << "x = "; std::cin >> x;

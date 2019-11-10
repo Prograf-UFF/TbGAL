@@ -36,13 +36,18 @@ namespace tbgal {
         }
 
         template<typename MetricSpaceType, typename MatrixType>
-        constexpr decltype(auto) from_actual_to_signed_metric(MetricSpaceType const &space, MatrixType const &factors_in_actual_metric) noexcept {
-            return from_actual_to_signed_metric_impl<MetricSpaceType>::eval(space, factors_in_actual_metric);
+        constexpr decltype(auto) from_actual_to_signed_metric(MetricSpaceType const &space, MatrixType &&factors_in_actual_metric) noexcept {
+            return from_actual_to_signed_metric_impl<MetricSpaceType>::eval(space, std::move(factors_in_actual_metric));
         }
 
         template<typename MetricSpaceType, typename MatrixType>
-        constexpr decltype(auto) from_signed_to_actual_metric(MetricSpaceType const &space, MatrixType const &factors_in_signed_metric) noexcept {
-            return from_signed_to_actual_metric_impl<MetricSpaceType>::eval(space, factors_in_signed_metric);
+        constexpr decltype(auto) from_signed_to_actual_metric(MetricSpaceType const &space, MatrixType &&factors_in_signed_metric) noexcept {
+            return from_signed_to_actual_metric_impl<MetricSpaceType>::eval(space, std::move(factors_in_signed_metric));
+        }
+
+        template<typename MetricSpaceType, typename MatrixType>
+        constexpr decltype(auto) metric_factor(MetricSpaceType const &space, MatrixType const &factors_in_signed_metric) noexcept {
+            return metric_factor_impl<MetricSpaceType>::eval(space, factors_in_signed_metric);
         }
 
     }
