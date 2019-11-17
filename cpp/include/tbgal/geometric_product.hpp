@@ -76,6 +76,9 @@ namespace tbgal {
 
                         auto const &QA = std::get<0>(qr_tuple_A);
                         auto OA = block_view<DimensionsAtCompileTime, Dynamic>(QA, 0, 0, n, r);
+
+                        //TODO Forcei aqui
+                        alpha *= determinant(prod_block<Dynamic, DimensionsAtCompileTime>(transpose(QA), 0, 0, r, n, A));
                         
                         std::cout << "--- A --------" << std::endl; print_matrix(A); std::cout << std::endl << std::endl;
                         std::cout << "--- QA -------" << std::endl; print_matrix(QA); std::cout << std::endl << std::endl;
@@ -86,6 +89,9 @@ namespace tbgal {
 
                         auto const &QB = std::get<0>(qr_tuple_B);
                         auto OB = block_view<DimensionsAtCompileTime, Dynamic>(QB, 0, 0, n, s);
+
+                        //TODO Forcei aqui
+                        alpha *= determinant(prod_block<Dynamic, DimensionsAtCompileTime>(transpose(QB), 0, 0, s, n, B));
 
                         std::cout << "--- B --------" << std::endl; print_matrix(B); std::cout << std::endl << std::endl;
                         std::cout << "--- QB -------" << std::endl; print_matrix(QB); std::cout << std::endl << std::endl;
@@ -112,11 +118,12 @@ namespace tbgal {
 
                             std::cout << "--- K --------" << std::endl; print_matrix(K); std::cout << std::endl << std::endl;
 
-                            alpha *= metric_factor(space, K); //TODO Essa é o fator de métrica que devo utilizar aqui?
-                            if (abs(alpha) <= ZeroTolerance) {
-                                A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(n, 0);
-                                return;
-                            }
+                            //TODO Mudei aqui!
+                            //alpha *= metric_factor(space, K); //TODO Essa é o fator de métrica que devo utilizar aqui?
+                            //if (abs(alpha) <= ZeroTolerance) {
+                            //    A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(n, 0);
+                            //    return;
+                            //}
 
                             FactorsMatrixType B_ = B; //TODO Mudarei aqui!
                             TwoByTwoMatrixType R;
@@ -125,80 +132,95 @@ namespace tbgal {
                             for (IndexType k = 0; k != t; ++k) {
                                 std::cout << "    --- k" << k << " -------" << std::endl << "    "; print_matrix(evaluate(block_view<DimensionsAtCompileTime, 1>(K, 0, k, n, 1))); std::cout << std::endl << std::endl;
 
-                                std::cout << "    --- A -before-" << std::endl << "    "; print_matrix(A); std::cout << std::endl << std::endl;
+                                if (r > 1) {
+                                    std::cout << "    --- A -before-" << std::endl << "    "; print_matrix(A); std::cout << std::endl << std::endl;
 
-                                x = prod_block<DimensionsAtCompileTime, 1>(transpose(A), K, 0, k, n, 1); //TODO A métrica entra aqui
-                                std::cout << "    --- x -before-" << std::endl << "    "; print_matrix(evaluate(x)); std::cout << std::endl << std::endl;
+                                    x = prod_block<DimensionsAtCompileTime, 1>(transpose(A), K, 0, k, n, 1); //TODO A métrica entra aqui
+                                    std::cout << "    --- x -before-" << std::endl << "    "; print_matrix(evaluate(x)); std::cout << std::endl << std::endl;
 
-                                for (IndexType i = 0; i != (r - 1); ++i) {
-                                    auto xi1 = coeff(x, i, 0);
-                                    if (abs(xi1) > ZeroTolerance) {
-                                        auto xi2 = coeff(x, i + 1, 0);
+                                    for (IndexType i = 0; i != (r - 1); ++i) {
+                                        auto xi1 = coeff(x, i, 0);
+                                        if (abs(xi1) > ZeroTolerance) {
+                                            auto xi2 = coeff(x, i + 1, 0);
 
-                                        auto inv_norm = 1 / sqrt(xi1 * xi1 - 2 * xi1 * xi2 * dot_product_column(A, i, A, i + 1) + xi2 * xi2); // Normalization under Euclidean metric
-                                        
-                                        auto dot11 = dot_product_column(A, i, A, i); //TODO A métrica vai aqui
-                                        auto dot12 = dot_product_column(A, i, A, i + 1); //TODO A métrica vai aqui
-                                        auto dot22 = dot_product_column(A, i + 1, A, i + 1); //TODO A métrica vai aqui
+                                            auto inv_norm = 1 / sqrt(xi1 * xi1 - 2 * xi1 * xi2 * dot_product_column(A, i, A, i + 1) + xi2 * xi2); // Normalization under Euclidean metric
+                                            
+                                            auto dot11 = dot_product_column(A, i, A, i); //TODO A métrica vai aqui
+                                            auto dot12 = dot_product_column(A, i, A, i + 1); //TODO A métrica vai aqui
+                                            auto dot22 = dot_product_column(A, i + 1, A, i + 1); //TODO A métrica vai aqui
 
-                                        auto rho11 = -inv_norm * xi2;
-                                        auto rho21 = inv_norm * xi1;
-                                        auto inv_norm_sqr_r1 = 1 / (rho11 * rho11 * dot11 + 2 * rho11 * rho21 * dot12 + rho21 * rho21 * dot22);
-                                        
-                                        coeff(R, 0, 0) = rho11;
-                                        coeff(R, 1, 0) = rho21;
-                                        coeff(R, 0, 1) = -inv_norm_sqr_r1 * (rho21 * dot22);
-                                        coeff(R, 1, 1) = inv_norm_sqr_r1 * (rho11 * dot11 + 2 * rho21 * dot12);
+                                            auto rho11 = -inv_norm * xi2;
+                                            auto rho21 = inv_norm * xi1;
+                                            auto inv_norm_sqr_r1 = 1 / (rho11 * rho11 * dot11 + 2 * rho11 * rho21 * dot12 + rho21 * rho21 * dot22);
+                                            
+                                            coeff(R, 0, 0) = rho11;
+                                            coeff(R, 1, 0) = rho21;
+                                            coeff(R, 0, 1) = -inv_norm_sqr_r1 * (rho21 * dot22);
+                                            coeff(R, 1, 1) = inv_norm_sqr_r1 * (rho11 * dot11 + 2 * rho21 * dot12);
 
-                                        assign_block<DimensionsAtCompileTime, 2>(prod_block<DimensionsAtCompileTime, 2>(A, 0, i, n, 2, R), A, 0, i, n, 2);
-                                        assign_block<2, 1>(prod_block<2, DimensionsAtCompileTime, 1>(transpose(A), i, 0, 2, K, 0, k, n, 1), x, i, 0, 2, 1); //TODO A métrica entra aqui
-                                        std::cout << "    --- A -updated" << std::endl << "    "; print_matrix(A); std::cout << std::endl << std::endl;
-                                        std::cout << "    --- x -updated" << std::endl << "    "; print_matrix(x); std::cout << std::endl << std::endl;
+                                            assign_block<DimensionsAtCompileTime, 2>(prod_block<DimensionsAtCompileTime, 2>(A, 0, i, n, 2, R), A, 0, i, n, 2);
+                                            assign_block<2, 1>(prod_block<2, DimensionsAtCompileTime, 1>(transpose(A), i, 0, 2, K, 0, k, n, 1), x, i, 0, 2, 1); //TODO A métrica entra aqui
+                                            std::cout << "    --- A -updated" << std::endl << "    "; print_matrix(A); std::cout << std::endl << std::endl;
+                                            std::cout << "    --- x -updated" << std::endl << "    "; print_matrix(x); std::cout << std::endl << std::endl;
+                                        }
                                     }
+                                    
+                                    //TODO Mudei aqui!
+                                    //alpha /= sqrt(dot_product_column(A, r - 1, A, r - 1));
                                 }
                                 
-                                alpha /= sqrt(dot_product_column(A, r - 1, A, r - 1));
+                                if (s > 1) {
+                                    std::cout << "    --- B -before-" << std::endl << "    "; print_matrix(B_); std::cout << std::endl << std::endl;
+
+                                    x = prod_block<DimensionsAtCompileTime, 1>(transpose(B_), K, 0, k, n, 1); //TODO A métrica entra aqui
+                                    std::cout << "    --- y -before-" << std::endl << "    "; print_matrix(evaluate(x)); std::cout << std::endl << std::endl;
+
+                                    for (IndexType i = s - 1; i != 0; --i) {
+                                        auto xi2 = coeff(x, i, 0);
+                                        if (abs(xi2) > ZeroTolerance) {
+                                            auto xi1 = coeff(x, i - 1, 0);
+
+                                            auto inv_norm = 1 / sqrt(xi1 * xi1 - 2 * xi1 * xi2 * dot_product_column(B_, i - 1, B_, i) + xi2 * xi2); // Normalization under Euclidean metric
+
+                                            auto dot11 = dot_product_column(B_, i - 1, B_, i - 1); //TODO A métrica vai aqui
+                                            auto dot12 = dot_product_column(B_, i - 1, B_, i); //TODO A métrica vai aqui
+                                            auto dot22 = dot_product_column(B_, i, B_, i); //TODO A métrica vai aqui
+
+                                            auto rho12 = -inv_norm * xi2;
+                                            auto rho22 = inv_norm * xi1;
+                                            auto inv_norm_sqr_r2 = 1 / (rho12 * rho12 * dot11 + 2 * rho12 * rho22 * dot12 + rho22 * rho22 * dot22);
+                                            
+                                            coeff(R, 0, 0) = -inv_norm_sqr_r2 * (rho22 * dot22);
+                                            coeff(R, 1, 0) = inv_norm_sqr_r2 * (rho12 * dot11 + 2 * rho22 * dot12);
+                                            coeff(R, 0, 1) = rho12;
+                                            coeff(R, 1, 1) = rho22;
+
+                                            assign_block<DimensionsAtCompileTime, 2>(prod_block<DimensionsAtCompileTime, 2>(B_, 0, i - 1, n, 2, R), B_, 0, i - 1, n, 2);
+                                            assign_block<2, 1>(prod_block<2, DimensionsAtCompileTime, 1>(transpose(B_), i - 1, 0, 2, K, 0, k, n, 1), x, i - 1, 0, 2, 1); //TODO A métrica entra aqui
+                                            std::cout << "    --- B -updated" << std::endl << "    "; print_matrix(B_); std::cout << std::endl << std::endl;
+                                            std::cout << "    --- y -updated" << std::endl << "    "; print_matrix(x); std::cout << std::endl << std::endl;
+                                        }
+                                    }
+
+                                    //TODO Mudei aqui
+                                    //alpha /= sqrt(dot_product_column(B_, 0, B_, 0));
+                                }
+
+                                //TODO Mudei aqui
+                                alpha *= dot_product_column(A, r - 1, B_, 0); //TODO A métrica vai aqui
+
                                 conservative_resize(A, n, --r);
                                 
-                                std::cout << "    --- B -before-" << std::endl << "    "; print_matrix(B_); std::cout << std::endl << std::endl;
-
-                                x = prod_block<DimensionsAtCompileTime, 1>(transpose(B_), K, 0, k, n, 1); //TODO A métrica entra aqui
-                                std::cout << "    --- y -before-" << std::endl << "    "; print_matrix(evaluate(x)); std::cout << std::endl << std::endl;
-
-                                for (IndexType i = s - 1; i != 0; --i) {
-                                    auto xi2 = coeff(x, i, 0);
-                                    if (abs(xi2) > ZeroTolerance) {
-                                        auto xi1 = coeff(x, i - 1, 0);
-
-                                        auto inv_norm = 1 / sqrt(xi1 * xi1 - 2 * xi1 * xi2 * dot_product_column(B_, i - 1, B_, i) + xi2 * xi2); // Normalization under Euclidean metric
-
-                                        auto dot11 = dot_product_column(B_, i - 1, B_, i - 1); //TODO A métrica vai aqui
-                                        auto dot12 = dot_product_column(B_, i - 1, B_, i); //TODO A métrica vai aqui
-                                        auto dot22 = dot_product_column(B_, i, B_, i); //TODO A métrica vai aqui
-
-                                        auto rho12 = -inv_norm * xi2;
-                                        auto rho22 = inv_norm * xi1;
-                                        auto inv_norm_sqr_r2 = 1 / (rho12 * rho12 * dot11 + 2 * rho12 * rho22 * dot12 + rho22 * rho22 * dot22);
-                                        
-                                        coeff(R, 0, 0) = -inv_norm_sqr_r2 * (rho22 * dot22);
-                                        coeff(R, 1, 0) = inv_norm_sqr_r2 * (rho12 * dot11 + 2 * rho22 * dot12);
-                                        coeff(R, 0, 1) = rho12;
-                                        coeff(R, 1, 1) = rho22;
-
-                                        assign_block<DimensionsAtCompileTime, 2>(prod_block<DimensionsAtCompileTime, 2>(B_, 0, i - 1, n, 2, R), B_, 0, i - 1, n, 2);
-                                        assign_block<2, 1>(prod_block<2, DimensionsAtCompileTime, 1>(transpose(B_), i - 1, 0, 2, K, 0, k, n, 1), x, i - 1, 0, 2, 1); //TODO A métrica entra aqui
-                                        std::cout << "    --- B -updated" << std::endl << "    "; print_matrix(B_); std::cout << std::endl << std::endl;
-                                        std::cout << "    --- y -updated" << std::endl << "    "; print_matrix(x); std::cout << std::endl << std::endl;
-                                    }
+                                if (s > 1) {
+                                    assign_block<DimensionsAtCompileTime, Dynamic>(B_, 0, 1, B_, n, s - 1);
                                 }
-
-                                alpha /= sqrt(dot_product_column(B_, 0, B_, 0));
-                                assign_block<DimensionsAtCompileTime, Dynamic>(B_, 0, 1, B_, n, s - 1);
                                 conservative_resize(B_, n, --s);
                             }
 
-                            conservative_resize(A, n, r + s);
-                            assign_block<DimensionsAtCompileTime, Dynamic>(B_, A, 0, r, n, s);
+                            if (s > 0) {
+                                conservative_resize(A, n, r + s);
+                                assign_block<DimensionsAtCompileTime, Dynamic>(B_, A, 0, r, n, s);
+                            }
                         }
                         else {
                             conservative_resize(A, n, r + s);
