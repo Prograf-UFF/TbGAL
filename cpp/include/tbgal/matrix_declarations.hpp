@@ -1,6 +1,8 @@
 #ifndef __TBGAL_MATRIX_DECLARATIONS_HPP__
 #define __TBGAL_MATRIX_DECLARATIONS_HPP__
 
+//TODO Verificar quais funções não são utilizadas.
+
 #include <cmath>
 #include <cstdint>
 #include <iostream>
@@ -122,6 +124,12 @@ namespace tbgal {
         template<typename MatrixType>
         constexpr decltype(auto) qr_orthogonal_matrix(MatrixType const &) noexcept;
 
+        template<typename MatrixType>
+        constexpr void resize(MatrixType &, DefaultIndexType, DefaultIndexType) noexcept;
+
+        template<typename MatrixType>
+        constexpr decltype(auto) singular_value_decomposition(MatrixType const &) noexcept;
+        
         template<typename MatrixType>
         constexpr decltype(auto) split_columns_and_swap(MatrixType const &, DefaultIndexType) noexcept;
 

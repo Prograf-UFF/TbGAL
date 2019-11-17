@@ -6,12 +6,15 @@
 #endif // TBGAL_USING_MATRIX_DEFINITIONS
 
 #include <cassert>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <stdexcept>
 #include <string>
 #include <tuple>
 #include <vector>
+
+//TODO Verificar quais funções não são utilizadas.
 
 #include "matrix_declarations.hpp"
 

@@ -200,6 +200,23 @@ namespace tbgal {
             return std::make_tuple(MatrixQType(qr.householderQ()), rank);
         }
 
+        template<typename MatrixType>
+        constexpr void resize(MatrixType &arg, DefaultIndexType rows, DefaultIndexType cols) noexcept {
+            arg.resize(rows, cols);
+        }
+
+        template<typename MatrixType>
+        constexpr decltype(auto) singular_value_decomposition(MatrixType const &arg) noexcept {
+            if (std::max(arg.rows(), arg.cols()) < 16) {
+                auto svd = arg.jacobiSvd(Eigen::ComputeFullU | Eigen::ComputeFullV);
+                return std::make_tuple(svd.singularValues(), svd.matrixU(), svd.matrixV(), svd.rank());
+            }
+            else {
+                auto svd = arg.bdcSvd(Eigen::ComputeFullU | Eigen::ComputeFullV);
+                return std::make_tuple(svd.singularValues(), svd.matrixU(), svd.matrixV(), svd.rank());
+            }
+        }
+
         //TODO Passar para dentro do código de dual e undual.
         template<typename MatrixType>
         constexpr decltype(auto) split_columns_and_swap(MatrixType const &input, DefaultIndexType col) noexcept {

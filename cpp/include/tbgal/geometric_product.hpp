@@ -1,6 +1,22 @@
 #ifndef __TBGAL_GEOMETRIC_PRODUCT_HPP__
 #define __TBGAL_GEOMETRIC_PRODUCT_HPP__
 
+//TODO {DEBUG}
+template<typename MatrixType>
+void print_matrix(MatrixType const &arg) {
+    std::cout << "{";
+    for (int row = 0; row != arg.rows(); ++row) {
+        if (row != 0) std::cout << ", ";
+        std::cout << "{";
+        for (int col = 0; col != arg.cols(); ++col) {
+            if (col != 0) std::cout << ", ";
+            std::cout << std::setprecision(20) << arg(row, col);
+        }
+        std::cout << "}";
+    }
+    std::cout << "}";
+}
+
 namespace tbgal {
 
     namespace detail {
@@ -8,42 +24,201 @@ namespace tbgal {
         struct gp_impl {
         private:
 
-            template<typename MetricSpaceType, typename ResultingScalarType, typename NxKMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-            constexpr static void update_factors(MetricSpaceType const &, ResultingScalarType const &, NxKMatrixType const &) noexcept {
+            template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType>
+            constexpr static void update_factors(MetricSpaceType const &, ScalarType const &, FactorsMatrixType const &) noexcept {
             }
 
-            template<typename MetricSpaceType, typename ResultingScalarType, typename NxKMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-            constexpr static void update_factors(MetricSpaceType const &space, ResultingScalarType &alpha, NxKMatrixType &A, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
-                alpha *= arg1.scalar();
+            template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename FirstScalarType, typename... NextTypes>
+            constexpr static void update_factors(MetricSpaceType const &space, ScalarType &alpha, FactorsMatrixType &A, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
+                constexpr DefaultIndexType DimensionsAtCompileTime = MetricSpaceType::DimensionsAtCompileTime;
+                constexpr DefaultIndexType MaxDimensionsAtCompileTime = MetricSpaceType::MaxDimensionsAtCompileTime;
+                constexpr ScalarType ZeroTolerance = 100 * std::numeric_limits<ScalarType>::epsilon(); //TODO Adequado?
+
+                alpha *= arg1;
+                if (abs(alpha) <= ZeroTolerance) {
+                    A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), 0);
+                    return;
+                }
+
+                update_factors(space, alpha, A, args...);
+            }
+
+            template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
+            constexpr static void update_factors(MetricSpaceType const &space, ScalarType &alpha, FactorsMatrixType &A, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
+                using IndexType = typename MetricSpaceType::IndexType;
+
+                constexpr DefaultIndexType DimensionsAtCompileTime = MetricSpaceType::DimensionsAtCompileTime;
+                constexpr DefaultIndexType MaxDimensionsAtCompileTime = MetricSpaceType::MaxDimensionsAtCompileTime;
+                constexpr ScalarType ZeroTolerance = 100 * std::numeric_limits<ScalarType>::epsilon(); //TODO Adequado?
+
+                using DynamicColumnMatrixType = matrix_type_t<ScalarType, Dynamic, 1, MaxDimensionsAtCompileTime, 1>;
+                using TwoByTwoMatrixType = matrix_type_t<ScalarType, 2, 2, 2, 2>;
                 
-                if (cols(A) != 0) {
-                    if (arg1.factors_count() != 0) {
-                        auto B = arg1.factors_in_signed_metric();
-                        //TODO [Parei aqui!] prod(transpose(B), B);
+                IndexType const n = space.dimensions();
+
+                alpha *= arg1.scalar();
+                if (abs(alpha) <= ZeroTolerance) {
+                    A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(n, 0);
+                    return;
+                }
+
+                auto const &B = arg1.factors_in_signed_metric();
+                IndexType r = cols(A);
+                IndexType s = cols(B);
+
+                if (r != 0) {
+                    if (s != 0) {
+                        std::cout << std::endl;
+                        std::cout << "**************************************************" << std::endl;
+
+                        auto qr_tuple_A = qr_orthogonal_matrix(A);
+                        assert(r == std::get<1>(qr_tuple_A));
+
+                        auto const &QA = std::get<0>(qr_tuple_A);
+                        auto OA = block_view<DimensionsAtCompileTime, Dynamic>(QA, 0, 0, n, r);
+                        
+                        std::cout << "--- A --------" << std::endl; print_matrix(A); std::cout << std::endl << std::endl;
+                        std::cout << "--- QA -------" << std::endl; print_matrix(QA); std::cout << std::endl << std::endl;
+                        std::cout << "--- OA -------" << std::endl; print_matrix(OA); std::cout << std::endl << std::endl;
+
+                        auto qr_tuple_B = qr_orthogonal_matrix(evaluate(B));
+                        assert(s == std::get<1>(qr_tuple_B));
+
+                        auto const &QB = std::get<0>(qr_tuple_B);
+                        auto OB = block_view<DimensionsAtCompileTime, Dynamic>(QB, 0, 0, n, s);
+
+                        std::cout << "--- B --------" << std::endl; print_matrix(B); std::cout << std::endl << std::endl;
+                        std::cout << "--- QB -------" << std::endl; print_matrix(QB); std::cout << std::endl << std::endl;
+                        std::cout << "--- OB -------" << std::endl; print_matrix(OB); std::cout << std::endl << std::endl;
+
+                        auto svd_tuple = singular_value_decomposition(prod(transpose(OA), OB));
+                        auto const &lambda = std::get<0>(svd_tuple);
+                        auto const &U = std::get<1>(svd_tuple);
+                        auto const &V = std::get<2>(svd_tuple);
+                        auto const rank = std::get<3>(svd_tuple);
+
+                        std::cout << "--- lambda ---" << std::endl << lambda << std::endl << std::endl;
+                        std::cout << "--- U --------" << std::endl; print_matrix(U); std::cout << std::endl << std::endl;
+                        std::cout << "--- V --------" << std::endl; print_matrix(V); std::cout << std::endl << std::endl;
+                        std::cout << "--- rank -----" << std::endl << rank << std::endl << std::endl;
+
+                        IndexType t = 0;
+                        while (t != rank && abs(abs(lambda[t]) - 1) <= ZeroTolerance) {
+                            ++t;
+                        }
+
+                        if (t > 0) {
+                            auto K = evaluate(prod_block<Dynamic, Dynamic>(OA, U, 0, 0, rows(U), t));
+
+                            std::cout << "--- K --------" << std::endl; print_matrix(K); std::cout << std::endl << std::endl;
+
+                            alpha *= metric_factor(space, K); //TODO Essa é o fator de métrica que devo utilizar aqui?
+                            if (abs(alpha) <= ZeroTolerance) {
+                                A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(n, 0);
+                                return;
+                            }
+
+                            FactorsMatrixType B_ = B; //TODO Mudarei aqui!
+                            TwoByTwoMatrixType R;
+                            DynamicColumnMatrixType x;
+                            
+                            for (IndexType k = 0; k != t; ++k) {
+                                std::cout << "    --- k" << k << " -------" << std::endl << "    "; print_matrix(evaluate(block_view<DimensionsAtCompileTime, 1>(K, 0, k, n, 1))); std::cout << std::endl << std::endl;
+
+                                std::cout << "    --- A -before-" << std::endl << "    "; print_matrix(A); std::cout << std::endl << std::endl;
+
+                                x = prod_block<DimensionsAtCompileTime, 1>(transpose(A), K, 0, k, n, 1); //TODO A métrica entra aqui
+                                std::cout << "    --- x -before-" << std::endl << "    "; print_matrix(evaluate(x)); std::cout << std::endl << std::endl;
+
+                                for (IndexType i = 0; i != (r - 1); ++i) {
+                                    auto xi1 = coeff(x, i, 0);
+                                    if (abs(xi1) > ZeroTolerance) {
+                                        auto xi2 = coeff(x, i + 1, 0);
+
+                                        auto inv_norm = 1 / sqrt(xi1 * xi1 - 2 * xi1 * xi2 * dot_product_column(A, i, A, i + 1) + xi2 * xi2); // Normalization under Euclidean metric
+                                        
+                                        auto dot11 = dot_product_column(A, i, A, i); //TODO A métrica vai aqui
+                                        auto dot12 = dot_product_column(A, i, A, i + 1); //TODO A métrica vai aqui
+                                        auto dot22 = dot_product_column(A, i + 1, A, i + 1); //TODO A métrica vai aqui
+
+                                        auto rho11 = -inv_norm * xi2;
+                                        auto rho21 = inv_norm * xi1;
+                                        auto inv_norm_sqr_r1 = 1 / (rho11 * rho11 * dot11 + 2 * rho11 * rho21 * dot12 + rho21 * rho21 * dot22);
+                                        
+                                        coeff(R, 0, 0) = rho11;
+                                        coeff(R, 1, 0) = rho21;
+                                        coeff(R, 0, 1) = -inv_norm_sqr_r1 * (rho21 * dot22);
+                                        coeff(R, 1, 1) = inv_norm_sqr_r1 * (rho11 * dot11 + 2 * rho21 * dot12);
+
+                                        assign_block<DimensionsAtCompileTime, 2>(prod_block<DimensionsAtCompileTime, 2>(A, 0, i, n, 2, R), A, 0, i, n, 2);
+                                        assign_block<2, 1>(prod_block<2, DimensionsAtCompileTime, 1>(transpose(A), i, 0, 2, K, 0, k, n, 1), x, i, 0, 2, 1); //TODO A métrica entra aqui
+                                        std::cout << "    --- A -updated" << std::endl << "    "; print_matrix(A); std::cout << std::endl << std::endl;
+                                        std::cout << "    --- x -updated" << std::endl << "    "; print_matrix(x); std::cout << std::endl << std::endl;
+                                    }
+                                }
+                                
+                                alpha /= sqrt(dot_product_column(A, r - 1, A, r - 1));
+                                conservative_resize(A, n, --r);
+                                
+                                std::cout << "    --- B -before-" << std::endl << "    "; print_matrix(B_); std::cout << std::endl << std::endl;
+
+                                x = prod_block<DimensionsAtCompileTime, 1>(transpose(B_), K, 0, k, n, 1); //TODO A métrica entra aqui
+                                std::cout << "    --- y -before-" << std::endl << "    "; print_matrix(evaluate(x)); std::cout << std::endl << std::endl;
+
+                                for (IndexType i = s - 1; i != 0; --i) {
+                                    auto xi2 = coeff(x, i, 0);
+                                    if (abs(xi2) > ZeroTolerance) {
+                                        auto xi1 = coeff(x, i - 1, 0);
+
+                                        auto inv_norm = 1 / sqrt(xi1 * xi1 - 2 * xi1 * xi2 * dot_product_column(B_, i - 1, B_, i) + xi2 * xi2); // Normalization under Euclidean metric
+
+                                        auto dot11 = dot_product_column(B_, i - 1, B_, i - 1); //TODO A métrica vai aqui
+                                        auto dot12 = dot_product_column(B_, i - 1, B_, i); //TODO A métrica vai aqui
+                                        auto dot22 = dot_product_column(B_, i, B_, i); //TODO A métrica vai aqui
+
+                                        auto rho12 = -inv_norm * xi2;
+                                        auto rho22 = inv_norm * xi1;
+                                        auto inv_norm_sqr_r2 = 1 / (rho12 * rho12 * dot11 + 2 * rho12 * rho22 * dot12 + rho22 * rho22 * dot22);
+                                        
+                                        coeff(R, 0, 0) = -inv_norm_sqr_r2 * (rho22 * dot22);
+                                        coeff(R, 1, 0) = inv_norm_sqr_r2 * (rho12 * dot11 + 2 * rho22 * dot12);
+                                        coeff(R, 0, 1) = rho12;
+                                        coeff(R, 1, 1) = rho22;
+
+                                        assign_block<DimensionsAtCompileTime, 2>(prod_block<DimensionsAtCompileTime, 2>(B_, 0, i - 1, n, 2, R), B_, 0, i - 1, n, 2);
+                                        assign_block<2, 1>(prod_block<2, DimensionsAtCompileTime, 1>(transpose(B_), i - 1, 0, 2, K, 0, k, n, 1), x, i - 1, 0, 2, 1); //TODO A métrica entra aqui
+                                        std::cout << "    --- B -updated" << std::endl << "    "; print_matrix(B_); std::cout << std::endl << std::endl;
+                                        std::cout << "    --- y -updated" << std::endl << "    "; print_matrix(x); std::cout << std::endl << std::endl;
+                                    }
+                                }
+
+                                alpha /= sqrt(dot_product_column(B_, 0, B_, 0));
+                                assign_block<DimensionsAtCompileTime, Dynamic>(B_, 0, 1, B_, n, s - 1);
+                                conservative_resize(B_, n, --s);
+                            }
+
+                            conservative_resize(A, n, r + s);
+                            assign_block<DimensionsAtCompileTime, Dynamic>(B_, A, 0, r, n, s);
+                        }
+                        else {
+                            conservative_resize(A, n, r + s);
+                            assign_block<DimensionsAtCompileTime, Dynamic>(B, A, 0, r, n, s);
+                        }
                     }
                 }
                 else {
-                    A = arg1.factors_in_signed_metric();
+                    A = B;
                 }
 
-                if (alpha != 0) {
-                    update_factors(space, alpha, A, args...);
-                }
-            }
+                std::cout << "--- C --------" << std::endl; print_matrix(A); std::cout << std::endl << std::endl;
 
-            template<typename MetricSpaceType, typename ResultingScalarType, typename NxKMatrixType, typename FirstScalarType, typename... NextTypes>
-            constexpr static void update_factors(MetricSpaceType const &space, ResultingScalarType &alpha, NxKMatrixType &A, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
-                alpha *= arg1;
-                if (alpha != 0) {
-                    update_factors(space, alpha, A, args...);
-                }
+                update_factors(space, alpha, A, args...);
             }
 
         public:
 
             template<typename... Types>
             constexpr static decltype(auto) eval(Types const &... args) noexcept {
-                /**
                 using ResultingScalarType = common_scalar_type_t<Types...>;
                 using ResultingMetricSpaceType = metric_space_type_t<Types...>;
                 using ResultingFactoringProductType = GeometricProduct<ResultingMetricSpaceType>;
@@ -52,163 +227,13 @@ namespace tbgal {
                 constexpr DefaultIndexType DimensionsAtCompileTime = ResultingMetricSpaceType::DimensionsAtCompileTime;
                 constexpr DefaultIndexType MaxDimensionsAtCompileTime = ResultingMetricSpaceType::MaxDimensionsAtCompileTime;
 
-                using MatrixNxKType = matrix_type_t<ResultingScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
-
                 auto const &space = *space_ptr(args...);
-                ScalarType alpha = 1;
-                MatrixNxKType A = make_matrix<ResultingScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), 0);
+                ResultingScalarType alpha = 1;
+                auto A = make_matrix<ResultingScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), 0);
 
                 update_factors(space, alpha, A, args...);
 
                 return ResultingFactoredMultivectorType(space, alpha, A);
-                //TODO Remover funções criadas para serem utilizadas na implementação antiga.
-                /*/
-                using ScalarType = common_scalar_type_t<Types...>;
-
-                using ResultingScalarType = ScalarType;
-                using ResultingMetricSpaceType = metric_space_type_t<Types...>;
-                using ResultingFactoringProductType = GeometricProduct<ResultingMetricSpaceType>;
-                using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
-
-                constexpr ScalarType ZeroTolerance = std::numeric_limits<ScalarType>::epsilon();
-                constexpr DefaultIndexType DimensionsAtCompileTime = ResultingMetricSpaceType::DimensionsAtCompileTime;
-                constexpr DefaultIndexType MaxDimensionsAtCompileTime = ResultingMetricSpaceType::MaxDimensionsAtCompileTime;
-
-                using MatrixNxKType = matrix_type_t<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
-                using MatrixNxDType = matrix_type_t<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, Dynamic>;
-                using MatrixKxKType = matrix_type_t<ScalarType, Dynamic, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
-                using MatrixNx1Type = matrix_type_t<ScalarType, DimensionsAtCompileTime, 1, MaxDimensionsAtCompileTime, 1>;
-                using Matrix1xNType = matrix_type_t<ScalarType, 1, DimensionsAtCompileTime, 1, MaxDimensionsAtCompileTime>;
-                using MatrixKx1Type = matrix_type_t<ScalarType, Dynamic, 1, MaxDimensionsAtCompileTime, 1>;
-                using Matrix2x2Type = matrix_type_t<ScalarType, 2, 2, 2, 2>;
-                
-                using IndexType = index_type_t<MatrixNxKType>;
-
-                auto& space = *space_ptr(args...);
-                IndexType factors_count = sum_factors_count(args...);
-
-                IndexType F_cols = first_factors_count(args...);
-                MatrixNxKType F = make_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), F_cols);
-                fill_matrix_with_first_factors(F, args...);
-
-                ScalarType scalar = multiply_scalars(args...);
-
-                if (factors_count != F_cols) {
-                    MatrixKxKType M = prod(transpose(F), F);
-                    MatrixKxKType W = eigen_eigenvectors(M);
-                    MatrixNxKType O = prod(F, W);
-
-                    IndexType A_cols = factors_count - F_cols;
-                    MatrixNxDType A = make_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, Dynamic>(space.dimensions(), A_cols);
-                    fill_matrix_with_tail_factors(A, args...);
-
-                    MatrixKx1Type c, t;
-                    Matrix2x2Type R = make_matrix<ScalarType, 2, 2, 2, 2>(2, 2);
-                    MatrixNx1Type r, a = make_matrix<ScalarType, DimensionsAtCompileTime, 1, MaxDimensionsAtCompileTime, 1>(space.dimensions(), 1);
-
-                    for (IndexType i = 0; i != A_cols; ++i) {
-                        // Take the current vector factor a and compute c as a in the coordinate system defines by the column of F, and r as the residual vector.
-                        assign_block<DimensionsAtCompileTime, 1>(A, 0, i, a, space.dimensions(), 1);
-                        c = prod(prod(W, transpose(O)), a);
-                        r = sub(a, prod(F, c));
-
-                        ScalarType r_sqr_norm = dot_product_column(r, 0, r, 0);
-
-                        // Check whether a is included in the subspace spanned by the column of F.
-                        if (r_sqr_norm <= ZeroTolerance) {
-                            for (IndexType j = 0; j != (F_cols - 1); ++j) {
-                                if (abs(coeff(c, j, 0)) > ZeroTolerance) {
-                                    // R^{curr} = [phi * alpha, gamma * c_{j}; -phi * beta, gamma * c_{j+1}]  ---  R^{curr} is in the block diagonal matrix Q^{curr} at row j and column j. The other portions of Q^{curr} define an identity matrix.
-                                    ScalarType delta = dot_product_column(F, j, F, j + 1);
-                                    ScalarType gamma = 1 / sqrt(coeff(c, j, 0) * coeff(c, j, 0) + 2 * coeff(c, j, 0) * coeff(c, j + 1, 0) * delta + coeff(c, j + 1, 0) * coeff(c, j + 1, 0));
-                                    ScalarType rho = sqrt(1 / (1 - delta * delta));
-                                    ScalarType alpha = coeff(c, j, 0) * delta * (1 + rho) + coeff(c, j + 1, 0);
-                                    ScalarType beta = coeff(c, j, 0) * rho;
-                                    ScalarType phi = 1 / sqrt(alpha * alpha - 2 * alpha * beta * delta + beta * beta);
-
-                                    coeff(R, 0, 0) = phi * alpha;
-                                    coeff(R, 0, 1) = gamma * coeff(c, j, 0);
-                                    coeff(R, 1, 0) = -phi * beta;
-                                    coeff(R, 1, 1) = gamma * coeff(c, j + 1, 0);
-
-                                    // F^{next} = F^{curr} . Q^{curr}
-                                    assign_block<DimensionsAtCompileTime, 2>(prod_block<DimensionsAtCompileTime, 2>(F, 0, j, space.dimensions(), 2, R), F, 0, j, space.dimensions(), 2);
-
-                                    // W^{next} = inv(Q^{curr}) . W^{curr}
-                                    assign_block<2, Dynamic>(prod_block<2, Dynamic>(inverse(R), W, j, 0, 2, F_cols), W, j, 0, 2, F_cols);
-
-                                    // M^{next} = transpose(Q^{curr}) . M^{curr} . Q^{curr}
-                                    assign_block<2, Dynamic>(prod_block<2, Dynamic>(transpose(R), M, j, 0, 2, F_cols), M, j, 0, 2, F_cols);
-                                    assign_block<Dynamic, 2>(prod_block<Dynamic, 2>(M, 0, j, F_cols, 2, R), M, 0, j, F_cols, 2);
-
-                                    // c^{next} = (W^{next} . transpose(O)) . a
-                                    assign_block<2, 1>(prod(prod_block<2, Dynamic>(W, j, 0, 2, F_cols, transpose(O)), a), c, j, 0, 2, 1);
-                                }
-                            }
-
-                            // Update the resulting scalar factor.
-                            scalar *= dot_product_column(F, F_cols - 1, a, 0);
-                            
-                            // Remove the rightmost last column of F and update matrices M, O, and W accordingly.
-                            conservative_resize(F, space.dimensions(), F_cols - 1);
-                            conservative_resize(M, F_cols - 1, F_cols - 1);
-                            if (F_cols > 1) {
-                                //TODO Posso simplificar as contas para obter a última linha ou coluna desejada.
-                                //auto O_ = evaluate(prod(compute_reflection_matrix_from_rows(O, F_cols - 1, prod(W, transpose(O)), F_cols - 1), O));
-                                //conservative_resize(O_, space.dimensions(), F_cols - 1);
-                                //
-                                //auto W_ = evaluate(prod(compute_reflection_matrix_from_cols(transpose(W), F_cols - 1, prod(W, transpose(W)), F_cols - 1), W));
-                                //conservative_resize(W_, F_cols - 1, F_cols - 1);
-                                
-                                W = eigen_eigenvectors(M); //TODO [FUTURE] It could be faster (see Fontijine's Thesis, Section 5.4.4).
-                                O = prod(F, W);            //TODO [FUTURE] It could be faster (see Fontijine's Thesis, Section 5.4.4).
-                            }
-                            else {
-                                W = make_zero_matrix<ScalarType, 0, 0, 0, 0>(0, 0);
-                                O = make_zero_matrix<ScalarType, DimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime, 0>(space.dimensions(), 0);
-                            }
-                            --F_cols;
-                        }
-                        else {
-                            ScalarType inv_r_norm = 1 / sqrt(r_sqr_norm);
-
-                            // M = [M (transpose(F) . a); (transpose(a) . F) 1]
-                            t = prod(transpose(F), a);
-
-                            conservative_resize(M, F_cols + 1, F_cols + 1);
-                            assign_block<Dynamic, 1>(t, M, 0, F_cols, F_cols, 1);
-                            assign_block<1, Dynamic>(transpose(t), M, F_cols, 0, 1, F_cols);
-                            coeff(M, F_cols, F_cols) = 1;
-
-                            // F = [F a]
-                            conservative_resize(F, space.dimensions(), F_cols + 1);
-                            assign_block<DimensionsAtCompileTime, 1>(a, F, 0, F_cols, space.dimensions(), 1);
-
-                            // O = [O r/r_norm]
-                            for (IndexType k = 0; k != space.dimensions(); ++k) {
-                                coeff(r, k, 0) *= inv_r_norm;
-                            }
-
-                            conservative_resize(O, space.dimensions(), F_cols + 1);
-                            assign_block<DimensionsAtCompileTime, 1>(r, O, 0, F_cols, space.dimensions(), 1);
-                            
-                            // W = [W -c/r_norm; 0 1/r_norm]
-                            for (IndexType k = 0; k != F_cols; ++k) {
-                                coeff(c, k, 0) *= -inv_r_norm;
-                            }
-
-                            conservative_resize(W, F_cols + 1, F_cols + 1);
-                            assign_block<Dynamic, 1>(c, W, 0, F_cols, F_cols, 1);
-                            assign_block<1, Dynamic>(make_zero_matrix<ScalarType, 1, Dynamic, 1, MaxDimensionsAtCompileTime>(1, F_cols), W, F_cols, 0, 1, F_cols);
-                            coeff(W, F_cols, F_cols) = inv_r_norm;
-
-                            ++F_cols;
-                        }
-                    }
-                }
-
-                return ResultingFactoredMultivectorType(space, scalar, F);
-                /**/
             }
         };
 

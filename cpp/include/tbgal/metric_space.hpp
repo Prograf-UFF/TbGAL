@@ -3,6 +3,8 @@
 
 namespace tbgal {
 
+    //TODO Verificar quais funções não são utilizadas.
+
     template<typename MetricSpaceType>
     class MetricSpace {
     public:
