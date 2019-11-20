@@ -23,7 +23,7 @@ namespace tbgal {
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
         return ResultingFactoredMultivectorType(
             arg.space(),
-            (((arg.factors_count() * (arg.factors_count() - 1)) >> 1) & 1) ? -arg.scalar() : arg.scalar(),
+            ((arg.factors_count() * (arg.factors_count() - 1)) & 2) ? -arg.scalar() : arg.scalar(),
             arg.factors_and_complement_in_signed_metric(),
             arg.factors_count()
         );

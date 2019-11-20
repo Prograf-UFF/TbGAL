@@ -1,8 +1,6 @@
 #ifndef __TBGAL_MATRIX_DECLARATIONS_HPP__
 #define __TBGAL_MATRIX_DECLARATIONS_HPP__
 
-//TODO Verificar quais funções não são utilizadas.
-
 #include <cmath>
 #include <cstdint>
 #include <iostream>
@@ -36,18 +34,6 @@ namespace tbgal {
 
         template<typename MatrixType>
         using scalar_type_t = typename scalar_type<MatrixType>::type;
-
-        template<typename MatrixType>
-        struct cols_at_compile_time;
-        
-        template<typename MatrixType>
-        constexpr auto cols_at_compile_time_v = cols_at_compile_time<MatrixType>::value;
-
-        template<typename MatrixType>
-        struct rows_at_compile_time;
-        
-        template<typename MatrixType>
-        constexpr auto rows_at_compile_time_v = rows_at_compile_time<MatrixType>::value;
 
         template<typename MatrixType>
         constexpr decltype(auto) coeff(MatrixType &, DefaultIndexType, DefaultIndexType) noexcept;
@@ -91,12 +77,10 @@ namespace tbgal {
         template<typename MatrixType>
         constexpr decltype(auto) determinant(MatrixType const &) noexcept;
         
+        //TODO Transformar em inner_product(space, ...) e euclidean_inner_product(space, ...)
         template<typename FirstMatrixType, typename SecondMatrixType>
         constexpr decltype(auto) dot_product_column(FirstMatrixType const &, DefaultIndexType, SecondMatrixType const &, DefaultIndexType) noexcept;
         
-        template<typename MatrixType>
-        constexpr decltype(auto) eigen_eigenvectors(MatrixType const &) noexcept;
-
         template<typename MatrixType>
         constexpr decltype(auto) evaluate(MatrixType const &arg) noexcept;
 
@@ -125,16 +109,7 @@ namespace tbgal {
         constexpr decltype(auto) qr_orthogonal_matrix(MatrixType const &) noexcept;
 
         template<typename MatrixType>
-        constexpr void resize(MatrixType &, DefaultIndexType, DefaultIndexType) noexcept;
-
-        template<typename MatrixType>
-        constexpr decltype(auto) singular_value_decomposition(MatrixType const &) noexcept;
-        
-        template<typename MatrixType>
         constexpr decltype(auto) split_columns_and_swap(MatrixType const &, DefaultIndexType) noexcept;
-
-        template<typename FirstMatrixType, typename SecondMatrixType>
-        constexpr decltype(auto) sub(FirstMatrixType const &, SecondMatrixType const &) noexcept;
 
         template<typename MatrixType>
         constexpr decltype(auto) transpose(MatrixType const &) noexcept;

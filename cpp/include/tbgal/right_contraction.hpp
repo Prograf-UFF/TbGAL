@@ -22,7 +22,7 @@ namespace tbgal {
         using ResultingFactoringProductType = GeometricProduct<FirstMetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
         auto resulting_scalar = arg1.scalar() * arg2;
-        if (resulting_scalar != 0) {
+        if (!is_zero(resulting_scalar)) {
             return ResultingFactoredMultivectorType(arg1.space(), resulting_scalar, arg1.factors_in_signed_metric(), arg1.factors_count());
         }
         return ResultingFactoredMultivectorType(arg1.space(), 0);
@@ -34,7 +34,7 @@ namespace tbgal {
         using ResultingFactoringProductType = OuterProduct<FirstMetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
         auto resulting_scalar = arg1.scalar() * arg2;
-        if (resulting_scalar != 0) {
+        if (!is_zero(resulting_scalar)) {
             return ResultingFactoredMultivectorType(arg1.space(), resulting_scalar, arg1.factors_and_complement_in_signed_metric(), arg1.factors_count());
         }
         return ResultingFactoredMultivectorType(arg1.space(), 0);

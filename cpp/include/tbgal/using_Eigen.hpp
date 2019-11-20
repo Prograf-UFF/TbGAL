@@ -25,16 +25,6 @@ namespace tbgal {
         };
 
         template<typename MatrixType>
-        struct cols_at_compile_time {
-            constexpr static auto value = MatrixType::ColsAtCompileTime;
-        };
-
-        template<typename MatrixType>
-        struct rows_at_compile_time {
-            constexpr static auto value = MatrixType::RowsAtCompileTime;
-        };
-
-        template<typename MatrixType>
         constexpr decltype(auto) coeff(MatrixType &arg, DefaultIndexType row, DefaultIndexType col) noexcept {
             return arg(row, col);
         }
@@ -117,13 +107,6 @@ namespace tbgal {
             return result;
         }
 
-        template<typename SelfAdjointMatrixType>
-        constexpr decltype(auto) eigen_eigenvectors(SelfAdjointMatrixType const &arg) noexcept {
-            using EigenSolverType = Eigen::SelfAdjointEigenSolver<SelfAdjointMatrixType>;
-            using EigenvectorsMatrixType = typename EigenSolverType::EigenvectorsType;
-            return EigenvectorsMatrixType(EigenSolverType(arg, Eigen::ComputeEigenvectors).eigenvectors());
-        }
-
         template<typename MatrixType, int BlockRowsAtCompileTime, int BlockColsAtCompileTime, bool InnerPanel>
         constexpr decltype(auto) evaluate(Eigen::Block<MatrixType, BlockRowsAtCompileTime, BlockColsAtCompileTime, InnerPanel> const &arg) noexcept {
             return arg.eval();
@@ -200,23 +183,6 @@ namespace tbgal {
             return std::make_tuple(MatrixQType(qr.householderQ()), rank);
         }
 
-        template<typename MatrixType>
-        constexpr void resize(MatrixType &arg, DefaultIndexType rows, DefaultIndexType cols) noexcept {
-            arg.resize(rows, cols);
-        }
-
-        template<typename MatrixType>
-        constexpr decltype(auto) singular_value_decomposition(MatrixType const &arg) noexcept {
-            if (std::max(arg.rows(), arg.cols()) < 16) {
-                auto svd = arg.jacobiSvd(Eigen::ComputeFullU | Eigen::ComputeFullV);
-                return std::make_tuple(svd.singularValues(), svd.matrixU(), svd.matrixV(), svd.rank());
-            }
-            else {
-                auto svd = arg.bdcSvd(Eigen::ComputeFullU | Eigen::ComputeFullV);
-                return std::make_tuple(svd.singularValues(), svd.matrixU(), svd.matrixV(), svd.rank());
-            }
-        }
-
         //TODO Passar para dentro do código de dual e undual.
         template<typename MatrixType>
         constexpr decltype(auto) split_columns_and_swap(MatrixType const &input, DefaultIndexType col) noexcept {
@@ -225,11 +191,6 @@ namespace tbgal {
             result.template block<ResultingMatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, 0, result.rows(), input.cols() - col) = input.template block<MatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, col, input.rows(), input.cols() - col);
             result.template block<ResultingMatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, input.cols() - col, result.rows(), col) = input.template block<MatrixType::RowsAtCompileTime, Eigen::Dynamic>(0, 0, input.rows(), col);
             return result;
-        }
-
-        template<typename FirstMatrixType, typename SecondMatrixType>
-        constexpr decltype(auto) sub(FirstMatrixType const &arg1, SecondMatrixType const &arg2) noexcept {
-            return arg1 - arg2;
         }
 
         template<typename MatrixType>

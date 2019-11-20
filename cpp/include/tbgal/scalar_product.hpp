@@ -9,7 +9,7 @@ namespace tbgal {
         using MetricSpaceType = typename FirstFactoringProductType::MetricSpaceType;
         using ResultingScalarType = std::common_type_t<FirstScalarType, SecondScalarType, typename MetricSpaceType::ScalarType>;
         if (arg1.factors_count() == arg2.factors_count()) {
-            return ((((arg1.factors_count() * (arg1.factors_count() - 1)) >> 1) & 1) ? -arg1.scalar() : arg1.scalar()) * arg2.scalar() * detail::determinant(detail::prod(detail::transpose(arg1.factors_in_signed_metric()), detail::apply_signed_metric(arg2.space(), arg2.factors_in_signed_metric())));
+            return (((arg1.factors_count() * (arg1.factors_count() - 1)) & 2) ? -arg1.scalar() : arg1.scalar()) * arg2.scalar() * detail::determinant(detail::prod(detail::transpose(arg1.factors_in_signed_metric()), detail::apply_signed_metric(arg2.space(), arg2.factors_in_signed_metric())));
         }
         return ResultingScalarType(0);
     }

@@ -1,7 +1,52 @@
 #ifndef __TBGAL_UTILS_HPP__
 #define __TBGAL_UTILS_HPP__
 
+#ifndef TBGAL_DEFAULT_FLT_TOLERANCE
+    #define TBGAL_DEFAULT_FLT_TOLERANCE 1.0e-8f
+#else
+    static_assert(TBGAL_DEFAULT_FLT_TOLERANCE >= 0, "TBGAL_DEFAULT_FLT_TOLERANCE must be a non-negative value.")
+#endif // TBGAL_DEFAULT_FLT_TOLERANCE
+
+#ifndef TBGAL_DEFAULT_DBL_TOLERANCE
+    #define TBGAL_DEFAULT_DBL_TOLERANCE 1.0e-8
+#else
+    static_assert(TBGAL_DEFAULT_DBL_TOLERANCE >= 0, "TBGAL_DEFAULT_DBL_TOLERANCE must be a non-negative value.")
+#endif // TBGAL_DEFAULT_DBL_TOLERANCE
+
 namespace tbgal {
+
+    template<typename ValueType>
+    constexpr decltype(auto) default_tolerance() noexcept;
+
+    template<>
+    constexpr decltype(auto) default_tolerance<std::float_t>() noexcept {
+        return TBGAL_DEFAULT_FLT_TOLERANCE;
+    }
+
+    template<>
+    constexpr decltype(auto) default_tolerance<std::double_t>() noexcept {
+        return TBGAL_DEFAULT_DBL_TOLERANCE;
+    }
+
+    template<>
+    constexpr decltype(auto) default_tolerance<std::int8_t>() noexcept {
+        return 0;
+    }
+
+    template<>
+    constexpr decltype(auto) default_tolerance<std::int16_t>() noexcept {
+        return 0;
+    }
+
+    template<>
+    constexpr decltype(auto) default_tolerance<std::int32_t>() noexcept {
+        return 0;
+    }
+
+    template<>
+    constexpr decltype(auto) default_tolerance<std::int64_t>() noexcept {
+        return 0;
+    }
 
     template<typename Type>
     constexpr bool is_blade(Type const &arg) noexcept {
@@ -10,13 +55,23 @@ namespace tbgal {
 
     template<typename ScalarType, typename MetricSpaceType>
     constexpr bool is_blade(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) noexcept {
-        return arg.factors_count() == 0 || arg.factors_count() == 1 || arg.scalar() == 0;
+        return arg.factors_count() == 0 || arg.factors_count() == 1 || is_zero(arg.scalar());
         //TODO [FUTURE] Implement the general case.
     }
 
     template<typename ScalarType, typename MetricSpaceType>
     constexpr bool is_blade(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) noexcept {
         return true;
+    }
+
+    template<typename ScalarType>
+    constexpr bool is_zero(ScalarType const &arg) noexcept {
+        return abs(arg) <= default_tolerance<ScalarType>();
+    }
+
+    template<typename ScalarType, typename FactoringProductType>
+    constexpr bool is_zero(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+        return arg.factors_count() == 0 && abs(arg.scalar()) <= default_tolerance<ScalarType>();
     }
 
     template<typename MetricSpaceType, typename ScalarType, typename = std::enable_if_t<!is_multivector_v<std::remove_cv_t<std::remove_reference_t<ScalarType> > > > >

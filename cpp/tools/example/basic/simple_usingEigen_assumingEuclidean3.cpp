@@ -12,12 +12,9 @@ int main(int argc, char *argv[]) {
 
     auto a_ = -gp(v, a, inverse(v));   // a_ = 0.5 * (e1 - e3)
 
-    std::cout << "       a = " << a << std::endl;
-    std::cout << "       M = " << M << std::endl;
-    std::cout << "       v = " << v << std::endl;
-    std::cout << "  inv(v) = " << inverse(v) << std::endl;
-    std::cout << "gp(v, a) = " << gp(v, a) << std::endl;
-    std::cout << "      a_ = " << a_ << std::endl; //TODO {DEBUG} There is a bug in the geometric product!
+    std::cout << "a = " << a << std::endl;
+    std::cout << "M = " << M << std::endl;
+    std::cout << "a_ = " << a_ << std::endl;
 
     return EXIT_SUCCESS;
 }
