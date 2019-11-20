@@ -360,9 +360,6 @@ constexpr bool same_multivector(LeftType const &arg1, RightType const &arg2) noe
     \
     BINARY_OPERATION_TESTS_FOR(OuterProduct, Outer, ARG1_K, Outer, ARG2_K) \
     \
-    BINARY_OPERATION_TESTS_FOR(ScalarProduct, Geometric, ARG1_K, Geometric, ARG2_K) \
-    BINARY_OPERATION_TESTS_FOR(ScalarProduct, Geometric, ARG1_K, Outer, ARG2_K) \
-    BINARY_OPERATION_TESTS_FOR(ScalarProduct, Outer, ARG1_K, Geometric, ARG2_K) \
     BINARY_OPERATION_TESTS_FOR(ScalarProduct, Outer, ARG1_K, Outer, ARG2_K) \
     \
     BINARY_OPERATION_TESTS_FOR(RightContraction, Outer, ARG1_K, Outer, ARG2_K)

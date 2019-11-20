@@ -96,17 +96,6 @@ namespace tbgal {
             return arg.determinant();
         }
         
-        template<typename FirstMatrixType, typename SecondMatrixType>
-        constexpr decltype(auto) dot_product_column(FirstMatrixType const &arg1, DefaultIndexType col1, SecondMatrixType const &arg2, DefaultIndexType col2) noexcept {
-            using ResultingScalarType = std::common_type_t<typename FirstMatrixType::Scalar, typename SecondMatrixType::Scalar>;
-            assert(arg1.rows() == arg2.rows());
-            ResultingScalarType result = 0;
-            for (Eigen::Index row = 0, rows = arg1.rows(); row != rows; ++row) {
-                result += arg1(row, col1) * arg2(row, col2);
-            }
-            return result;
-        }
-
         template<typename MatrixType, int BlockRowsAtCompileTime, int BlockColsAtCompileTime, bool InnerPanel>
         constexpr decltype(auto) evaluate(Eigen::Block<MatrixType, BlockRowsAtCompileTime, BlockColsAtCompileTime, InnerPanel> const &arg) noexcept {
             return arg.eval();

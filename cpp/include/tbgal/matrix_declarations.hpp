@@ -77,10 +77,6 @@ namespace tbgal {
         template<typename MatrixType>
         constexpr decltype(auto) determinant(MatrixType const &) noexcept;
         
-        //TODO Transformar em inner_product(space, ...) e euclidean_inner_product(space, ...)
-        template<typename FirstMatrixType, typename SecondMatrixType>
-        constexpr decltype(auto) dot_product_column(FirstMatrixType const &, DefaultIndexType, SecondMatrixType const &, DefaultIndexType) noexcept;
-        
         template<typename MatrixType>
         constexpr decltype(auto) evaluate(MatrixType const &arg) noexcept;
 
