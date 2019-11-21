@@ -69,7 +69,7 @@ namespace tbgal {
         constexpr void assign_block(SourceType const &, TargetMatrixType &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
 
         template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename MatrixType>
-        constexpr decltype(auto) block_view(MatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
+        constexpr decltype(auto) block(MatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
 
         template<typename MatrixType>
         constexpr void conservative_resize(MatrixType &, DefaultIndexType, DefaultIndexType) noexcept;
@@ -103,6 +103,9 @@ namespace tbgal {
 
         template<typename MatrixType>
         constexpr decltype(auto) qr_orthogonal_matrix(MatrixType const &) noexcept;
+
+        template<typename MatrixType>
+        constexpr decltype(auto) reverse_columns(MatrixType const &) noexcept;
 
         template<typename MatrixType>
         constexpr decltype(auto) split_columns_and_swap(MatrixType const &, DefaultIndexType) noexcept;

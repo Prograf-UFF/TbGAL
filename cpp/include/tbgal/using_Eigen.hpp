@@ -82,7 +82,7 @@ namespace tbgal {
         }
 
         template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename MatrixType>
-        constexpr decltype(auto) block_view(MatrixType const &arg, DefaultIndexType start_row, DefaultIndexType start_col, DefaultIndexType block_rows, DefaultIndexType block_cols) noexcept {
+        constexpr decltype(auto) block(MatrixType const &arg, DefaultIndexType start_row, DefaultIndexType start_col, DefaultIndexType block_rows, DefaultIndexType block_cols) noexcept {
             return arg.template block<BlockRowsAtCompileTime, BlockColsAtCompileTime>(start_row, start_col, block_rows, block_cols);
         }
 
@@ -170,6 +170,11 @@ namespace tbgal {
             Eigen::ColPivHouseholderQR<MatrixType> qr(arg);
             auto rank = qr.rank();
             return std::make_tuple(MatrixQType(qr.householderQ()), rank);
+        }
+
+        template<typename MatrixType>
+        constexpr decltype(auto) reverse_columns(MatrixType const &arg) noexcept {
+            return Eigen::Reverse<MatrixType, Eigen::Horizontal>(arg);
         }
 
         //TODO Passar para dentro do código de dual e undual.

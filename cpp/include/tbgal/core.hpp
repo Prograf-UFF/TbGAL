@@ -57,7 +57,7 @@ namespace tbgal {
         constexpr bool is_iterator_v = is_iterator<T>::value;
 
         struct gp_impl;
-        template<bool AnyFactoredMultivector> struct op_impl;
+        struct op_impl;
 
         template<typename MetricSpaceType> struct apply_signed_metric_impl;
         template<typename MetricSpaceType> struct from_actual_to_signed_metric_impl;

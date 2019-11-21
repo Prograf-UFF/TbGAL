@@ -77,7 +77,7 @@ namespace tbgal {
         FactorsMatrixType factors_in_signed_metric_;
 
         friend struct detail::gp_impl;
-        template<bool AnyFactoredMultivector> friend struct detail::op_impl;
+        friend struct detail::op_impl;
 
         template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType> friend constexpr decltype(auto) addition(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &) noexcept;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) inverse(FactoredMultivector<SomeScalarType, GeometricProduct<SomeMetricSpaceType> > const &) noexcept;
@@ -138,7 +138,7 @@ namespace tbgal {
         }
 
         constexpr decltype(auto) factors_in_signed_metric() const noexcept {
-            return detail::block_view<MetricSpaceType::DimensionsAtCompileTime, Dynamic>(factors_and_complement_in_signed_metric_, 0, 0, space_.dimensions(), factors_count_);
+            return detail::block<MetricSpaceType::DimensionsAtCompileTime, Dynamic>(factors_and_complement_in_signed_metric_, 0, 0, space_.dimensions(), factors_count_);
         }
 
         constexpr auto const & factors_and_complement_in_signed_metric() const noexcept {
@@ -169,7 +169,7 @@ namespace tbgal {
         IndexType factors_count_;
 
         friend struct detail::gp_impl;
-        template<bool AnyFactoredMultivector> friend struct detail::op_impl;
+        friend struct detail::op_impl;
 
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend decltype(auto) e(SomeMetricSpaceType const &, DefaultIndexType) noexcept;
         template<typename SomeMetricSpaceType, typename SomeScalarType, typename> friend decltype(auto) scalar(SomeMetricSpaceType const &, SomeScalarType const &) noexcept;

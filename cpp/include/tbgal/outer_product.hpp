@@ -7,32 +7,26 @@ namespace tbgal {
 
     namespace detail {
 
-        //TODO Pode ser embutido desde que encontre uma solução packed para *
-        constexpr decltype(auto) multiply_scalars() noexcept {
-            return 1;
-        }
-
-        template<typename ScalarType, typename FactoringProductType>
-        constexpr decltype(auto) multiply_scalars(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
-            return arg.scalar();
-        }
-
         template<typename ScalarType>
-        constexpr decltype(auto) multiply_scalars(ScalarType const &arg) noexcept {
-            return arg;
-        }
-
-        template<typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-        constexpr decltype(auto) multiply_scalars(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
-            return arg1.scalar() * multiply_scalars(args...);
-        }
-
-        template<typename FirstScalarType, typename... NextTypes>
-        constexpr decltype(auto) multiply_scalars(FirstScalarType const &arg1, NextTypes const &... args) noexcept {
-            return arg1 * multiply_scalars(args...);
+        constexpr decltype(auto) _op_impl_get_factors_count(ScalarType const &arg) noexcept {
+            return 0;
         }
         
-        template<bool AnyFactoredMultivector>
+        template<typename ScalarType, typename FactoringProductType>
+        constexpr decltype(auto) _op_impl_get_factors_count(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+            return arg.factors_count();
+        }
+        
+        template<typename ScalarType>
+        constexpr decltype(auto) _op_impl_get_scalar(ScalarType const &arg) noexcept {
+            return arg;
+        }
+        
+        template<typename ScalarType, typename FactoringProductType>
+        constexpr decltype(auto) _op_impl_get_scalar(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+            return arg.scalar();
+        }
+        
         struct op_impl {
         private:
 
@@ -83,33 +77,6 @@ namespace tbgal {
                 return fill_matrix(result, args...);
             }
 
-            //TODO Pode ser embutido, desde de que encontre uma versão packed para +
-            constexpr static decltype(auto) sum_factors_count() noexcept {
-                return 0;
-            }
-
-            template<typename ScalarType, typename FactoringProductType>
-            constexpr static decltype(auto) sum_factors_count(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
-                assert(is_blade(arg));
-                return arg.factors_count();
-            }
-
-            template<typename ScalarType>
-            constexpr static decltype(auto) sum_factors_count(ScalarType const &) noexcept {
-                return 0;
-            }
-
-            template<typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-            constexpr static decltype(auto) sum_factors_count(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
-                assert(is_blade(arg1));
-                return arg1.factors_count() + sum_factors_count(args...);
-            }
-
-            template<typename FirstScalarType, typename... NextTypes>
-            constexpr static decltype(auto) sum_factors_count(FirstScalarType const &, NextTypes const &... args) noexcept {
-                return sum_factors_count(args...);
-            }
-
         public:
 
             template<typename... Types>
@@ -119,9 +86,9 @@ namespace tbgal {
                 using ResultingFactoringProductType = OuterProduct<ResultingMetricSpaceType>;
                 using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
                 auto& space = *space_ptr(args...);
-                auto factors_count = sum_factors_count(args...);
+                auto factors_count = (_op_impl_get_factors_count(args) + ... + 0);
                 if (factors_count <= space.dimensions()) {
-                    auto prod_scalar = multiply_scalars(args...);
+                    auto prod_scalar = (_op_impl_get_scalar(args) * ... * 1);
                     if (factors_count > 0 && !is_zero(prod_scalar)) {
                         auto input = make_matrix<ResultingScalarType, ResultingMetricSpaceType::DimensionsAtCompileTime, Dynamic, ResultingMetricSpaceType::MaxDimensionsAtCompileTime, Dynamic>(space.dimensions(), factors_count);
                         auto qr_tuple = qr_orthogonal_matrix(std::get<0>(fill_matrix(input, args...)));
@@ -143,19 +110,11 @@ namespace tbgal {
             }
         };
 
-        template<>
-        struct op_impl<false> {
-            template<typename... ScalarTypes>
-            constexpr static decltype(auto) eval(ScalarTypes const &... args) noexcept {
-                return multiply_scalars(args...);
-            }
-        };
-
     }
 
     template<typename FirstType, typename... NextTypes>
     constexpr decltype(auto) op(FirstType const &arg1, NextTypes const &... args) noexcept {
-        return detail::op_impl<detail::is_any_v<std::true_type, is_multivector_t<FirstType>, is_multivector_t<NextTypes>...> >::eval(arg1, args...);
+        return detail::op_impl::eval(arg1, args...);
     }
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType>

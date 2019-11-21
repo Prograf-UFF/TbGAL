@@ -8,12 +8,7 @@ namespace tbgal {
         using ResultingScalarType = std::common_type_t<ScalarType, typename MetricSpaceType::ScalarType>;
         using ResultingFactoringProductType = GeometricProduct<MetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
-        using IndexType = typename ResultingFactoredMultivectorType::IndexType;
-        auto resulting_factors = detail::make_matrix<ResultingScalarType, MetricSpaceType::DimensionsAtCompileTime, Dynamic, MetricSpaceType::MaxDimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(arg.space().dimensions(), arg.factors_count());
-        for (IndexType col = 0; col != arg.factors_count(); ++col) {
-            detail::assign_block<MetricSpaceType::DimensionsAtCompileTime, 1>(arg.factors_in_signed_metric(), 0, col, resulting_factors, 0, arg.factors_count() - (col + 1), arg.space().dimensions(), 1);
-        }
-        return ResultingFactoredMultivectorType(arg.space(), 1 / (arg.scalar() * detail::metric_factor(arg.space(), arg.factors_in_signed_metric())), resulting_factors);
+        return ResultingFactoredMultivectorType(arg.space(), 1 / (arg.scalar() * detail::metric_factor(arg.space(), arg.factors_in_signed_metric())), detail::reverse_columns(arg.factors_in_signed_metric()));
     }
 
     template<typename ScalarType, typename MetricSpaceType>

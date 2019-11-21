@@ -95,11 +95,11 @@ namespace tbgal {
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
         struct apply_signed_metric_impl<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &, MatrixType const &factors_in_signed_metric) noexcept {
+            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &space, MatrixType const &factors_in_signed_metric) noexcept {
                 //TODO Resolver com block
                 using IndexType = index_type_t<MatrixType>;
                 auto result = evaluate(factors_in_signed_metric);
-                for (IndexType col = 0, col_end = cols(result), last_row = rows(result) - 1; col != col_end; ++col) {
+                for (IndexType col = 0, col_end = cols(result), last_row = space.dimensions() - 1; col != col_end; ++col) {
                     coeff(result, last_row, col) *= -1;
                 }
                 return result;
@@ -126,7 +126,6 @@ namespace tbgal {
         struct metric_factor_impl<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
             constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &space, MatrixType const &factors_in_signed_metric) noexcept {
-                //TODO How to implement it faster?
                 return determinant(prod(transpose(factors_in_signed_metric), apply_signed_metric(space, factors_in_signed_metric)));
             }
         };

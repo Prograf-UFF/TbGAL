@@ -36,7 +36,7 @@ namespace tbgal {
                 IndexType const n = space.dimensions();
 
                 auto column = [&](auto const &F, IndexType const col) -> auto {
-                    return block_view<DimensionsAtCompileTime, 1>(F, 0, col, n, 1);
+                    return block<DimensionsAtCompileTime, 1>(F, 0, col, n, 1);
                 };
 
                 auto inner_product = [&](auto const &F1, IndexType const col1, auto const &F2, IndexType const col2) -> auto {
@@ -171,7 +171,7 @@ namespace tbgal {
 
     template<typename FirstType, typename... NextTypes>
     constexpr decltype(auto) gp(FirstType const &arg1, NextTypes const &... args) noexcept {
-        return std::conditional_t<detail::gp_impl_reduces_to_op_impl_v<FirstType, NextTypes...>, detail::op_impl<detail::is_any_v<std::true_type, is_multivector_t<FirstType>, is_multivector_t<NextTypes>...> >, detail::gp_impl>::eval(arg1, args...);
+        return std::conditional_t<detail::gp_impl_reduces_to_op_impl_v<FirstType, NextTypes...>, detail::op_impl, detail::gp_impl>::eval(arg1, args...);
     }
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType>
