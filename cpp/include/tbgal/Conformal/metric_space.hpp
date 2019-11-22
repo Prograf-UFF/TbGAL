@@ -4,29 +4,27 @@
 namespace tbgal {
 
     template<DefaultIndexType BaseSpaceDimensionsAtCompileTime_, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime_ = BaseSpaceDimensionsAtCompileTime_>
-    class ConformalMetricSpace : public MetricSpace<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime_, MaxBaseSpaceDimensionsAtCompileTime_> > {
+    class ConformalMetricSpace : public BaseSignedMetricSpace<BaseSpaceDimensionsAtCompileTime_ != Dynamic ? BaseSpaceDimensionsAtCompileTime_ + 1 : Dynamic, 1, MaxBaseSpaceDimensionsAtCompileTime_ != Dynamic ? MaxBaseSpaceDimensionsAtCompileTime_ + 2 : Dynamic> {
     private:
 
-        static_assert(BaseSpaceDimensionsAtCompileTime_ == Dynamic || (BaseSpaceDimensionsAtCompileTime_ >= 0 && BaseSpaceDimensionsAtCompileTime_ == MaxBaseSpaceDimensionsAtCompileTime_), "Invalid number of base dimensions.");
-
-        using Super = MetricSpace<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime_, MaxBaseSpaceDimensionsAtCompileTime_> >;
+        using Super = BaseSignedMetricSpace<BaseSpaceDimensionsAtCompileTime_ != Dynamic ? BaseSpaceDimensionsAtCompileTime_ + 1 : Dynamic, 1, MaxBaseSpaceDimensionsAtCompileTime_ != Dynamic ? MaxBaseSpaceDimensionsAtCompileTime_ + 2 : Dynamic>;
     
     public:
 
         using IndexType = typename Super::IndexType;
-        using ScalarType = DefaultScalarType;
+        using ScalarType = typename Super::ScalarType;
+
+        constexpr static IndexType DimensionsAtCompileTime = Super::DimensionsAtCompileTime;
+        constexpr static IndexType MaxDimensionsAtCompileTime = Super::MaxDimensionsAtCompileTime;
 
         constexpr static IndexType BaseSpaceDimensionsAtCompileTime = BaseSpaceDimensionsAtCompileTime_;
         constexpr static IndexType MaxBaseSpaceDimensionsAtCompileTime = MaxBaseSpaceDimensionsAtCompileTime_;
-
-        constexpr static IndexType DimensionsAtCompileTime = (BaseSpaceDimensionsAtCompileTime != Dynamic) ? (BaseSpaceDimensionsAtCompileTime + 2) : Dynamic;
-        constexpr static IndexType MaxDimensionsAtCompileTime = (MaxBaseSpaceDimensionsAtCompileTime != Dynamic) ? (MaxBaseSpaceDimensionsAtCompileTime + 2) : Dynamic;
 
         inline ConformalMetricSpace(ConformalMetricSpace const &) = default;
         inline ConformalMetricSpace(ConformalMetricSpace &&) = default;
 
         inline ConformalMetricSpace(IndexType base_space_dimensions) noexcept :
-            Super(),
+            Super(base_space_dimensions + 1, 1),
             basis_vectors_str_(),
             from_actual_to_signed_metric_(),
             from_signed_to_actual_metric_() {
@@ -45,21 +43,17 @@ namespace tbgal {
         }
         
         inline IndexType base_space_dimensions() const noexcept {
-            return basis_vectors_str_.size() - 2;
-        }
-
-        inline IndexType dimensions() const noexcept override {
-            return basis_vectors_str_.size();
+            return Super::dimensions() - 2;
         }
 
         inline void set_base_space_dimensions(IndexType base_space_dimensions) noexcept {
+            Super::set_dimensions(base_space_dimensions + 1, 1);
             update_basis_vectors_str(base_space_dimensions);
         }
 
     private:
 
         inline void update_basis_vectors_str(IndexType base_space_dimensions) noexcept {
-            assert(base_space_dimensions >= 0 && (BaseSpaceDimensionsAtCompileTime == Dynamic || base_space_dimensions == BaseSpaceDimensionsAtCompileTime) && (MaxBaseSpaceDimensionsAtCompileTime == Dynamic || base_space_dimensions <= MaxBaseSpaceDimensionsAtCompileTime));
             basis_vectors_str_.resize(base_space_dimensions + 2);
             for (IndexType ind = 0; ind != base_space_dimensions; ++ind) {
                 basis_vectors_str_[ind] = "e" + std::to_string(ind + 1);
@@ -81,30 +75,11 @@ namespace tbgal {
         detail::matrix_type_t<ScalarType, DimensionsAtCompileTime, DimensionsAtCompileTime, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime> from_actual_to_signed_metric_;
         detail::matrix_type_t<ScalarType, DimensionsAtCompileTime, DimensionsAtCompileTime, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime> from_signed_to_actual_metric_;
 
-        template<DefaultIndexType SomeBaseSpaceDimensionsAtCompileTime, DefaultIndexType SomeMaxBaseSpaceDimensionsAtCompileTime> friend struct detail::from_actual_to_signed_metric_impl;
-        template<DefaultIndexType SomeBaseSpaceDimensionsAtCompileTime, DefaultIndexType SomeMaxBaseSpaceDimensionsAtCompileTime> friend struct detail::from_signed_to_actual_metric_impl;
-    };
-
-    template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
-    struct is_metric_space<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > :
-        std::true_type {
+        template<typename SomeMetricSpaceType> friend struct detail::from_actual_to_signed_metric_impl;
+        template<typename SomeMetricSpaceType> friend struct detail::from_signed_to_actual_metric_impl;
     };
 
     namespace detail {
-
-        template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
-        struct apply_signed_metric_impl<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
-            template<typename MatrixType>
-            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &space, MatrixType const &factors_in_signed_metric) noexcept {
-                //TODO Resolver com block
-                using IndexType = index_type_t<MatrixType>;
-                auto result = evaluate(factors_in_signed_metric);
-                for (IndexType col = 0, col_end = cols(result), last_row = space.dimensions() - 1; col != col_end; ++col) {
-                    coeff(result, last_row, col) *= -1;
-                }
-                return result;
-            }
-        };
 
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
         struct from_actual_to_signed_metric_impl<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
@@ -119,14 +94,6 @@ namespace tbgal {
             template<typename MatrixType>
             constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &space, MatrixType &&factors_in_signed_metric) noexcept {
                 return detail::prod(space.from_signed_to_actual_metric_, std::move(factors_in_signed_metric));
-            }
-        };
-
-        template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
-        struct metric_factor_impl<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
-            template<typename MatrixType>
-            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &space, MatrixType const &factors_in_signed_metric) noexcept {
-                return determinant(prod(transpose(factors_in_signed_metric), apply_signed_metric(space, factors_in_signed_metric)));
             }
         };
 

@@ -44,17 +44,26 @@ namespace tbgal {
         template<typename MatrixType>
         constexpr decltype(auto) rows(MatrixType const &) noexcept;
 
+        template<typename ScalarType, DefaultIndexType SizeAtCompileTime, DefaultIndexType MaxSizeAtCompileTime>
+        struct diagonal_matrix_type;
+
+        template<typename ScalarType, DefaultIndexType SizeAtCompileTime, DefaultIndexType MaxSizeAtCompileTime>
+        using diagonal_matrix_type_t = typename diagonal_matrix_type<ScalarType, SizeAtCompileTime, MaxSizeAtCompileTime>::type;
+
         template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, DefaultIndexType MaxColsAtCompileTime>
         struct matrix_type;
 
         template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, DefaultIndexType MaxColsAtCompileTime>
         using matrix_type_t = typename matrix_type<ScalarType, RowsAtCompileTime, ColsAtCompileTime, MaxRowsAtCompileTime, MaxColsAtCompileTime>::type;
 
-        template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, DefaultIndexType MaxColsAtCompileTime>
-        constexpr decltype(auto) make_matrix(DefaultIndexType, DefaultIndexType) noexcept;
+        template<typename ScalarType, DefaultIndexType SizeAtCompileTime, DefaultIndexType MaxSizeAtCompileTime>
+        constexpr decltype(auto) make_diagonal_matrix(DefaultIndexType) noexcept;
 
         template<typename ScalarType, DefaultIndexType SizeAtCompileTime, DefaultIndexType MaxSizeAtCompileTime>
         constexpr decltype(auto) make_identity_matrix(DefaultIndexType) noexcept;
+
+        template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, DefaultIndexType MaxColsAtCompileTime>
+        constexpr decltype(auto) make_matrix(DefaultIndexType, DefaultIndexType) noexcept;
 
         template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, DefaultIndexType MaxColsAtCompileTime>
         constexpr decltype(auto) make_zero_matrix(DefaultIndexType, DefaultIndexType) noexcept;
@@ -76,6 +85,9 @@ namespace tbgal {
 
         template<typename MatrixType>
         constexpr decltype(auto) determinant(MatrixType const &) noexcept;
+        
+        template<typename MatrixType>
+        constexpr decltype(auto) es_eigenvectors_matrix(MatrixType const &arg) noexcept;
         
         template<typename MatrixType>
         constexpr decltype(auto) evaluate(MatrixType const &arg) noexcept;

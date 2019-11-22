@@ -21,12 +21,18 @@ namespace tbgal {
 
         template<typename MatrixType>
         struct scalar_type {
-            using type = typename MatrixType::Scalar;
+            using type = typename std::remove_cv_t<std::remove_reference_t<MatrixType> >::Scalar;
         };
 
         template<typename MatrixType>
         constexpr decltype(auto) coeff(MatrixType &arg, DefaultIndexType row, DefaultIndexType col) noexcept {
             return arg(row, col);
+        }
+
+        template<typename ScalarType, int SizeAtCompileTime, int MaxSizeAtCompileTime>
+        constexpr decltype(auto) coeff(Eigen::DiagonalMatrix<ScalarType, SizeAtCompileTime, MaxSizeAtCompileTime> &arg, DefaultIndexType row, DefaultIndexType col) noexcept {
+            assert(row == col);
+            return arg.diagonal()[row];
         }
 
         template<typename MatrixType>
@@ -38,6 +44,15 @@ namespace tbgal {
         constexpr decltype(auto) rows(MatrixType const &arg) noexcept {
             return arg.rows();
         }
+
+        template<typename ScalarType, DefaultIndexType SizeAtCompileTime, DefaultIndexType MaxSizeAtCompileTime>
+        struct diagonal_matrix_type {
+            using type = Eigen::DiagonalMatrix<
+                    ScalarType,
+                    SizeAtCompileTime,
+                    MaxSizeAtCompileTime
+                >;
+        };
 
         template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, DefaultIndexType MaxColsAtCompileTime>
         struct matrix_type {
@@ -51,9 +66,9 @@ namespace tbgal {
                 >;
         };
 
-        template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, DefaultIndexType MaxColsAtCompileTime>
-        constexpr decltype(auto) make_matrix(DefaultIndexType rows, DefaultIndexType cols) noexcept {
-            return matrix_type_t<ScalarType, RowsAtCompileTime, ColsAtCompileTime, MaxRowsAtCompileTime, MaxColsAtCompileTime>(rows, cols);
+        template<typename ScalarType, DefaultIndexType SizeAtCompileTime, DefaultIndexType MaxSizeAtCompileTime>
+        constexpr decltype(auto) make_diagonal_matrix(DefaultIndexType size) noexcept {
+            return diagonal_matrix_type_t<ScalarType, SizeAtCompileTime, MaxSizeAtCompileTime>(size);
         }
         
         template<typename ScalarType, DefaultIndexType SizeAtCompileTime, DefaultIndexType MaxSizeAtCompileTime>
@@ -61,6 +76,11 @@ namespace tbgal {
             return matrix_type_t<ScalarType, SizeAtCompileTime, SizeAtCompileTime, MaxSizeAtCompileTime, MaxSizeAtCompileTime>::Identity(size, size);
         }
 
+        template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, DefaultIndexType MaxColsAtCompileTime>
+        constexpr decltype(auto) make_matrix(DefaultIndexType rows, DefaultIndexType cols) noexcept {
+            return matrix_type_t<ScalarType, RowsAtCompileTime, ColsAtCompileTime, MaxRowsAtCompileTime, MaxColsAtCompileTime>(rows, cols);
+        }
+        
         template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, DefaultIndexType MaxColsAtCompileTime>
         constexpr decltype(auto) make_zero_matrix(DefaultIndexType rows, DefaultIndexType cols) noexcept {
             return matrix_type_t<ScalarType, RowsAtCompileTime, ColsAtCompileTime, MaxRowsAtCompileTime, MaxColsAtCompileTime>::Zero(rows, cols);
@@ -96,6 +116,13 @@ namespace tbgal {
             return arg.determinant();
         }
         
+        template<typename MatrixType>
+        constexpr decltype(auto) es_eigenvectors_matrix(MatrixType const &arg) noexcept {
+            using EigenSolverType = Eigen::SelfAdjointEigenSolver<MatrixType>;
+            using EigenVectorsMatrixType = typename EigenSolverType::EigenvectorsType;
+            return EigenVectorsMatrixType(EigenSolverType(arg, Eigen::ComputeEigenvectors).eigenvectors());
+        }
+
         template<typename MatrixType, int BlockRowsAtCompileTime, int BlockColsAtCompileTime, bool InnerPanel>
         constexpr decltype(auto) evaluate(Eigen::Block<MatrixType, BlockRowsAtCompileTime, BlockColsAtCompileTime, InnerPanel> const &arg) noexcept {
             return arg.eval();

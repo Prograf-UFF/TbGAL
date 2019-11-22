@@ -34,7 +34,6 @@ namespace tbgal {
         std::cout << "}";
     }
 
-    template<typename MetricSpaceType> class MetricSpace;
     template<typename ScalarType, typename FactoringProductType> class FactoredMultivector;
 
     template<typename MetricSpaceType> struct GeometricProduct;
@@ -59,10 +58,8 @@ namespace tbgal {
         struct gp_impl;
         struct op_impl;
 
-        template<typename MetricSpaceType> struct apply_signed_metric_impl;
         template<typename MetricSpaceType> struct from_actual_to_signed_metric_impl;
         template<typename MetricSpaceType> struct from_signed_to_actual_metric_impl;
-        template<typename MetricSpaceType> struct metric_factor_impl;
 
         template<typename FirstType, typename... NextTypes>
         struct common_scalar_type;
@@ -146,28 +143,6 @@ namespace tbgal {
     }
 
     template<typename Type>
-    struct is_factoring_product :
-        std::false_type {
-    };
-
-    template<typename Type>
-    using is_factoring_product_t = typename is_factoring_product<Type>::type;
-
-    template<typename Type>
-    constexpr bool is_factoring_product_v = is_factoring_product<Type>::value;
-
-    template<typename Type>
-    struct is_metric_space :
-        std::false_type {
-    };
-
-    template<typename Type>
-    using is_metric_space_t = typename is_metric_space<Type>::type;
-
-    template<typename Type>
-    constexpr bool is_metric_space_v = is_metric_space<Type>::value;
-
-    template<typename Type>
     struct is_multivector :
         std::false_type {
     };
@@ -220,5 +195,8 @@ namespace tbgal {
 
 #include "Homogeneous/metric_space.hpp"
 #include "Homogeneous/macro.hpp"
+
+#include "Signed/metric_space.hpp"
+#include "Signed/macro.hpp"
 
 #endif // __TBGAL_CORE_HPP__

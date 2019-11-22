@@ -32,7 +32,13 @@ constexpr decltype(auto) tbgal_HestenesInnerProduct(FirstType const &arg1, Secon
 
 template<typename Type>
 constexpr decltype(auto) tbgal_Inversion(Type const &arg) noexcept {
-    return tbgal::inverse(arg);
+    using ResultingType = decltype(tbgal::inverse(arg));
+    if (!tbgal::is_zero(tbgal::rnorm_sqr(arg))) {
+        return tbgal::inverse(arg);
+    }
+    else {
+        return ResultingType(arg.space());
+    }
 }
 
 template<typename FirstType, typename SecondType>
@@ -43,11 +49,6 @@ constexpr decltype(auto) tbgal_LeftContraction(FirstType const &arg1, SecondType
 template<typename FirstType, typename... NextTypes>
 constexpr decltype(auto) tbgal_OuterProduct(FirstType const &arg1, NextTypes const &... args) noexcept {
     return tbgal::op(arg1, args...);
-}
-
-template<typename Type>
-constexpr decltype(auto) tbgal_ReverseNorm(Type const &arg) noexcept {
-    return tbgal::rnorm(arg);
 }
 
 template<typename Type>
@@ -117,7 +118,13 @@ constexpr decltype(auto) gatl_HestenesInnerProduct(FirstType const &arg1, Second
 template<typename Type>
 constexpr decltype(auto) gatl_Inversion(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
-    return inv(arg);
+    using ResultingType = decltype(inv(arg));
+    if (!ga::is_zero(rnorm_sqr(arg))) {
+        return inv(arg);
+    }
+    else {
+        return ResultingType();
+    }
 }
 
 template<typename FirstType, typename SecondType>
@@ -135,12 +142,6 @@ template<typename FirstType, typename... NextTypes>
 constexpr decltype(auto) gatl_OuterProduct(FirstType const &arg1, NextTypes const &... args) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
     return op(arg1, gatl_OuterProduct(args...));
-}
-
-template<typename Type>
-constexpr decltype(auto) gatl_ReverseNorm(Type const &arg) noexcept {
-    using namespace TESTING_GATL_MODEL_NAMESPACE;
-    return rnorm(arg);
 }
 
 template<typename Type>

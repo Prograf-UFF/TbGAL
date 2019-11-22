@@ -3,51 +3,182 @@
 
 namespace tbgal {
 
-    template<typename MetricSpaceType>
-    class MetricSpace {
+    template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType QDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime>
+    class BaseSignedMetricSpace;
+    
+    namespace detail {
+
+        template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType QDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
+        constexpr decltype(auto) apply_signed_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &, MatrixType &&) noexcept;
+
+    }
+
+    template<DefaultIndexType PDimensionsAtCompileTime_, DefaultIndexType QDimensionsAtCompileTime_, DefaultIndexType MaxDimensionsAtCompileTime_ = ((PDimensionsAtCompileTime_ != Dynamic && QDimensionsAtCompileTime_ != Dynamic) ? (PDimensionsAtCompileTime_ + QDimensionsAtCompileTime_) : Dynamic)>
+    class BaseSignedMetricSpace {
     public:
 
+        static_assert(PDimensionsAtCompileTime_ == Dynamic || QDimensionsAtCompileTime_ == Dynamic || (PDimensionsAtCompileTime_ >= 0 && QDimensionsAtCompileTime_ >= 0 && (PDimensionsAtCompileTime_ + QDimensionsAtCompileTime_) > 0 && (PDimensionsAtCompileTime_ + QDimensionsAtCompileTime_) == MaxDimensionsAtCompileTime_), "Invalid number of dimensions.");
+
         using IndexType = DefaultIndexType;
+        using ScalarType = DefaultScalarType;
+
+        constexpr static DefaultIndexType PDimensionsAtCompileTime = PDimensionsAtCompileTime_;
+        constexpr static DefaultIndexType QDimensionsAtCompileTime = QDimensionsAtCompileTime_;
+
+        constexpr static IndexType DimensionsAtCompileTime = (PDimensionsAtCompileTime != Dynamic && QDimensionsAtCompileTime != Dynamic) ? (PDimensionsAtCompileTime + QDimensionsAtCompileTime) : Dynamic;
+        constexpr static IndexType MaxDimensionsAtCompileTime = MaxDimensionsAtCompileTime_;
+
+        inline IndexType dimensions() const noexcept {
+            return detail::rows(signed_metric_);
+        }
 
         virtual std::string const & basis_vector_str(IndexType) const noexcept = 0;
 
-        virtual IndexType dimensions() const noexcept = 0;
+    protected:
+
+        inline BaseSignedMetricSpace(BaseSignedMetricSpace const &) = default;
+        inline BaseSignedMetricSpace(BaseSignedMetricSpace &&) = default;
+
+        inline BaseSignedMetricSpace(IndexType p_dimensions, IndexType q_dimensions) noexcept :
+            signed_metric_() {
+            update_basis(p_dimensions, q_dimensions);
+        }
+
+        inline BaseSignedMetricSpace & operator=(BaseSignedMetricSpace const &) = default;
+        inline BaseSignedMetricSpace & operator=(BaseSignedMetricSpace &&) = default;
+
+        inline void set_dimensions(IndexType p_dimensions, IndexType q_dimensions) noexcept {
+            update_basis(p_dimensions, q_dimensions);
+        }
+
+    private:
+
+        inline void update_basis(IndexType p_dimensions, IndexType q_dimensions) noexcept {
+            assert(p_dimensions >= 0 && q_dimensions >= 0 && (p_dimensions + q_dimensions) >= 0 && (PDimensionsAtCompileTime == Dynamic || PDimensionsAtCompileTime == p_dimensions) && (QDimensionsAtCompileTime == Dynamic || QDimensionsAtCompileTime == q_dimensions) && (MaxDimensionsAtCompileTime == Dynamic || MaxDimensionsAtCompileTime >= (p_dimensions + q_dimensions)));
+            signed_metric_ = detail::make_diagonal_matrix<ScalarType, DimensionsAtCompileTime, MaxDimensionsAtCompileTime>(p_dimensions + q_dimensions);
+            for (IndexType ind = 0; ind != p_dimensions; ++ind) {
+                detail::coeff(signed_metric_, ind, ind) = 1;
+            }
+            for (IndexType ind = p_dimensions; ind != (p_dimensions + q_dimensions); ++ind) {
+                detail::coeff(signed_metric_, ind, ind) = -1;
+            }
+        }
+
+        detail::diagonal_matrix_type_t<ScalarType, DimensionsAtCompileTime, MaxDimensionsAtCompileTime> signed_metric_;
+
+        template<DefaultIndexType SomePDimensionsAtCompileTime, DefaultIndexType SomeQDimensionsAtCompileTime, DefaultIndexType SomeMaxDimensionsAtCompileTime, typename SomeMatrixType> friend constexpr decltype(auto) detail::apply_signed_metric(BaseSignedMetricSpace<SomePDimensionsAtCompileTime, SomeQDimensionsAtCompileTime, SomeMaxDimensionsAtCompileTime> const &, SomeMatrixType &&) noexcept;
+    };
+
+    template<DefaultIndexType PDimensionsAtCompileTime_, DefaultIndexType MaxDimensionsAtCompileTime_>
+    class BaseSignedMetricSpace<PDimensionsAtCompileTime_, 0, MaxDimensionsAtCompileTime_> {
+    public:
+
+        static_assert(PDimensionsAtCompileTime_ == Dynamic || (PDimensionsAtCompileTime_ > 0 && PDimensionsAtCompileTime_ == MaxDimensionsAtCompileTime_), "Invalid number of dimensions.");
+
+        using IndexType = DefaultIndexType;
+        using ScalarType = DefaultScalarType;
+
+        constexpr static DefaultIndexType PDimensionsAtCompileTime = PDimensionsAtCompileTime_;
+        constexpr static DefaultIndexType QDimensionsAtCompileTime = 0;
+
+        constexpr static IndexType DimensionsAtCompileTime = (PDimensionsAtCompileTime != Dynamic) ? PDimensionsAtCompileTime : Dynamic;
+        constexpr static IndexType MaxDimensionsAtCompileTime = MaxDimensionsAtCompileTime_;
+
+        inline IndexType dimensions() const noexcept {
+            return dimensions_;
+        }
+
+        virtual std::string const & basis_vector_str(IndexType) const noexcept = 0;
 
     protected:
 
-        constexpr MetricSpace() = default;
-        constexpr MetricSpace(MetricSpace const &) = default;
-        constexpr MetricSpace(MetricSpace &&) = default;
+        inline BaseSignedMetricSpace(BaseSignedMetricSpace const &) = default;
+        inline BaseSignedMetricSpace(BaseSignedMetricSpace &&) = default;
 
-        constexpr MetricSpace & operator=(MetricSpace const &) = default;
-        constexpr MetricSpace & operator=(MetricSpace &&) = default;
-    };
+        inline BaseSignedMetricSpace(IndexType p_dimensions, IndexType q_dimensions) noexcept :
+            dimensions_(p_dimensions) {
+            assert(p_dimensions >= 0 && q_dimensions == 0 && (PDimensionsAtCompileTime == Dynamic || PDimensionsAtCompileTime == p_dimensions) && (MaxDimensionsAtCompileTime == Dynamic || MaxDimensionsAtCompileTime >= p_dimensions));
+        }
 
-    template<typename MetricSpaceType>
-    struct is_metric_space<MetricSpace<MetricSpaceType> > :
-        std::true_type {
+        inline BaseSignedMetricSpace & operator=(BaseSignedMetricSpace const &) = default;
+        inline BaseSignedMetricSpace & operator=(BaseSignedMetricSpace &&) = default;
+
+        inline void set_dimensions(IndexType p_dimensions, IndexType q_dimensions) noexcept {
+            assert(p_dimensions >= 0 && q_dimensions == 0 && (PDimensionsAtCompileTime == Dynamic || PDimensionsAtCompileTime == p_dimensions) && (MaxDimensionsAtCompileTime == Dynamic || MaxDimensionsAtCompileTime >= p_dimensions));
+            dimensions_ = p_dimensions;
+        }
+
+    private:
+
+        IndexType dimensions_;
     };
 
     namespace detail {
 
-        template<typename MetricSpaceType, typename MatrixType>
-        constexpr decltype(auto) apply_signed_metric(MetricSpaceType const &space, MatrixType const &factors_in_signed_metric) noexcept {
-            return apply_signed_metric_impl<MetricSpaceType>::eval(space, factors_in_signed_metric);
+        template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType QDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
+        constexpr decltype(auto) apply_signed_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &space, MatrixType &&factors_in_signed_metric) noexcept {
+            return prod(space.signed_metric_, std::move(factors_in_signed_metric));
         }
 
-        template<typename MetricSpaceType, typename MatrixType>
+        template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
+        constexpr decltype(auto) apply_signed_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const &, MatrixType &&factors_in_signed_metric) noexcept {
+            return std::move(factors_in_signed_metric);
+        }
+
+        template<typename MetricSpaceType, typename MatrixType, typename = std::enable_if_t<MetricSpaceType::QDimensionsAtCompileTime != 0> >
         constexpr decltype(auto) from_actual_to_signed_metric(MetricSpaceType const &space, MatrixType &&factors_in_actual_metric) noexcept {
             return from_actual_to_signed_metric_impl<MetricSpaceType>::eval(space, std::move(factors_in_actual_metric));
         }
 
-        template<typename MetricSpaceType, typename MatrixType>
+        template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
+        constexpr decltype(auto) from_actual_to_signed_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const &, MatrixType &&factors_in_actual_metric) noexcept {
+            return std::move(factors_in_actual_metric);
+        }
+
+        template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType QDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
+        constexpr decltype(auto) from_outer_to_geometric_factors(BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &space, MatrixType &&factors_in_signed_metric) noexcept {
+            auto new_factors_in_signed_metric = evaluate(prod(factors_in_signed_metric, es_eigenvectors_matrix(evaluate(prod(transpose(factors_in_signed_metric), apply_signed_metric(space, factors_in_signed_metric))))));
+            return std::make_tuple(determinant(prod(transpose(new_factors_in_signed_metric), factors_in_signed_metric)), new_factors_in_signed_metric);
+        }
+
+        template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
+        constexpr decltype(auto) from_outer_to_geometric_factors(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const &, MatrixType &&factors_in_signed_metric) noexcept {
+            using MetricSpaceType = BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime>;
+            using ResultingScalarType = std::common_type_t<scalar_type_t<MatrixType>, typename MetricSpaceType::ScalarType>;
+            return std::make_tuple(ResultingScalarType(1), std::move(factors_in_signed_metric));
+        }
+
+        template<typename MetricSpaceType, typename MatrixType, typename = std::enable_if_t<MetricSpaceType::QDimensionsAtCompileTime != 0> >
         constexpr decltype(auto) from_signed_to_actual_metric(MetricSpaceType const &space, MatrixType &&factors_in_signed_metric) noexcept {
             return from_signed_to_actual_metric_impl<MetricSpaceType>::eval(space, std::move(factors_in_signed_metric));
         }
 
-        template<typename MetricSpaceType, typename MatrixType>
-        constexpr decltype(auto) metric_factor(MetricSpaceType const &space, MatrixType const &factors_in_signed_metric) noexcept {
-            return metric_factor_impl<MetricSpaceType>::eval(space, factors_in_signed_metric);
+        template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
+        constexpr decltype(auto) from_signed_to_actual_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const &, MatrixType &&factors_in_signed_metric) noexcept {
+            return std::move(factors_in_signed_metric);
+        }
+
+        template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType QDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
+        constexpr decltype(auto) metric_factor(BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &space, MatrixType &&factors_in_signed_metric) noexcept {
+            using MetricSpaceType = BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
+            using ResulingScalarType = std::common_type_t<scalar_type_t<MatrixType>, typename MetricSpaceType::ScalarType>;
+            using IndexType = index_type_t<MatrixType>;
+            
+            constexpr DefaultIndexType DimensionsAtCompileTime = MetricSpaceType::DimensionsAtCompileTime;
+
+            ResulingScalarType result = 1;
+            for (IndexType col = 0, col_end = cols(factors_in_signed_metric); col != col_end; ++col) {
+                auto column = block<DimensionsAtCompileTime, 1>(factors_in_signed_metric, 0, col, space.dimensions(), 1);
+                result *= coeff(prod(transpose(column), apply_signed_metric(space, column)), 0, 0);
+            }
+            return result;
+        }
+
+        template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
+        constexpr decltype(auto) metric_factor(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const &space, MatrixType &&factors_in_signed_metric) noexcept {
+            using MetricSpaceType = BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime>;
+            using ResulingScalarType = std::common_type_t<scalar_type_t<MatrixType>, typename MetricSpaceType::ScalarType>;
+            return ResulingScalarType(1);
         }
 
     }

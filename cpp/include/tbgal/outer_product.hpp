@@ -85,18 +85,22 @@ namespace tbgal {
                 using ResultingMetricSpaceType = metric_space_type_t<Types...>;
                 using ResultingFactoringProductType = OuterProduct<ResultingMetricSpaceType>;
                 using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
+
+                constexpr DefaultIndexType DimensionsAtCompileTime = ResultingMetricSpaceType::DimensionsAtCompileTime;
+                constexpr DefaultIndexType MaxDimensionsAtCompileTime = ResultingMetricSpaceType::MaxDimensionsAtCompileTime;
+
                 auto& space = *space_ptr(args...);
                 auto factors_count = (_op_impl_get_factors_count(args) + ... + 0);
                 if (factors_count <= space.dimensions()) {
                     auto prod_scalar = (_op_impl_get_scalar(args) * ... * 1);
                     if (factors_count > 0 && !is_zero(prod_scalar)) {
-                        auto input = make_matrix<ResultingScalarType, ResultingMetricSpaceType::DimensionsAtCompileTime, Dynamic, ResultingMetricSpaceType::MaxDimensionsAtCompileTime, Dynamic>(space.dimensions(), factors_count);
+                        auto input = make_matrix<ResultingScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, Dynamic>(space.dimensions(), factors_count);
                         auto qr_tuple = qr_orthogonal_matrix(std::get<0>(fill_matrix(input, args...)));
                         if (std::get<1>(qr_tuple) == factors_count) {
                             auto const &matrix_q = std::get<0>(qr_tuple);
                             return ResultingFactoredMultivectorType(
                                 space,
-                                prod_scalar * determinant(prod_block<Dynamic, ResultingMetricSpaceType::DimensionsAtCompileTime>(transpose(matrix_q), 0, 0, factors_count, space.dimensions(), input)),
+                                prod_scalar * determinant(prod_block<Dynamic, DimensionsAtCompileTime>(transpose(matrix_q), 0, 0, factors_count, space.dimensions(), input)),
                                 matrix_q,
                                 factors_count
                             );
