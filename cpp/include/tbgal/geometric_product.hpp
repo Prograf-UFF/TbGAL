@@ -5,9 +5,32 @@ namespace tbgal {
 
     namespace detail {
 
+        //TODO {DEBUG}
+        template<typename MatrixType>
+        void print_entry(int level, std::string const &name, MatrixType const &arg) {
+            for (int i = 0; i != level; ++i) std::cout << "    ";
+            std::cout << name << std::endl;
+            for (int i = 0; i != level; ++i) std::cout << "    ";
+            std::cout << "----------------------------------------------" << std::endl;
+            for (int i = 0; i != level; ++i) std::cout << "    ";
+            print_matrix(arg);
+            std::cout << std::endl << std::endl;
+        }
+
         struct gp_impl {
         private:
 
+            template<typename ScalarType, typename MetricSpaceType>
+            constexpr static decltype(auto) to_geometric_factors(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) noexcept {
+                return std::make_tuple(arg.scalar(), arg.factors_in_signed_metric());
+            }
+            
+            template<typename ScalarType, typename MetricSpaceType>
+            constexpr static decltype(auto) to_geometric_factors(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) noexcept {
+                auto factors_tuple = from_outer_to_geometric_factors(arg.space(), arg.factors_in_signed_metric());
+                return std::make_tuple(arg.scalar() * std::get<0>(factors_tuple), std::get<1>(factors_tuple));
+            }
+            
             template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType>
             constexpr static void update_factors(MetricSpaceType const &, ScalarType &, FactorsMatrixType const &, DynamicSquareMatrixType const &, TwoByTwoMatrixType const &, DynamicColumnMatrixType const &, DynamicColumnMatrixType const &) noexcept {
             }
@@ -22,7 +45,6 @@ namespace tbgal {
                     A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), 0);
                     return;
                 }
-
                 update_factors(space, alpha, A, MA, R, u, x, args...);
             }
 
@@ -47,18 +69,23 @@ namespace tbgal {
                     return coeff(prod(transpose(column(F1, col1)), column(F2, col2)), 0, 0);
                 };
 
-                alpha *= arg1.scalar();
-                if (is_zero(alpha)) {
-                    A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(n, 0);
-                    return;
-                }
+                IndexType s = arg1.factors_count();
 
-                auto const &B = arg1.factors_in_signed_metric();
-                IndexType r = cols(A);
-                IndexType s = cols(B);
+                if (s != 0) {
+                    auto B_tuple = to_geometric_factors(arg1);
 
-                if (r != 0) {
-                    if (s != 0) {
+                    alpha *= std::get<0>(B_tuple);
+                    if (is_zero(alpha)) {
+                        A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(n, 0);
+                        return;
+                    }
+
+                    auto const &B = std::get<1>(B_tuple);
+                    IndexType r = cols(A);
+
+                    if (r != 0) {
+                        print_entry(0, "A", A);
+                        print_entry(0, "B", B);
                         for (IndexType k = 0; k != s; ++k) {
                             auto qr_tuple_A = qr_orthogonal_matrix(A);
                             assert(r == std::get<1>(qr_tuple_A));
@@ -68,8 +95,10 @@ namespace tbgal {
                             if (is_zero(coeff(prod(transpose(u), u), 0, 0) - 1)) {
                                 if (r > 1) {
                                     for (IndexType i = 0; i != (r - 1); ++i) {
+                                        print_entry(1, "i = " + std::to_string(i) + " | A - before", A);
                                         MA = prod(transpose(A), apply_signed_metric(space, A));
                                         x = prod(prod(inverse(MA), transpose(A)), apply_signed_metric(space, column(B, k)));
+                                        print_entry(1, "i = " + std::to_string(i) + " | x - before", x);
 
                                         auto xi1 = coeff(x, i, 0);
                                         if (!is_zero(xi1)) {
@@ -81,7 +110,7 @@ namespace tbgal {
 
                                             auto delta1 = 2 * mu12 * xi1 + mu22 * xi2;
                                             auto delta2 = -mu11 * xi1;
-                                            auto gamma1 = 1 / sqrt(delta1 * delta1 * inner_product_em(A, i, A, i) + 2 * delta1 * delta2 * inner_product_em(A, i, A, i + 1) + delta2 * delta2); // Normalization under Euclidean metric
+                                            auto gamma1 = 1 / sqrt(delta1 * delta1 * inner_product_em(A, i, A, i) + 2 * delta1 * delta2 * inner_product_em(A, i, A, i + 1) + delta2 * delta2 * inner_product_em(A, i + 1, A, i + 1)); // Normalization under Euclidean metric
 
                                             coeff(R, 0, 0) = gamma1 * delta1;
                                             coeff(R, 1, 0) = gamma1 * delta2;
@@ -90,12 +119,20 @@ namespace tbgal {
 
                                             assign_block<DimensionsAtCompileTime, 2>(prod_block<DimensionsAtCompileTime, 2>(A, 0, i, n, 2, R), A, 0, i, n, 2);
                                         }
+                                        print_entry(1, "i = " + std::to_string(i) + " | A - after", A);
+                                        print_entry(1, "i = " + std::to_string(i) + " | x - after", evaluate(prod(prod(inverse(prod(transpose(A), apply_signed_metric(space, A))), transpose(A)), apply_signed_metric(space, column(B, k)))));
                                     }
                                 }
 
                                 alpha *= inner_product(A, r - 1, B, k);
+                                if (is_zero(alpha)) {
+                                    A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(n, 0);
+                                    return;
+                                }
+
                                 conservative_resize(A, n, r - 1);
                                 --r;
+                                print_entry(0, "A - resized", A);
                             }
                             else {
                                 conservative_resize(A, n, r + 1);
@@ -104,9 +141,16 @@ namespace tbgal {
                             }
                         }
                     }
+                    else {
+                        A = B;
+                    }
                 }
                 else {
-                    A = B;
+                    alpha *= arg1.scalar();
+                    if (is_zero(alpha)) {
+                        A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(n, 0);
+                        return;
+                    }
                 }
                 update_factors(space, alpha, A, MA, R, u, x, args...);
             }
