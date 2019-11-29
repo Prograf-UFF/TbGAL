@@ -17,6 +17,17 @@ namespace tbgal {
             std::cout << std::endl << std::endl;
         }
 
+        //TODO {DEBUG}
+        void print_entry(int level, std::string const &name, double const &arg) {
+            for (int i = 0; i != level; ++i) std::cout << "    ";
+            std::cout << name << std::endl;
+            for (int i = 0; i != level; ++i) std::cout << "    ";
+            std::cout << "----------------------------------------------" << std::endl;
+            for (int i = 0; i != level; ++i) std::cout << "    ";
+            std::cout << arg;
+            std::cout << std::endl << std::endl;
+        }
+
         struct gp_impl {
         private:
 
@@ -90,15 +101,22 @@ namespace tbgal {
                             auto qr_tuple_A = qr_orthogonal_matrix(A);
                             assert(r == std::get<1>(qr_tuple_A));
 
-                            u = prod_block<Dynamic, DimensionsAtCompileTime, 1>(transpose(std::get<0>(qr_tuple_A)), 0, 0, r, B, 0, k, n, 1);
+                            auto const &OA = std::get<0>(qr_tuple_A);
+
+                            u = prod_block<Dynamic, DimensionsAtCompileTime, 1>(transpose(OA), 0, 0, r, B, 0, k, n, 1);
 
                             if (is_zero(coeff(prod(transpose(u), u), 0, 0) - 1)) {
                                 if (r > 1) {
+                                    auto b = column(B, k); //TODO Embutir no código
+
+                                    //print_entry(0, "b" + std::to_string(k), column(B, k));
+                                    print_entry(0, "b'" + std::to_string(k), b);
+
                                     for (IndexType i = 0; i != (r - 1); ++i) {
                                         print_entry(1, "i = " + std::to_string(i) + " | A - before", A);
                                         MA = prod(transpose(A), apply_signed_metric(space, A));
-                                        x = prod(prod(inverse(MA), transpose(A)), apply_signed_metric(space, column(B, k)));
-                                        print_entry(1, "i = " + std::to_string(i) + " | x - before", x);
+                                        x = prod(prod(inverse(MA), transpose(A)), apply_signed_metric(space, b));
+                                        //print_entry(1, "i = " + std::to_string(i) + " | x - before", x);
 
                                         auto xi1 = coeff(x, i, 0);
                                         if (!is_zero(xi1)) {
@@ -108,19 +126,28 @@ namespace tbgal {
                                             auto mu12 = coeff(MA, i, i + 1);
                                             auto mu22 = coeff(MA, i + 1, i + 1);
 
+                                            auto mu11_em = inner_product_em(A, i, A, i);
+                                            auto mu12_em = inner_product_em(A, i, A, i + 1);
+                                            auto mu22_em = inner_product_em(A, i + 1, A, i + 1);
+
                                             auto delta1 = 2 * mu12 * xi1 + mu22 * xi2;
                                             auto delta2 = -mu11 * xi1;
-                                            auto gamma1 = 1 / sqrt(delta1 * delta1 * inner_product_em(A, i, A, i) + 2 * delta1 * delta2 * inner_product_em(A, i, A, i + 1) + delta2 * delta2 * inner_product_em(A, i + 1, A, i + 1)); // Normalization under Euclidean metric
+                                            
+                                            auto rnorm_r2_sqr = xi1 * xi1 * mu11 + 2 * xi1 * xi2 * mu12 + xi2 * xi2 * mu22;
+                                            auto rnorm_r1_em = sqrt(delta1 * delta1 * mu11_em + 2 * delta1 * delta2 * mu12_em + delta2 * delta2 * mu22_em); // Normalization under Euclidean metric
+
+                                            auto gamma1 = 1 / rnorm_r1_em;
+                                            auto gamma2 = rnorm_r1_em / rnorm_r2_sqr;
 
                                             coeff(R, 0, 0) = gamma1 * delta1;
                                             coeff(R, 1, 0) = gamma1 * delta2;
-                                            coeff(R, 0, 1) = xi1;
-                                            coeff(R, 1, 1) = xi2;
+                                            coeff(R, 0, 1) = gamma2 * xi1;
+                                            coeff(R, 1, 1) = gamma2 * xi2;
 
                                             assign_block<DimensionsAtCompileTime, 2>(prod_block<DimensionsAtCompileTime, 2>(A, 0, i, n, 2, R), A, 0, i, n, 2);
                                         }
                                         print_entry(1, "i = " + std::to_string(i) + " | A - after", A);
-                                        print_entry(1, "i = " + std::to_string(i) + " | x - after", evaluate(prod(prod(inverse(prod(transpose(A), apply_signed_metric(space, A))), transpose(A)), apply_signed_metric(space, column(B, k)))));
+                                        //print_entry(1, "i = " + std::to_string(i) + " | x - after", evaluate(prod(prod(inverse(prod(transpose(A), apply_signed_metric(space, A))), transpose(A)), apply_signed_metric(space, b))));
                                     }
                                 }
 

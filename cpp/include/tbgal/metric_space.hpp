@@ -178,7 +178,7 @@ namespace tbgal {
         constexpr decltype(auto) metric_factor(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const &space, MatrixType &&factors_in_signed_metric) noexcept {
             using MetricSpaceType = BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime>;
             using ResulingScalarType = std::common_type_t<scalar_type_t<MatrixType>, typename MetricSpaceType::ScalarType>;
-            return ResulingScalarType(1);
+            return ResulingScalarType(1); //TODO Os fatores são unitários sob métrica Euclidiana?
         }
 
     }
