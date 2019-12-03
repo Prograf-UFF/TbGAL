@@ -406,14 +406,14 @@ constexpr bool same_multivector(LeftType const &arg1, RightType const &arg2) noe
     }
 
 #define TERNARY_OPERATION_TESTS(ARG1_K, ARG2_K, ARG3_K) \
-    /*TODO {DEBUG} TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Geometric, ARG1_K, Geometric, ARG2_K, Geometric, ARG3_K)*/ \
-    /*TODO {DEBUG} TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Geometric, ARG1_K, Geometric, ARG2_K, Outer, ARG3_K)*/ \
-    /*TODO {DEBUG} TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Geometric, ARG1_K, Outer, ARG2_K, Geometric, ARG3_K)*/ \
-    /*TODO {DEBUG} TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Geometric, ARG1_K, Outer, ARG2_K, Outer, ARG3_K)*/ \
-    /*TODO {DEBUG} TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Outer, ARG1_K, Geometric, ARG2_K, Geometric, ARG3_K)*/ \
-    /*TODO {DEBUG} TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Outer, ARG1_K, Geometric, ARG2_K, Outer, ARG3_K)*/ \
-    /*TODO {DEBUG} TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Outer, ARG1_K, Outer, ARG2_K, Geometric, ARG3_K)*/ \
-    /*TODO {DEBUG} TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Outer, ARG1_K, Outer, ARG2_K, Outer, ARG3_K)*/ \
+    TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Geometric, ARG1_K, Geometric, ARG2_K, Geometric, ARG3_K) \
+    TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Geometric, ARG1_K, Geometric, ARG2_K, Outer, ARG3_K) \
+    TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Geometric, ARG1_K, Outer, ARG2_K, Geometric, ARG3_K) \
+    TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Geometric, ARG1_K, Outer, ARG2_K, Outer, ARG3_K) \
+    TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Outer, ARG1_K, Geometric, ARG2_K, Geometric, ARG3_K) \
+    TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Outer, ARG1_K, Geometric, ARG2_K, Outer, ARG3_K) \
+    TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Outer, ARG1_K, Outer, ARG2_K, Geometric, ARG3_K) \
+    TERNARY_OPERATION_TESTS_FOR(GeometricProduct, Outer, ARG1_K, Outer, ARG2_K, Outer, ARG3_K) \
     \
     TERNARY_OPERATION_TESTS_FOR(OuterProduct, Outer, ARG1_K, Outer, ARG2_K, Outer, ARG3_K)
 
