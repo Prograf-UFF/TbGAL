@@ -43,11 +43,11 @@ namespace tbgal {
             }
             
             template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType>
-            constexpr static void update_factors(MetricSpaceType const &, ScalarType &, FactorsMatrixType const &, DynamicSquareMatrixType const &, TwoByTwoMatrixType const &, DynamicColumnMatrixType const &, DynamicColumnMatrixType const &) noexcept {
+            constexpr static void update_factors(MetricSpaceType const &, ScalarType &, FactorsMatrixType const &, DynamicSquareMatrixType const &, FactorsMatrixType const &, TwoByTwoMatrixType const &, DynamicColumnMatrixType const &) noexcept {
             }
 
             template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType, typename FirstScalarType, typename... NextTypes>
-            constexpr static void update_factors(MetricSpaceType const &space, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, TwoByTwoMatrixType &T, DynamicColumnMatrixType &u, DynamicColumnMatrixType &x, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
+            constexpr static void update_factors(MetricSpaceType const &space, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, DynamicColumnMatrixType &x, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
                 constexpr DefaultIndexType DimensionsAtCompileTime = MetricSpaceType::DimensionsAtCompileTime;
                 constexpr DefaultIndexType MaxDimensionsAtCompileTime = MetricSpaceType::MaxDimensionsAtCompileTime;
 
@@ -56,11 +56,11 @@ namespace tbgal {
                     A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), 0);
                     return;
                 }
-                update_factors(space, alpha, A, MA, T, u, x, args...);
+                update_factors(space, alpha, A, MA, QA, T, x, args...);
             }
 
             template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-            constexpr static void update_factors(MetricSpaceType const &space, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, TwoByTwoMatrixType &T, DynamicColumnMatrixType &u, DynamicColumnMatrixType &x, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
+            constexpr static void update_factors(MetricSpaceType const &space, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, DynamicColumnMatrixType &x, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
                 using IndexType = typename MetricSpaceType::IndexType;
 
                 constexpr DefaultIndexType DimensionsAtCompileTime = MetricSpaceType::DimensionsAtCompileTime;
@@ -70,10 +70,6 @@ namespace tbgal {
 
                 auto column = [&](auto const &F, IndexType const col) -> auto {
                     return block<DimensionsAtCompileTime, 1>(F, 0, col, n, 1);
-                };
-
-                auto inner_product = [&](auto const &F1, IndexType const col1, auto const &F2, IndexType const col2) -> auto {
-                    return coeff(prod(transpose(column(F1, col1)), apply_signed_metric(space, column(F2, col2))), 0, 0);
                 };
 
                 auto inner_product_em = [&](auto const &F1, IndexType const col1, auto const &F2, IndexType const col2) -> auto {
@@ -95,36 +91,21 @@ namespace tbgal {
                     IndexType r = cols(A);
 
                     if (r != 0) {
-                        //print_entry(0, "A", A);
-                        //print_entry(0, "B", B);
                         for (IndexType k = 0; k != s; ++k) {
                             auto qr_tuple_A = qr_orthogonal_matrix(A);
                             assert(r == std::get<1>(qr_tuple_A));
 
                             auto const &OA = std::get<0>(qr_tuple_A);
+                            x = prod_block<Dynamic, DimensionsAtCompileTime, 1>(transpose(OA), 0, 0, r, B, 0, k, n, 1);
 
-                            u = prod_block<Dynamic, DimensionsAtCompileTime, 1>(transpose(OA), 0, 0, r, B, 0, k, n, 1);
-
-                            if (is_zero(coeff(prod(transpose(u), u), 0, 0) - 1)) {
+                            if (is_zero(coeff(prod(transpose(x), x), 0, 0) - 1)) {
+                                auto b_metric = apply_signed_metric(space, column(B, k));
+                                
                                 if (r > 1) {
-                                    auto b = column(B, k); //TODO Embutir no código
-
-                                    //print_entry(0, "b" + std::to_string(k), column(B, k));
-                                    //print_entry(0, "b'" + std::to_string(k), b);
-
                                     for (IndexType i = 0; i != (r - 1); ++i) {
-                                        //print_entry(1, "i = " + std::to_string(i) + " | A - before", A);
                                         MA = prod(transpose(A), apply_signed_metric(space, A)); // Metric matrix of A
-                                        auto QA = prod(A, inverse(MA)); // Reciprocal frame vectors of A
-                                        x = prod(transpose(QA), apply_signed_metric(space, b)); // Projection of b onto A using reciprocal frame vectors (thus, b = A . x)
-                                        //print_entry(1, "i = " + std::to_string(i) + " | x - before", x);
-
-                                        //TODO {DEBUG}
-                                        //auto x_rec = prod(transpose(A), apply_signed_metric(space, b));
-                                        //print_entry(2, "x", x);
-                                        //print_entry(2, "x_rec", x_rec);
-                                        //print_entry(2, "b", prod(A, x));
-                                        //print_entry(2, "b_rec", prod(QA, x_rec));
+                                        QA = prod(A, inverse(MA)); // Reciprocal frame vectors of A
+                                        x = prod(transpose(QA), b_metric); // Projection of b onto A using reciprocal frame vectors (thus, b = A . x)
 
                                         auto xi1 = coeff(x, i, 0);
                                         if (!is_zero(xi1)) {
@@ -166,12 +147,10 @@ namespace tbgal {
                                                 assign_block<DimensionsAtCompileTime, 2>(prod_block<DimensionsAtCompileTime, 2>(A, 0, i, n, 2, T), A, 0, i, n, 2);
                                             }
                                         }
-                                        //print_entry(1, "i = " + std::to_string(i) + " | A - after", A);
-                                        //print_entry(1, "i = " + std::to_string(i) + " | x - after", evaluate(prod(prod(inverse(prod(transpose(A), apply_signed_metric(space, A))), transpose(A)), apply_signed_metric(space, b))));
                                     }
                                 }
 
-                                alpha *= inner_product(A, r - 1, B, k);
+                                alpha *= coeff(prod(transpose(column(A, r - 1)), b_metric), 0, 0); // Inner product
                                 if (is_zero(alpha)) {
                                     A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(n, 0);
                                     return;
@@ -179,7 +158,6 @@ namespace tbgal {
 
                                 conservative_resize(A, n, r - 1);
                                 --r;
-                                //print_entry(0, "A - resized", A);
                             }
                             else {
                                 conservative_resize(A, n, r + 1);
@@ -199,7 +177,7 @@ namespace tbgal {
                         return;
                     }
                 }
-                update_factors(space, alpha, A, MA, T, u, x, args...);
+                update_factors(space, alpha, A, MA, QA, T, x, args...);
             }
 
         public:
@@ -216,17 +194,19 @@ namespace tbgal {
 
                 using DynamicColumnMatrixType = matrix_type_t<ResultingScalarType, Dynamic, 1, MaxDimensionsAtCompileTime, 1>;
                 using DynamicSquareMatrixType = matrix_type_t<ResultingScalarType, Dynamic, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
+                using FactorsMatrixType = matrix_type_t<ResultingScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
                 using TwoByTwoMatrixType = matrix_type_t<ResultingScalarType, 2, 2, 2, 2>;
 
                 auto const &space = *space_ptr(args...);
 
                 ResultingScalarType alpha = 1;
-                auto A = make_matrix<ResultingScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), 0);
+                FactorsMatrixType A = make_matrix<ResultingScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), 0);
                 
+                FactorsMatrixType QA;
                 TwoByTwoMatrixType T;
                 DynamicSquareMatrixType MA;
-                DynamicColumnMatrixType u, x;
-                update_factors(space, alpha, A, MA, T, u, x, args...);
+                DynamicColumnMatrixType x;
+                update_factors(space, alpha, A, MA, QA, T, x, args...);
 
                 return ResultingFactoredMultivectorType(space, alpha, A);
             }
