@@ -18,22 +18,6 @@
 
 namespace tbgal {
 
-    //TODO {DEBUG}
-    template<typename MatrixType>
-    void print_matrix(MatrixType const &arg) {
-        std::cout << "factors_matrix_t<double, " << detail::rows(arg) << ", " << detail::cols(arg) << ">{";
-        for (int row = 0; row != detail::rows(arg); ++row) {
-            if (row != 0) std::cout << ", ";
-            std::cout << "factors_row_t<double, " << detail::cols(arg) << ">{";
-            for (int col = 0; col != detail::cols(arg); ++col) {
-                if (col != 0) std::cout << ", ";
-                std::cout << std::setprecision(20) << detail::coeff(arg, row, col);
-            }
-            std::cout << "}";
-        }
-        std::cout << "}";
-    }
-
     template<typename ScalarType, typename FactoringProductType> class FactoredMultivector;
 
     template<typename MetricSpaceType> struct GeometricProduct;
