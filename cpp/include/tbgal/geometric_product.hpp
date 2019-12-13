@@ -127,13 +127,11 @@ namespace tbgal {
                                             assign_block<2, 1>(prod_block<2, 1>(inv_T, x, i, 0, 2, 1), x, i, 0, 2, 1);
 
                                             if (r2_is_null) {
-                                                assign_block<DimensionsAtCompileTime, 1>(apply_signed_metric(space, column(A, i + 1)), A, 0, i + 1, n, 1);
+                                                assign_block<Dynamic, 1>(prod_block<DimensionsAtCompileTime, 1>(transpose(A), A, 0, i + 1, n, 1), MA, 0, i + 1, r, 1);
+                                                assign_block<1, Dynamic>(transpose(MA), i + 1, 0, MA, i + 1, 0, 1, r);
 
-                                                if (i < r - 2) {
-                                                    //TODO Update MA
-                                                    //TODO Update QA
-                                                    //TODO Update x
-                                                }
+                                                assign_block<DimensionsAtCompileTime, 1>(A, 0, i + 1, QA, 0, i + 1, n, 1);
+                                                assign_block<DimensionsAtCompileTime, 1>(apply_signed_metric(space, column(A, i + 1)), A, 0, i + 1, n, 1);
                                             }
                                         }
                                     }
