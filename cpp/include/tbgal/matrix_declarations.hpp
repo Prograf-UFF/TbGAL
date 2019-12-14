@@ -122,6 +122,9 @@ namespace tbgal {
         template<typename MatrixType>
         constexpr decltype(auto) split_columns_and_swap(MatrixType const &, DefaultIndexType) noexcept;
 
+        template<typename FirstMatrixType, typename SecondMatrixType>
+        constexpr decltype(auto) subtract(FirstMatrixType const &arg1, SecondMatrixType const &arg2) noexcept;
+
         template<typename MatrixType>
         constexpr decltype(auto) transpose(MatrixType const &) noexcept;
 

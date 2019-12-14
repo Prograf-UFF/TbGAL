@@ -214,6 +214,11 @@ namespace tbgal {
             return result;
         }
 
+        template<typename FirstMatrixType, typename SecondMatrixType>
+        constexpr decltype(auto) subtract(FirstMatrixType const &arg1, SecondMatrixType const &arg2) noexcept {
+            return arg1 - arg2;
+        }
+
         template<typename MatrixType>
         constexpr decltype(auto) transpose(MatrixType const &arg) noexcept {
             return arg.transpose();

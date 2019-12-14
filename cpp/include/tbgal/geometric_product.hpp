@@ -19,12 +19,12 @@ namespace tbgal {
                 return std::make_tuple(arg.scalar() * std::get<0>(factors_tuple), std::get<1>(factors_tuple));
             }
             
-            template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType>
-            constexpr static void update_factors(MetricSpaceType const &, ScalarType &, FactorsMatrixType const &, DynamicSquareMatrixType const &, FactorsMatrixType const &, TwoByTwoMatrixType const &, TwoByTwoMatrixType const &, DynamicColumnMatrixType const &) noexcept {
+            template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType, typename ColumnMatrixType>
+            constexpr static void update_factors(MetricSpaceType const &, ScalarType &, FactorsMatrixType const &, DynamicSquareMatrixType const &, FactorsMatrixType const &, TwoByTwoMatrixType const &, TwoByTwoMatrixType const &, DynamicColumnMatrixType const &, ColumnMatrixType const &) noexcept {
             }
 
-            template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType, typename FirstScalarType, typename... NextTypes>
-            constexpr static void update_factors(MetricSpaceType const &space, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, TwoByTwoMatrixType &inv_T, DynamicColumnMatrixType &x, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
+            template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType, typename ColumnMatrixType, typename FirstScalarType, typename... NextTypes>
+            constexpr static void update_factors(MetricSpaceType const &space, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, TwoByTwoMatrixType &inv_T, DynamicColumnMatrixType &x, ColumnMatrixType &z, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
                 constexpr DefaultIndexType DimensionsAtCompileTime = MetricSpaceType::DimensionsAtCompileTime;
                 constexpr DefaultIndexType MaxDimensionsAtCompileTime = MetricSpaceType::MaxDimensionsAtCompileTime;
 
@@ -33,11 +33,11 @@ namespace tbgal {
                     A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), 0);
                     return;
                 }
-                update_factors(space, alpha, A, MA, QA, T, inv_T, x, args...);
+                update_factors(space, alpha, A, MA, QA, T, inv_T, x, z, args...);
             }
 
-            template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-            constexpr static void update_factors(MetricSpaceType const &space, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, TwoByTwoMatrixType &inv_T, DynamicColumnMatrixType &x, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
+            template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType, typename ColumnMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
+            constexpr static void update_factors(MetricSpaceType const &space, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, TwoByTwoMatrixType &inv_T, DynamicColumnMatrixType &x, ColumnMatrixType &z, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
                 using IndexType = typename MetricSpaceType::IndexType;
 
                 constexpr DefaultIndexType DimensionsAtCompileTime = MetricSpaceType::DimensionsAtCompileTime;
@@ -69,18 +69,14 @@ namespace tbgal {
 
                     if (r != 0) {
                         for (IndexType k = 0; k != s; ++k) {
-                            auto qr_tuple_A = qr_orthogonal_matrix(A); //TODO Could it be faster?
-                            assert(r == std::get<1>(qr_tuple_A));
+                            auto b = column(B, k);
+                            auto b_metric = apply_signed_metric(space, b);
 
-                            auto const &OA = std::get<0>(qr_tuple_A);
-                            x = prod_block<Dynamic, DimensionsAtCompileTime, 1>(transpose(OA), 0, 0, r, B, 0, k, n, 1);
+                            x = prod(transpose(QA), b_metric); // Projection of b onto A using reciprocal frame vectors (thus, b = A . x)
+                            z = subtract(b, prod(A, x));
 
-                            auto b_metric = apply_signed_metric(space, column(B, k));
-
-                            if (is_zero(coeff(prod(transpose(x), x), 0, 0) - 1)) {
+                            if (is_zero(coeff(prod(transpose(z), z), 0, 0))) {
                                 if (r > 1) {
-                                    x = prod(transpose(QA), b_metric); // Projection of b onto A using reciprocal frame vectors (thus, b = A . x)
-
                                     for (IndexType i = 0; i != (r - 1); ++i) {
                                         auto xi1 = coeff(x, i, 0);
                                         if (!is_zero(xi1)) {
@@ -156,7 +152,7 @@ namespace tbgal {
                                 assign_block<Dynamic, 1>(prod(transpose(A), b_metric), MA, 0, r, r + 1, 1);
                                 assign_block<1, Dynamic>(transpose(MA), r, 0, MA, r, 0, 1, r);
 
-                                QA = prod(A, inverse(MA)); //TODO Could it be faster?
+                                QA = prod(A, inverse(MA)); //TODO Use blockwise inversion
 
                                 ++r;
                             }
@@ -175,7 +171,7 @@ namespace tbgal {
                         return;
                     }
                 }
-                update_factors(space, alpha, A, MA, QA, T, inv_T, x, args...);
+                update_factors(space, alpha, A, MA, QA, T, inv_T, x, z, args...);
             }
 
         public:
@@ -192,6 +188,7 @@ namespace tbgal {
 
                 using DynamicColumnMatrixType = matrix_type_t<ResultingScalarType, Dynamic, 1, MaxDimensionsAtCompileTime, 1>;
                 using DynamicSquareMatrixType = matrix_type_t<ResultingScalarType, Dynamic, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
+                using ColumnMatrixType = matrix_type_t<ResultingScalarType, DimensionsAtCompileTime, 1, MaxDimensionsAtCompileTime, 1>;
                 using FactorsMatrixType = matrix_type_t<ResultingScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
                 using TwoByTwoMatrixType = matrix_type_t<ResultingScalarType, 2, 2, 2, 2>;
 
@@ -204,7 +201,8 @@ namespace tbgal {
                 TwoByTwoMatrixType T, inv_T;
                 DynamicSquareMatrixType MA;
                 DynamicColumnMatrixType x;
-                update_factors(space, alpha, A, MA, QA, T, inv_T, x, args...);
+                ColumnMatrixType z;
+                update_factors(space, alpha, A, MA, QA, T, inv_T, x, z, args...);
 
                 return ResultingFactoredMultivectorType(space, alpha, A);
             }
