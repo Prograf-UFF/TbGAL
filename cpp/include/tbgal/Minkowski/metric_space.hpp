@@ -47,7 +47,7 @@ namespace tbgal {
 
         inline MinkowskiMetricSpace(IndexType base_space_dimensions) noexcept :
             Super(base_space_dimensions + 1, 1),
-            basis_vectors_str_(),
+            basis_vectors_str_() {
             update_basis_vectors_str(base_space_dimensions);
         }
 
