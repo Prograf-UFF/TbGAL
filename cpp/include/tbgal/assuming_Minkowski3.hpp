@@ -27,9 +27,9 @@
 
 namespace tbgal {
 
-    namespace Minkowsi3 {
+    namespace Minkowski3 {
         
-        using MetricSpaceType = MinkowsiMetricSpace<3>;
+        using MetricSpaceType = MinkowskiMetricSpace<3>;
 
         static MetricSpaceType const SPACE;
         

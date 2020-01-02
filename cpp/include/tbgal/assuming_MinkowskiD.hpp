@@ -25,19 +25,19 @@
 
 #include "core.hpp"
 
-#ifndef TBGAL_MinkowsiD_BaseSpaceDimensions
-    #define TBGAL_MinkowsiD_BaseSpaceDimensions Dynamic
-#endif // TBGAL_MinkowsiD_BaseSpaceDimensions
+#ifndef TBGAL_MinkowskiD_BaseSpaceDimensions
+    #define TBGAL_MinkowskiD_BaseSpaceDimensions Dynamic
+#endif // TBGAL_MinkowskiD_BaseSpaceDimensions
 
-#ifndef TBGAL_MinkowsiD_MaxBaseSpaceDimensions
-    #define TBGAL_MinkowsiD_MaxBaseSpaceDimensions (TBGAL_MinkowsiD_BaseSpaceDimensions)
-#endif // TBGAL_MinkowsiD_MaxBaseSpaceDimensions
+#ifndef TBGAL_MinkowskiD_MaxBaseSpaceDimensions
+    #define TBGAL_MinkowskiD_MaxBaseSpaceDimensions (TBGAL_MinkowskiD_BaseSpaceDimensions)
+#endif // TBGAL_MinkowskiD_MaxBaseSpaceDimensions
 
 namespace tbgal {
 
-    namespace MinkowsiD {
+    namespace MinkowskiD {
         
-        using MetricSpaceType = MinkowsiMetricSpace<(TBGAL_MinkowsiD_BaseSpaceDimensions), (TBGAL_MinkowsiD_MaxBaseSpaceDimensions)>;
+        using MetricSpaceType = MinkowskiMetricSpace<(TBGAL_MinkowskiD_BaseSpaceDimensions), (TBGAL_MinkowskiD_MaxBaseSpaceDimensions)>;
 
         static MetricSpaceType SPACE;
         

@@ -80,11 +80,10 @@ namespace tbgal {
     private:
 
         inline void update_basis_vectors_str(IndexType p_dimensions, IndexType q_dimensions) noexcept {
-            basis_vectors_str_.resize(base_space_dimensions + 1);
-            for (IndexType ind = 0; ind != base_space_dimensions; ++ind) {
+            basis_vectors_str_.resize(p_dimensions + q_dimensions);
+            for (IndexType ind = 0, ind_end = p_dimensions + q_dimensions; ind != ind_end; ++ind) {
                 basis_vectors_str_[ind] = "e" + std::to_string(ind + 1);
             }
-            basis_vectors_str_[base_space_dimensions] = "ep";
         }
 
         std::vector<std::string> basis_vectors_str_;
