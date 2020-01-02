@@ -91,6 +91,26 @@ namespace tbgal {
         IndexType q_dimensions_;
     };
 
+    namespace detail {
+
+        template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType QDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime>
+        struct from_actual_to_signed_metric_impl<SignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> > {
+            template<typename MatrixType>
+            constexpr static decltype(auto) eval(SignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &, MatrixType &&factors_in_actual_metric) noexcept {
+                return std::move(factors_in_actual_metric);
+            }
+        };
+
+        template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType QDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime>
+        struct from_signed_to_actual_metric_impl<SignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> > {
+            template<typename MatrixType>
+            constexpr static decltype(auto) eval(SignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &space, MatrixType &&factors_in_signed_metric) noexcept {
+                return std::move(factors_in_signed_metric);
+            }
+        };
+
+    }
+
 }
 
 #endif // __TBGAL_SIGNED_METRIC_SPACE_HPP__
