@@ -20,8 +20,8 @@
  * along with TbGAL. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __TBGAL_ASSUMING_MINKOWSID_HPP__
-#define __TBGAL_ASSUMING_MINKOWSID_HPP__
+#ifndef __TBGAL_ASSUMING_MINKOWSKID_HPP__
+#define __TBGAL_ASSUMING_MINKOWSKID_HPP__
 
 #include "core.hpp"
 
@@ -42,7 +42,7 @@ namespace tbgal {
         static MetricSpaceType SPACE;
         
         _TBGAL_OVERLOAD_UTILS(SPACE)
-        _TBGAL_OVERLOAD_MINKOWSI_UTILS(SPACE)
+        _TBGAL_OVERLOAD_MINKOWSKI_UTILS(SPACE)
 
         inline decltype(auto) ep() noexcept {
             return e(SPACE.dimensions() - 1);
@@ -56,4 +56,4 @@ namespace tbgal {
 
 }
 
-#endif // __TBGAL_ASSUMING_MINKOWSID_HPP__
+#endif // __TBGAL_ASSUMING_MINKOWSKID_HPP__

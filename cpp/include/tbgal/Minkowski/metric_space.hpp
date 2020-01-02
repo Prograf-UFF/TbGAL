@@ -20,8 +20,8 @@
  * along with TbGAL. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __TBGAL_MINKOWSI_METRIC_SPACE_HPP__
-#define __TBGAL_MINKOWSI_METRIC_SPACE_HPP__
+#ifndef __TBGAL_MINKOWSKI_METRIC_SPACE_HPP__
+#define __TBGAL_MINKOWSKI_METRIC_SPACE_HPP__
 
 namespace tbgal {
 
@@ -107,4 +107,4 @@ namespace tbgal {
 
 }
 
-#endif // __TBGAL_MINKOWSI_METRIC_SPACE_HPP__
+#endif // __TBGAL_MINKOWSKI_METRIC_SPACE_HPP__
