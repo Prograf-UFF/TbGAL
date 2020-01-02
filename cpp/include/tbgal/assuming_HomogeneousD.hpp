@@ -44,7 +44,7 @@ namespace tbgal {
         _TBGAL_OVERLOAD_UTILS(SPACE)
         _TBGAL_OVERLOAD_HOMOGENEOUS_UTILS(SPACE)
 
-        constexpr decltype(auto) ep() noexcept {
+        inline decltype(auto) ep() noexcept {
             return e(SPACE.dimensions());
         }
 

@@ -44,11 +44,11 @@ namespace tbgal {
         _TBGAL_OVERLOAD_UTILS(SPACE)
         _TBGAL_OVERLOAD_CONFORMAL_UTILS(SPACE)
 
-        constexpr decltype(auto) no() noexcept {
+        inline decltype(auto) no() noexcept {
             return e(SPACE.dimensions() - 1);
         }
 
-        constexpr decltype(auto) ni() noexcept {
+        inline decltype(auto) ni() noexcept {
             return e(SPACE.dimensions());
         }
 
