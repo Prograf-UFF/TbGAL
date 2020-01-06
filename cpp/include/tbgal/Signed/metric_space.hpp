@@ -38,6 +38,8 @@ namespace tbgal {
 
         constexpr static IndexType PDimensionsAtCompileTime = Super::PDimensionsAtCompileTime;
         constexpr static IndexType QDimensionsAtCompileTime = Super::QDimensionsAtCompileTime;
+
+        constexpr static IndexType DimensionsAtCompileTime = Super::DimensionsAtCompileTime;
         constexpr static IndexType MaxDimensionsAtCompileTime = Super::MaxDimensionsAtCompileTime;
 
         inline SignedMetricSpace(SignedMetricSpace const &) = default;

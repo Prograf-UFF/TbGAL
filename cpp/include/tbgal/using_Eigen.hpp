@@ -23,14 +23,19 @@
 #ifndef __TBGAL_USING_EIGEN_HPP__
 #define __TBGAL_USING_EIGEN_HPP__
 
-#include <Eigen/Dense>
-#include "matrix_declarations.hpp"
-
 #ifdef TBGAL_USING_MATRIX_DEFINITIONS
     #error "Matrix definition already included by command '#include <using_{SomeMatrixAlgebraLibrary}.hpp>.'"
 #else
     #define TBGAL_USING_MATRIX_DEFINITIONS
 #endif // TBGAL_USING_MATRIX_DEFINITIONS
+
+#include <Eigen/Dense>
+
+#ifndef TBGAL_DEFAULT_INDEX_TYPE
+    #define TBGAL_DEFAULT_INDEX_TYPE Eigen::Index
+#endif // TBGAL_DEFAULT_INDEX_TYPE
+
+#include "matrix_declarations.hpp"
 
 namespace tbgal {
 
@@ -160,31 +165,36 @@ namespace tbgal {
             return arg.eval();
         }
 
+        template<typename MatrixType>
+        constexpr void _fill_column_matrix_impl(MatrixType const &, Eigen::Index const) noexcept {
+        }
+        
         template<typename MatrixType, typename ScalarType>
-        constexpr void _fill_column_matrix_impl(MatrixType &target, ScalarType &&arg) noexcept {
-            target(target.rows() - 1, 0) = std::move(arg);
+        constexpr void _fill_column_matrix_impl(MatrixType &target, Eigen::Index offset, ScalarType &&arg) noexcept {
+            target(offset, 0) = std::move(arg);
         }
         
         template<typename MatrixType, typename FirstScalarType, typename... NextScalarTypes>
-        constexpr void _fill_column_matrix_impl(MatrixType &target, FirstScalarType &&arg1, NextScalarTypes &&... args) noexcept {
-            target(target.rows() - (1 + sizeof...(NextScalarTypes)), 0) = std::move(arg1);
-            _fill_column_matrix_impl(target, std::move(args)...);
+        constexpr void _fill_column_matrix_impl(MatrixType &target, Eigen::Index offset, FirstScalarType &&arg1, NextScalarTypes &&... args) noexcept {
+            target(offset, 0) = std::move(arg1);
+            _fill_column_matrix_impl(target, offset + 1, std::move(args)...);
         }
         
         template<typename... ScalarTypes>
         constexpr decltype(auto) fill_column_matrix(ScalarTypes &&... args) noexcept {
             matrix_type_t<std::common_type_t<std::remove_cv_t<std::remove_reference_t<ScalarTypes> >...>, sizeof...(ScalarTypes), 1, sizeof...(ScalarTypes), 1> result;
-            _fill_column_matrix_impl(result, std::move(args)...);
+            _fill_column_matrix_impl(result, 0, std::move(args)...);
             return result;
         }
 
-        template<DefaultIndexType RowsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, typename IteratorType>
-        constexpr decltype(auto) fill_column_matrix_using_iterators(IteratorType begin, IteratorType end) noexcept {
-            assert(RowsAtCompileTime == Eigen::Dynamic || RowsAtCompileTime == std::distance(begin, end));
+        template<DefaultIndexType RowsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, typename IteratorType, typename... ExtraScalarTypes>
+        constexpr decltype(auto) fill_column_matrix_using_iterator(IteratorType begin, IteratorType end, ExtraScalarTypes &&...extra_args) noexcept {
             matrix_type_t<std::remove_cv_t<std::remove_reference_t<typename std::iterator_traits<IteratorType>::value_type> >, RowsAtCompileTime, 1, MaxRowsAtCompileTime, 1> result(std::distance(begin, end), 1);
-            for (Eigen::Index ind = 0; begin != end; ++ind, ++begin) {
+            Eigen::Index ind = 0;
+            for (; begin != end; ++ind, ++begin) {
                 result(ind, 0) = *begin;
             }
+            _fill_column_matrix_impl(result, ind, std::move(extra_args)...);
             return result;
         }
 

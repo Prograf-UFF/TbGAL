@@ -213,14 +213,9 @@ decltype(auto) make_tbgal_vector(vector_factor_t const &arg) noexcept {
     return vector(arg.begin(), arg.end());
 }
 
-template<std::size_t... Indices>
-constexpr decltype(auto) _make_gatl_vector_impl(vector_factor_t const &arg, std::index_sequence<Indices...>) noexcept {
-    using namespace TESTING_GATL_MODEL_NAMESPACE;
-    return vector(arg[Indices]...);
-}
-
 constexpr decltype(auto) make_gatl_vector(vector_factor_t const &arg) noexcept {
-    return _make_gatl_vector_impl(arg, std::make_index_sequence<std::tuple_size_v<vector_factor_t> >{});
+    using namespace TESTING_GATL_MODEL_NAMESPACE;
+    return vector(arg.begin(), arg.end());
 }
 
 template<typename ScalarFactorType, typename VectorFactorType, std::size_t K, std::size_t... Indices>

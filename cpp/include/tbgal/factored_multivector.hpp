@@ -192,10 +192,11 @@ namespace tbgal {
         friend struct detail::gp_impl;
         friend struct detail::op_impl;
 
+        template<typename SomeMetricSpaceType, typename... SomeScalarTypes> friend constexpr decltype(auto) detail::make_vector(SomeMetricSpaceType const &, SomeScalarTypes &&...) noexcept;
+        template<typename SomeMetricSpaceType, typename SomeIteratorType, typename... SomeExtraScalarTypes> friend constexpr decltype(auto) detail::make_vector_using_iterator(SomeMetricSpaceType const &, SomeIteratorType, SomeIteratorType, SomeExtraScalarTypes &&...) noexcept;
+
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend decltype(auto) e(SomeMetricSpaceType const &, DefaultIndexType) noexcept;
         template<typename SomeMetricSpaceType, typename SomeScalarType, typename> friend decltype(auto) scalar(SomeMetricSpaceType const &, SomeScalarType const &) noexcept;
-        template<typename SomeMetricSpaceType, typename... ScalarTypes, typename> friend decltype(auto) vector(SomeMetricSpaceType const &, ScalarTypes &&...) noexcept;
-        template<typename SomeMetricSpaceType, typename IteratorType, typename> friend decltype(auto) vector(SomeMetricSpaceType const &, IteratorType, IteratorType) noexcept;
 
         template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType> friend constexpr decltype(auto) addition(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &) noexcept;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) dual(FactoredMultivector<SomeScalarType, OuterProduct<SomeMetricSpaceType> > const &) noexcept;

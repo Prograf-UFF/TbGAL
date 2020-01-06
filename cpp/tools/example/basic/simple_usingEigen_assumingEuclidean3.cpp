@@ -20,8 +20,8 @@
  * along with TbGAL. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../../../include/tbgal/using_Eigen.hpp" //TODO [DEBUG]
-#include "../../../include/tbgal/assuming_Euclidean3.hpp" //TODO [DEBUG]
+#include <tbgal/using_Eigen.hpp>
+#include <tbgal/assuming_Euclidean3.hpp>
 
 using namespace tbgal;
 using namespace tbgal::Euclidean3;

@@ -26,7 +26,10 @@
 #include <cmath>
 #include <cstdint>
 #include <iostream>
+#include <iterator>
 #include <type_traits>
+#include <tuple>
+#include <utility>
 
 #ifndef TBGAL_DEFAULT_SCALAR_TYPE
     #define TBGAL_DEFAULT_SCALAR_TYPE std::double_t
@@ -117,8 +120,8 @@ namespace tbgal {
         template<typename... ScalarTypes>
         constexpr decltype(auto) fill_column_matrix(ScalarTypes &&...) noexcept;
 
-        template<DefaultIndexType RowsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, typename IteratorType>
-        constexpr decltype(auto) fill_column_matrix_using_iterators(IteratorType, IteratorType) noexcept;
+        template<DefaultIndexType RowsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, typename IteratorType, typename... ExtraScalarTypes>
+        constexpr decltype(auto) fill_column_matrix_using_iterator(IteratorType, IteratorType, ExtraScalarTypes &&...) noexcept;
 
         template<typename MatrixType>
         constexpr decltype(auto) inverse(MatrixType const &) noexcept;

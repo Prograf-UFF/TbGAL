@@ -30,13 +30,9 @@
 #include <cassert>
 #include <iomanip>
 #include <iostream>
-#include <iterator>
 #include <stdexcept>
 #include <string>
-#include <tuple>
 #include <vector>
-
-#include "matrix_declarations.hpp"
 
 namespace tbgal {
 
@@ -145,6 +141,12 @@ namespace tbgal {
         constexpr decltype(auto) space_ptr(FirstScalarType const &, NextTypes const &... args) noexcept {
             return space_ptr(args...);
         }
+
+        template<typename MetricSpaceType, typename... ScalarTypes>
+        constexpr decltype(auto) make_vector(MetricSpaceType const &, ScalarTypes &&...) noexcept;
+
+        template<typename MetricSpaceType, typename IteratorType, typename... ExtraScalarTypes>
+        constexpr decltype(auto) make_vector_using_iterator(MetricSpaceType const &, IteratorType, IteratorType, ExtraScalarTypes &&...) noexcept;
 
     }
 

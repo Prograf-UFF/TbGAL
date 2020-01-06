@@ -68,7 +68,7 @@ namespace tbgal {
                 IndexType const n = space.dimensions();
 
                 auto column = [&](auto const &F, IndexType const col) -> auto {
-                    return block<DimensionsAtCompileTime, 1>(F, 0, col, n, 1);
+                    return block<MetricSpaceType::DimensionsAtCompileTime, 1>(F, 0, col, n, 1);
                 };
 
                 auto inner_product_em = [&](auto const &F1, IndexType const col1, auto const &F2, IndexType const col2) -> auto {

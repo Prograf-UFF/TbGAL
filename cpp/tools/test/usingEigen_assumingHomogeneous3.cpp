@@ -20,8 +20,8 @@
  * along with TbGAL. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../../include/tbgal/using_Eigen.hpp" //TODO [DEBUG]
-#include "../../include/tbgal/assuming_Homogeneous3.hpp" //TODO [DEBUG]
+#include <tbgal/using_Eigen.hpp>
+#include <tbgal/assuming_Homogeneous3.hpp>
 #define TESTING_TBGAL_MODEL_NAMESPACE tbgal::Homogeneous3
 
 #include <gatl/ga3h.hpp>
