@@ -186,11 +186,17 @@ namespace tbgal {
 #include "hestenes_inner_product.hpp"
 #include "scalar_product.hpp"
 
+#include "conjugation.hpp"
 #include "reversion.hpp"
+#include "involution.hpp"
 
 #include "reverse_norm.hpp"
 #include "inversion.hpp"
 #include "dualization.hpp"
+
+#include "apply_versor.hpp"
+#include "inverse_geometric_product.hpp"
+#include "normalization.hpp"
 
 #include "write.hpp"
 #include "macro.hpp"

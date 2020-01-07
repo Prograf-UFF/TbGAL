@@ -32,6 +32,11 @@ using vector_factor_t = std::array<scalar_factor_t, TESTING_VECTOR_SPACE_DIMENSI
 std::default_random_engine random_engine{ static_cast<long unsigned int>(32) };
 std::uniform_real_distribution<scalar_factor_t> uniform_distribution(0, 1);
 
+template<typename Type>
+constexpr decltype(auto) tbgal_Conjugation(Type const &arg) noexcept {
+    return tbgal::conjugation(arg);
+}
+
 template<typename FirstType, typename SecondType>
 constexpr decltype(auto) tbgal_DotProduct(FirstType const &arg1, SecondType const &arg2) noexcept {
     return tbgal::dot(arg1, arg2);
@@ -52,6 +57,17 @@ constexpr decltype(auto) tbgal_HestenesInnerProduct(FirstType const &arg1, Secon
     return tbgal::hip(arg1, arg2);
 }
 
+template<typename FirstType, typename SecondType>
+constexpr decltype(auto) tbgal_InverseGeometricProduct(FirstType const &arg1, SecondType const &arg2) noexcept {
+    using ResultingType = decltype(tbgal::igp(arg1, arg2));
+    if (!tbgal::is_zero(tbgal::rnorm_sqr(arg2))) {
+        return tbgal::igp(arg1, arg2);
+    }
+    else {
+        return ResultingType(arg1.space());
+    }
+}
+
 template<typename Type>
 constexpr decltype(auto) tbgal_Inversion(Type const &arg) noexcept {
     using ResultingType = decltype(tbgal::inverse(arg));
@@ -63,9 +79,25 @@ constexpr decltype(auto) tbgal_Inversion(Type const &arg) noexcept {
     }
 }
 
+template<typename Type>
+constexpr decltype(auto) tbgal_Involution(Type const &arg) noexcept {
+    return tbgal::involution(arg);
+}
+
 template<typename FirstType, typename SecondType>
 constexpr decltype(auto) tbgal_LeftContraction(FirstType const &arg1, SecondType const &arg2) noexcept {
     return tbgal::lcont(arg1, arg2);
+}
+
+template<typename Type>
+constexpr decltype(auto) tbgal_Normalization(Type const &arg) noexcept {
+    using ResultingType = decltype(tbgal::unit(arg));
+    if (!tbgal::is_zero(tbgal::rnorm_sqr(arg))) {
+        return tbgal::unit(arg);
+    }
+    else {
+        return ResultingType(arg.space());
+    }
 }
 
 template<typename FirstType, typename... NextTypes>
@@ -108,6 +140,12 @@ constexpr decltype(auto) tbgal_Undualization(Type const &arg) noexcept {
     return tbgal::undual(arg);
 }
 
+template<typename Type>
+constexpr decltype(auto) gatl_Conjugation(Type const &arg) noexcept {
+    using namespace TESTING_GATL_MODEL_NAMESPACE;
+    return conjugation(arg);
+}
+
 template<typename FirstType, typename SecondType>
 constexpr decltype(auto) gatl_DotProduct(FirstType const &arg1, SecondType const &arg2) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
@@ -137,6 +175,18 @@ constexpr decltype(auto) gatl_HestenesInnerProduct(FirstType const &arg1, Second
     return hip(arg1, arg2);
 }
 
+template<typename FirstType, typename SecondType>
+constexpr decltype(auto) gatl_InverseGeometricProduct(FirstType const &arg1, SecondType const &arg2) noexcept {
+    using namespace TESTING_GATL_MODEL_NAMESPACE;
+    using ResultingType = decltype(igp(arg1, arg2));
+    if (!ga::is_zero(rnorm_sqr(arg2))) {
+        return igp(arg1, arg2);
+    }
+    else {
+        return ResultingType();
+    }
+}
+
 template<typename Type>
 constexpr decltype(auto) gatl_Inversion(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
@@ -149,10 +199,28 @@ constexpr decltype(auto) gatl_Inversion(Type const &arg) noexcept {
     }
 }
 
+template<typename Type>
+constexpr decltype(auto) gatl_Involution(Type const &arg) noexcept {
+    using namespace TESTING_GATL_MODEL_NAMESPACE;
+    return involution(arg);
+}
+
 template<typename FirstType, typename SecondType>
 constexpr decltype(auto) gatl_LeftContraction(FirstType const &arg1, SecondType const &arg2) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
     return lcont(arg1, arg2);
+}
+
+template<typename Type>
+constexpr decltype(auto) gatl_Normalization(Type const &arg) noexcept {
+    using namespace TESTING_GATL_MODEL_NAMESPACE;
+    using ResultingType = decltype(unit(arg));
+    if (!ga::is_zero(rnorm_sqr(arg))) {
+        return unit(arg);
+    }
+    else {
+        return ResultingType();
+    }
 }
 
 template<typename Type>
@@ -374,6 +442,11 @@ constexpr bool same_multivector(LeftType const &arg1, RightType const &arg2) noe
     \
     BINARY_OPERATION_TESTS_FOR(HestenesInnerProduct, Outer, ARG1_K, Outer, ARG2_K) \
     \
+    BINARY_OPERATION_TESTS_FOR(InverseGeometricProduct, Geometric, ARG1_K, Geometric, ARG2_K) \
+    BINARY_OPERATION_TESTS_FOR(InverseGeometricProduct, Geometric, ARG1_K, Outer, ARG2_K) \
+    BINARY_OPERATION_TESTS_FOR(InverseGeometricProduct, Outer, ARG1_K, Geometric, ARG2_K) \
+    BINARY_OPERATION_TESTS_FOR(InverseGeometricProduct, Outer, ARG1_K, Outer, ARG2_K) \
+    \
     BINARY_OPERATION_TESTS_FOR(LeftContraction, Outer, ARG1_K, Outer, ARG2_K) \
     \
     BINARY_OPERATION_TESTS_FOR(OuterProduct, Outer, ARG1_K, Outer, ARG2_K) \
@@ -463,10 +536,19 @@ constexpr bool same_multivector(LeftType const &arg1, RightType const &arg2) noe
     }
 
 #define UNARY_OPERATION_TESTS(ARG_K) \
+    UNARY_OPERATION_TESTS_FOR(Conjugation, Geometric, ARG_K) \
+    UNARY_OPERATION_TESTS_FOR(Conjugation, Outer, ARG_K) \
+    \
     UNARY_OPERATION_TESTS_FOR(Dualization, Outer, ARG_K) \
     \
     UNARY_OPERATION_TESTS_FOR(Inversion, Geometric, ARG_K) \
     UNARY_OPERATION_TESTS_FOR(Inversion, Outer, ARG_K) \
+    \
+    UNARY_OPERATION_TESTS_FOR(Involution, Geometric, ARG_K) \
+    UNARY_OPERATION_TESTS_FOR(Involution, Outer, ARG_K) \
+    \
+    UNARY_OPERATION_TESTS_FOR(Normalization, Geometric, ARG_K) \
+    UNARY_OPERATION_TESTS_FOR(Normalization, Outer, ARG_K) \
     \
     UNARY_OPERATION_TESTS_FOR(Reversion, Geometric, ARG_K) \
     UNARY_OPERATION_TESTS_FOR(Reversion, Outer, ARG_K) \

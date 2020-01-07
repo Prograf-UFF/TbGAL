@@ -66,6 +66,11 @@ namespace tbgal {
         return arg1 + arg2;
     }
 
+    template<typename FirstType, typename SecondType>
+    constexpr decltype(auto) add(FirstType const &arg1, SecondType const &arg2) noexcept {
+        return addition(arg1, arg2);
+    }
+
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType>
     constexpr decltype(auto) operator+(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
         return addition(arg1, arg2);

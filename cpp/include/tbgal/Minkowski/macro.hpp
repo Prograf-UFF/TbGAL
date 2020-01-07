@@ -37,7 +37,7 @@
     \
     template<typename... ScalarTypes, typename = std::enable_if_t<std::disjunction_v<std::bool_constant<!detail::is_iterator_v<ScalarTypes> >...> > > \
     constexpr decltype(auto) point(ScalarTypes &&... coords) noexcept { \
-        auto aux = auto aux = ((std::move(coords) * std::move(coords)) + ... + 0); \
+        auto aux = ((std::move(coords) * std::move(coords)) + ... + 0); \
         return tbgal::detail::make_vector(METRIC_SPACE, std::move(coords)..., (aux - 1) / 2, (aux + 1) / 2); \
     } \
     \
