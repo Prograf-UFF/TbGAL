@@ -54,8 +54,19 @@ namespace tbgal {
         //template<typename OtherScalarType, typename OtherFactoringProductType>
         //constexpr FactoredMultivector(FactoredMultivector<OtherScalarType, OtherFactoringProductType> const &other) noexcept;
 
-        constexpr FactoredMultivector & operator=(FactoredMultivector const &) = default;
-        constexpr FactoredMultivector & operator=(FactoredMultivector &&) = default;
+        constexpr FactoredMultivector & operator=(FactoredMultivector const &other) noexcept {
+            assert(&space_ == &other.space_);
+            scalar_ = other.scalar_;
+            factors_in_signed_metric_ = other.factors_in_signed_metric_;
+            return *this;
+        }
+
+        constexpr FactoredMultivector & operator=(FactoredMultivector &&other) noexcept {
+            assert(&space_ == &other.space_);
+            scalar_ = other.scalar_;
+            factors_in_signed_metric_ = other.factors_in_signed_metric_;
+            return *this;
+        }
 
         //TODO [FUTURE] Specialization.
         //template<typename OtherScalarType, typename OtherFactoringProductType>
@@ -142,8 +153,21 @@ namespace tbgal {
         //template<typename OtherScalarType, typename OtherFactoringProductType>
         //constexpr FactoredMultivector(FactoredMultivector<OtherScalarType, OtherFactoringProductType> const &other) noexcept;
 
-        constexpr FactoredMultivector & operator=(FactoredMultivector const &) = default;
-        constexpr FactoredMultivector & operator=(FactoredMultivector &&) = default;
+        constexpr FactoredMultivector & operator=(FactoredMultivector const &other) noexcept {
+            assert(&space_ == &other.space_);
+            scalar_ = other.scalar_;
+            factors_and_complement_in_signed_metric_ = other.factors_and_complement_in_signed_metric_;
+            factors_count_ = other.factors_count_;
+            return *this;
+        }
+
+        constexpr FactoredMultivector & operator=(FactoredMultivector &&other) noexcept {
+            assert(&space_ == &other.space_);
+            scalar_ = other.scalar_;
+            factors_and_complement_in_signed_metric_ = other.factors_and_complement_in_signed_metric_;
+            factors_count_ = other.factors_count_;
+            return *this;
+        }
 
         //TODO [FUTURE] Specialization.
         //template<typename OtherScalarType, typename OtherFactoringProductType>
