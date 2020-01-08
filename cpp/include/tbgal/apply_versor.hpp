@@ -25,71 +25,65 @@
 
 namespace tbgal {
 
-    //TODO [Parei aqui]
-    /*
-    template<typename VersorCoefficientType, typename VersorExpression, typename CoefficientType, typename Expression>
-    constexpr decltype(auto) apply_even_versor(clifford_expression<VersorCoefficientType, VersorExpression> const &versor, clifford_expression<CoefficientType, Expression> const &arg) {
-        auto const lazy = make_lazy_context(versor, arg);
-        return lazy.eval(gp(gp(lazy.template argument<0>(), lazy.template argument<1>(), mtr), inv(lazy.template argument<0>(), mtr), mtr));
+    template<typename VersorScalarType, typename VersorFactoringProductType, typename ScalarType, typename FactoringProductType>
+    constexpr decltype(auto) apply_even_versor(FactoredMultivector<VersorScalarType, VersorFactoringProductType> const &versor, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+        return gp(versor, arg, inverse(versor));
     }
 
-    template<typename VersorCoefficientType, typename VersorExpression, typename Type>
-    constexpr decltype(auto) apply_even_versor(clifford_expression<VersorCoefficientType, VersorExpression> const &versor, Type const &arg) {
-        return apply_even_versor(versor, scalar(arg), mtr);
+    template<typename VersorScalarType, typename VersorFactoringProductType, typename Type, typename = std::enable_if_t<!is_multivector_v<Type> > >
+    constexpr Type apply_even_versor(FactoredMultivector<VersorScalarType, VersorFactoringProductType> const &, Type const &arg) noexcept {
+        return arg;
     }
 
-    template<typename VersorType, typename CoefficientType, typename Expression>
-    constexpr decltype(auto) apply_even_versor(VersorType const &versor, clifford_expression<CoefficientType, Expression> const &arg) {
-        return apply_even_versor(scalar(versor), arg, mtr);
+    template<typename VersorType, typename ScalarType, typename FactoringProductType, typename = std::enable_if_t<!is_multivector_v<VersorType> > >
+    constexpr FactoredMultivector<ScalarType, FactoringProductType> apply_even_versor(VersorType const &, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+        return arg;
     }
 
-    template<typename VersorType, typename Type>
-    constexpr decltype(auto) apply_even_versor(VersorType const &versor, Type const &arg) {
-        return apply_even_versor(scalar(versor), scalar(arg), mtr);
+    template<typename VersorType, typename Type, typename = std::enable_if_t<!(is_multivector_v<VersorType> || is_multivector_v<Type>)> >
+    constexpr Type apply_even_versor(VersorType const &, Type const &arg) noexcept {
+        return arg;
     }
 
-    template<typename VersorCoefficientType, typename VersorExpression, typename CoefficientType, typename Expression>
-    constexpr decltype(auto) apply_odd_versor(clifford_expression<VersorCoefficientType, VersorExpression> const &versor, clifford_expression<CoefficientType, Expression> const &arg) {
-        auto const lazy = make_lazy_context(versor, arg);
-        return lazy.eval(gp(gp(lazy.template argument<0>(), involution(lazy.template argument<1>()), mtr), inv(lazy.template argument<0>(), mtr), mtr));
+    template<typename VersorScalarType, typename VersorFactoringProductType, typename ScalarType, typename FactoringProductType>
+    constexpr decltype(auto) apply_odd_versor(FactoredMultivector<VersorScalarType, VersorFactoringProductType> const &versor, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+        return gp(versor, involute(arg), inverse(versor));
     }
 
-    template<typename VersorCoefficientType, typename VersorExpression, typename Type>
-    constexpr decltype(auto) apply_odd_versor(clifford_expression<VersorCoefficientType, VersorExpression> const &versor, Type const &arg) {
-        return apply_odd_versor(versor, scalar(arg), mtr);
+    template<typename VersorScalarType, typename VersorFactoringProductType, typename Type, typename = std::enable_if_t<!is_multivector_v<Type> > >
+    constexpr Type apply_odd_versor(FactoredMultivector<VersorScalarType, VersorFactoringProductType> const &, Type const &arg) noexcept {
+        return arg;
     }
 
-    template<typename VersorType, typename CoefficientType, typename Expression>
-    constexpr decltype(auto) apply_odd_versor(VersorType const &versor, clifford_expression<CoefficientType, Expression> const &arg) {
-        return apply_odd_versor(scalar(versor), arg, mtr);
+    template<typename VersorType, typename ScalarType, typename FactoringProductType, typename = std::enable_if_t<!is_multivector_v<VersorType> > >
+    constexpr FactoredMultivector<ScalarType, FactoringProductType> apply_odd_versor(VersorType const &, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+        return arg;
     }
 
-    template<typename VersorType, typename Type>
-    constexpr decltype(auto) apply_odd_versor(VersorType const &versor, Type const &arg) {
-        return apply_odd_versor(scalar(versor), scalar(arg), mtr);
+    template<typename VersorType, typename Type, typename = std::enable_if_t<!(is_multivector_v<VersorType> || is_multivector_v<Type>)> >
+    constexpr Type apply_odd_versor(VersorType const &, Type const &arg) noexcept {
+        return arg;
     }
 
-    template<typename RotorCoefficientType, typename RotorExpression, typename CoefficientType, typename Expression>
-    constexpr decltype(auto) apply_rotor(clifford_expression<RotorCoefficientType, RotorExpression> const &rotor, clifford_expression<CoefficientType, Expression> const &arg) {
-        auto const lazy = make_lazy_context(rotor, arg);
-        return lazy.eval(gp(gp(lazy.template argument<0>(), lazy.template argument<1>(), mtr), reversion(lazy.template argument<0>()), mtr));
+    template<typename RotorScalarType, typename RotorFactoringProductType, typename ScalarType, typename FactoringProductType>
+    constexpr decltype(auto) apply_rotor(FactoredMultivector<RotorScalarType, RotorFactoringProductType> const &rotor, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+        return gp(rotor, arg, reverse(rotor));
     }
 
-    template<typename RotorCoefficientType, typename RotorExpression, typename Type>
-    constexpr decltype(auto) apply_rotor(clifford_expression<RotorCoefficientType, RotorExpression> const &rotor, Type const &arg) {
-        return apply_rotor(rotor, scalar(arg), mtr);
+    template<typename RotorScalarType, typename RotorFactoringProductType, typename Type, typename = std::enable_if_t<!is_multivector_v<Type> > >
+    constexpr Type apply_rotor(FactoredMultivector<RotorScalarType, RotorFactoringProductType> const &, Type const &arg) noexcept {
+        return arg;
     }
 
-    template<typename RotorType, typename CoefficientType, typename Expression>
-    constexpr decltype(auto) apply_rotor(RotorType const &rotor, clifford_expression<CoefficientType, Expression> const &arg) {
-        return apply_rotor(scalar(rotor), arg, mtr);
+    template<typename RotorType, typename ScalarType, typename FactoringProductType, typename = std::enable_if_t<!is_multivector_v<RotorType> > >
+    constexpr FactoredMultivector<ScalarType, FactoringProductType> apply_rotor(RotorType const &, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+        return arg;
     }
 
-    template<typename RotorType, typename Type>
-    constexpr decltype(auto) apply_rotor(RotorType const &rotor, Type const &arg) {
-        return apply_rotor(scalar(rotor), scalar(arg), mtr);
+    template<typename RotorType, typename Type, typename = std::enable_if_t<!(is_multivector_v<RotorType> || is_multivector_v<Type>)> >
+    constexpr Type apply_rotor(RotorType const &, Type const &arg) noexcept {
+        return arg;
     }
-    */
 
 }
 

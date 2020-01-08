@@ -34,7 +34,7 @@ std::uniform_real_distribution<scalar_factor_t> uniform_distribution(0, 1);
 
 template<typename Type>
 constexpr decltype(auto) tbgal_Conjugation(Type const &arg) noexcept {
-    return tbgal::conjugation(arg);
+    return tbgal::conjugate(arg);
 }
 
 template<typename FirstType, typename SecondType>
@@ -81,7 +81,7 @@ constexpr decltype(auto) tbgal_Inversion(Type const &arg) noexcept {
 
 template<typename Type>
 constexpr decltype(auto) tbgal_Involution(Type const &arg) noexcept {
-    return tbgal::involution(arg);
+    return tbgal::involute(arg);
 }
 
 template<typename FirstType, typename SecondType>
@@ -143,7 +143,7 @@ constexpr decltype(auto) tbgal_Undualization(Type const &arg) noexcept {
 template<typename Type>
 constexpr decltype(auto) gatl_Conjugation(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
-    return conjugation(arg);
+    return conjugate(arg);
 }
 
 template<typename FirstType, typename SecondType>
@@ -202,7 +202,7 @@ constexpr decltype(auto) gatl_Inversion(Type const &arg) noexcept {
 template<typename Type>
 constexpr decltype(auto) gatl_Involution(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
-    return involution(arg);
+    return involute(arg);
 }
 
 template<typename FirstType, typename SecondType>
@@ -237,7 +237,7 @@ constexpr decltype(auto) gatl_OuterProduct(FirstType const &arg1, NextTypes cons
 template<typename Type>
 constexpr decltype(auto) gatl_Reversion(Type const &arg) noexcept {
     using namespace TESTING_GATL_MODEL_NAMESPACE;
-    return reversion(arg);
+    return reverse(arg);
 }
 
 template<typename FirstType, typename SecondType>

@@ -307,7 +307,7 @@ def __used_basis_vectors(arg):
     return result
 
 
-def conjugation(arg):
+def conjugate(arg):
     """Clifford conjugation operation.
     """
     def change(mask):
@@ -481,7 +481,7 @@ def igp_em(lhs, rhs, tol=DEFAULT_TOLERANCE):
 def inv(arg, metric=DEFAULT_METRIC, tol=DEFAULT_TOLERANCE):
     """Blade inverse.
     """
-    rev = reversion(arg)
+    rev = reverse(arg)
     return gp(rev, 1 / native(scp(arg, rev, metric), tol), metric)
 
 
@@ -491,7 +491,7 @@ def inv_em(arg, tol=DEFAULT_TOLERANCE):
     return inv(arg, EuclideanMetric(), tol)
 
 
-def involution(arg):
+def involute(arg):
     """Grade involution operation.
     """
     return graded_uminus(arg, lambda mask: (__population_count(mask) & 1) != 0)
@@ -523,7 +523,7 @@ def is_versor(arg, metric=DEFAULT_METRIC, tol=DEFAULT_TOLERANCE):
     if not isinstance(arg, Multivector):
         arg = Multivector(arg)
 
-    arg_hat = involution(arg)
+    arg_hat = involute(arg)
     inv_arg = inv(arg, metric, tol)
 
     tmp1 = gp(arg_hat, inv_arg, metric)
@@ -534,7 +534,7 @@ def is_versor(arg, metric=DEFAULT_METRIC, tol=DEFAULT_TOLERANCE):
     if not equal(tmp1, tmp2, tol):
         return False
 
-    arg_tild = reversion(arg)
+    arg_tild = reverse(arg)
     if isinstance(metric, OrthogonalMetric):
         basis_vectors = __used_basis_vectors(arg)
     else:
@@ -635,7 +635,7 @@ def op(lhs, rhs):
                      lambda lhs_grade, rhs_grade, result_grade: result_grade == (lhs_grade + rhs_grade))
 
 
-def reversion(arg):
+def reverse(arg):
     """Reversion operation.
     """
     def change(mask):
@@ -694,7 +694,7 @@ def scp_em(lhs, rhs):
 def sqr_rnorm(arg, metric=DEFAULT_METRIC, tol=DEFAULT_TOLERANCE):
     """Squared reverse norm.
     """
-    return native(scp(arg, reversion(arg), metric), tol)
+    return native(scp(arg, reverse(arg), metric), tol)
 
 
 def sqr_rnorm_em(arg, tol=DEFAULT_TOLERANCE):
