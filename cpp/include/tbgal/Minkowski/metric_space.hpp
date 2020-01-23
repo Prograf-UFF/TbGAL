@@ -90,7 +90,7 @@ namespace tbgal {
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
         struct from_actual_to_signed_metric_impl<MinkowskiMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static decltype(auto) eval(MinkowskiMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &, MatrixType &&factors_in_actual_metric) noexcept {
+            constexpr static decltype(auto) eval(MinkowskiMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const *, MatrixType &&factors_in_actual_metric) noexcept {
                 return std::move(factors_in_actual_metric);
             }
         };
