@@ -64,7 +64,7 @@ constexpr decltype(auto) tbgal_InverseGeometricProduct(FirstType const &arg1, Se
         return tbgal::igp(arg1, arg2);
     }
     else {
-        return ResultingType(arg1.space());
+        return ResultingType(arg1.space_ptr());
     }
 }
 
@@ -75,7 +75,7 @@ constexpr decltype(auto) tbgal_Inversion(Type const &arg) noexcept {
         return tbgal::inverse(arg);
     }
     else {
-        return ResultingType(arg.space());
+        return ResultingType(arg.space_ptr());
     }
 }
 
@@ -96,7 +96,7 @@ constexpr decltype(auto) tbgal_Normalization(Type const &arg) noexcept {
         return tbgal::unit(arg);
     }
     else {
-        return ResultingType(arg.space());
+        return ResultingType(arg.space_ptr());
     }
 }
 

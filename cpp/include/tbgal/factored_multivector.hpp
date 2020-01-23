@@ -38,42 +38,39 @@ namespace tbgal {
         using IndexType = detail::index_type_t<FactorsMatrixType>;
         using ScalarType = ScalarType_;
 
+        constexpr FactoredMultivector() noexcept :
+            FactoredMultivector(nullptr, 0, detail::make_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, Dynamic, MetricSpaceType::MaxDimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(MetricSpaceType::DimensionsAtCompileTime != Dynamic ? MetricSpaceType::DimensionsAtCompileTime : 0, 0)) {
+        }
+
         constexpr FactoredMultivector(FactoredMultivector const &) = default;
         constexpr FactoredMultivector(FactoredMultivector &&) = default;
 
-        constexpr FactoredMultivector(MetricSpaceType const &space) noexcept :
-            FactoredMultivector(space, 0, detail::make_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, Dynamic, MetricSpaceType::MaxDimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(space.dimensions(), 0)) {
+        constexpr FactoredMultivector(MetricSpaceType const *space_ptr) noexcept :
+            FactoredMultivector(space_ptr, 0, detail::make_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, Dynamic, MetricSpaceType::MaxDimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(space_ptr->dimensions(), 0)) {
         }
 
         template<typename OtherScalarType>
-        constexpr FactoredMultivector(MetricSpaceType const &space, OtherScalarType &&scalar) noexcept :
-            FactoredMultivector(space, std::move(scalar), detail::make_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, Dynamic, MetricSpaceType::MaxDimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(space.dimensions(), 0)) {
+        constexpr FactoredMultivector(MetricSpaceType const *space_ptr, OtherScalarType &&scalar) noexcept :
+            FactoredMultivector(space_ptr, std::move(scalar), detail::make_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, Dynamic, MetricSpaceType::MaxDimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(space_ptr->dimensions(), 0)) {
         }
 
         //TODO [FUTURE] Specialization.
         //template<typename OtherScalarType, typename OtherFactoringProductType>
         //constexpr FactoredMultivector(FactoredMultivector<OtherScalarType, OtherFactoringProductType> const &other) noexcept;
 
-        constexpr FactoredMultivector & operator=(FactoredMultivector const &other) noexcept {
-            assert(&space_ == &other.space_);
-            scalar_ = other.scalar_;
-            factors_in_signed_metric_ = other.factors_in_signed_metric_;
-            return *this;
-        }
-
-        constexpr FactoredMultivector & operator=(FactoredMultivector &&other) noexcept {
-            assert(&space_ == &other.space_);
-            scalar_ = other.scalar_;
-            factors_in_signed_metric_ = other.factors_in_signed_metric_;
-            return *this;
-        }
+        constexpr FactoredMultivector & operator=(FactoredMultivector const &other) = default;
+        constexpr FactoredMultivector & operator=(FactoredMultivector &&other) = default;
 
         //TODO [FUTURE] Specialization.
         //template<typename OtherScalarType, typename OtherFactoringProductType>
         //constexpr FactoredMultivector & operator=(FactoredMultivector<OtherScalarType, OtherFactoringProductType> const &) = default;
 
         constexpr MetricSpaceType const & space() const noexcept {
-            return space_;
+            return *space_ptr_;
+        }
+
+        constexpr MetricSpaceType const * space_ptr() const noexcept {
+            return space_ptr_;
         }
 
         constexpr ScalarType const & scalar() const noexcept {
@@ -81,7 +78,7 @@ namespace tbgal {
         }
 
         constexpr decltype(auto) factors_in_actual_metric() const noexcept {
-            return detail::evaluate(detail::from_signed_to_actual_metric(space_, factors_in_signed_metric_));
+            return detail::evaluate(detail::from_signed_to_actual_metric(space_ptr_, factors_in_signed_metric_));
         }
 
         constexpr auto const & factors_in_signed_metric() const noexcept {
@@ -95,15 +92,15 @@ namespace tbgal {
     private:
 
         template<typename OtherScalarType, typename OtherFactorsMatrixType>
-        constexpr FactoredMultivector(MetricSpaceType const &space, OtherScalarType &&scalar, OtherFactorsMatrixType &&factors_in_signed_metric) noexcept :
-            space_(space),
+        constexpr FactoredMultivector(MetricSpaceType const *space_ptr, OtherScalarType &&scalar, OtherFactorsMatrixType &&factors_in_signed_metric) noexcept :
+            space_ptr_(space_ptr),
             scalar_(std::move(scalar)),
             factors_in_signed_metric_(std::move(factors_in_signed_metric)) {
         }
 
     private:
 
-        MetricSpaceType const &space_;
+        MetricSpaceType const *space_ptr_;
 
         ScalarType scalar_;
 
@@ -137,44 +134,39 @@ namespace tbgal {
         using IndexType = detail::index_type_t<FactorsAndComplementMatrixType>;
         using ScalarType = ScalarType_;
 
+        constexpr FactoredMultivector() noexcept :
+            FactoredMultivector(nullptr, 0, detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(MetricSpaceType::DimensionsAtCompileTime != Dynamic ? MetricSpaceType::DimensionsAtCompileTime : 0), 0) {
+        }
+
         constexpr FactoredMultivector(FactoredMultivector const &) = default;
         constexpr FactoredMultivector(FactoredMultivector &&) = default;
 
-        constexpr FactoredMultivector(MetricSpaceType const &space) noexcept :
-            FactoredMultivector(space, 0, detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(space.dimensions()), 0) {
+        constexpr FactoredMultivector(MetricSpaceType const *space_ptr) noexcept :
+            FactoredMultivector(space_ptr, 0, detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(space_ptr->dimensions()), 0) {
         }
 
         template<typename OtherScalarType>
-        constexpr FactoredMultivector(MetricSpaceType const &space, OtherScalarType &&scalar) noexcept :
-            FactoredMultivector(space, std::move(scalar), detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(space.dimensions()), 0) {
+        constexpr FactoredMultivector(MetricSpaceType const *space_ptr, OtherScalarType &&scalar) noexcept :
+            FactoredMultivector(space_ptr, std::move(scalar), detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(space_ptr->dimensions()), 0) {
         }
 
         //TODO [FUTURE] Specialization.
         //template<typename OtherScalarType, typename OtherFactoringProductType>
         //constexpr FactoredMultivector(FactoredMultivector<OtherScalarType, OtherFactoringProductType> const &other) noexcept;
 
-        constexpr FactoredMultivector & operator=(FactoredMultivector const &other) noexcept {
-            assert(&space_ == &other.space_);
-            scalar_ = other.scalar_;
-            factors_and_complement_in_signed_metric_ = other.factors_and_complement_in_signed_metric_;
-            factors_count_ = other.factors_count_;
-            return *this;
-        }
-
-        constexpr FactoredMultivector & operator=(FactoredMultivector &&other) noexcept {
-            assert(&space_ == &other.space_);
-            scalar_ = other.scalar_;
-            factors_and_complement_in_signed_metric_ = other.factors_and_complement_in_signed_metric_;
-            factors_count_ = other.factors_count_;
-            return *this;
-        }
+        constexpr FactoredMultivector & operator=(FactoredMultivector const &other) = default;
+        constexpr FactoredMultivector & operator=(FactoredMultivector &&other) = default;
 
         //TODO [FUTURE] Specialization.
         //template<typename OtherScalarType, typename OtherFactoringProductType>
         //constexpr FactoredMultivector & operator=(FactoredMultivector<OtherScalarType, OtherFactoringProductType> const &) = default;
 
         constexpr MetricSpaceType const & space() const noexcept {
-            return space_;
+            return *space_ptr_;
+        }
+
+        constexpr MetricSpaceType const * space_ptr() const noexcept {
+            return space_ptr_;
         }
 
         constexpr ScalarType const & scalar() const noexcept {
@@ -182,11 +174,11 @@ namespace tbgal {
         }
 
         constexpr decltype(auto) factors_in_actual_metric() const noexcept {
-            return detail::evaluate(detail::from_signed_to_actual_metric(space_, factors_in_signed_metric()));
+            return detail::evaluate(detail::from_signed_to_actual_metric(space_ptr_, factors_in_signed_metric()));
         }
 
         constexpr decltype(auto) factors_in_signed_metric() const noexcept {
-            return detail::block<MetricSpaceType::DimensionsAtCompileTime, Dynamic>(factors_and_complement_in_signed_metric_, 0, 0, space_.dimensions(), factors_count_);
+            return detail::block<MetricSpaceType::DimensionsAtCompileTime, Dynamic>(factors_and_complement_in_signed_metric_, 0, 0, space_ptr_->dimensions(), factors_count_);
         }
 
         constexpr auto const & factors_and_complement_in_signed_metric() const noexcept {
@@ -200,8 +192,8 @@ namespace tbgal {
     private:
 
         template<typename OtherScalarType, typename OtherFactorsAndComplementMatrixType, typename OtherIndexType>
-        constexpr FactoredMultivector(MetricSpaceType const &space, OtherScalarType &&scalar, OtherFactorsAndComplementMatrixType &&factors_and_complement_in_signed_metric, OtherIndexType &&factors_count) noexcept :
-            space_(space),
+        constexpr FactoredMultivector(MetricSpaceType const *space_ptr, OtherScalarType &&scalar, OtherFactorsAndComplementMatrixType &&factors_and_complement_in_signed_metric, OtherIndexType &&factors_count) noexcept :
+            space_ptr_(space_ptr),
             scalar_(std::move(scalar)),
             factors_and_complement_in_signed_metric_(std::move(factors_and_complement_in_signed_metric)),
             factors_count_(std::move(factors_count)) {
@@ -209,7 +201,7 @@ namespace tbgal {
 
     private:
 
-        MetricSpaceType const &space_;
+        MetricSpaceType const *space_ptr_;
 
         ScalarType scalar_;
 
@@ -219,11 +211,11 @@ namespace tbgal {
         friend struct detail::gp_impl;
         friend struct detail::op_impl;
 
-        template<typename SomeMetricSpaceType, typename... SomeScalarTypes> friend constexpr decltype(auto) detail::make_vector(SomeMetricSpaceType const &, SomeScalarTypes &&...) noexcept;
-        template<typename SomeMetricSpaceType, typename SomeIteratorType, typename... SomeExtraScalarTypes> friend constexpr decltype(auto) detail::make_vector_using_iterator(SomeMetricSpaceType const &, SomeIteratorType, SomeIteratorType, SomeExtraScalarTypes &&...) noexcept;
+        template<typename SomeMetricSpaceType, typename... SomeScalarTypes> friend constexpr decltype(auto) detail::make_vector(SomeMetricSpaceType const *, SomeScalarTypes &&...) noexcept;
+        template<typename SomeMetricSpaceType, typename SomeIteratorType, typename... SomeExtraScalarTypes> friend constexpr decltype(auto) detail::make_vector_using_iterator(SomeMetricSpaceType const *, SomeIteratorType, SomeIteratorType, SomeExtraScalarTypes &&...) noexcept;
 
-        template<typename SomeScalarType, typename SomeMetricSpaceType> friend decltype(auto) e(SomeMetricSpaceType const &, DefaultIndexType) noexcept;
-        template<typename SomeMetricSpaceType, typename SomeScalarType, typename> friend decltype(auto) scalar(SomeMetricSpaceType const &, SomeScalarType const &) noexcept;
+        template<typename SomeScalarType, typename SomeMetricSpaceType> friend decltype(auto) e(SomeMetricSpaceType const *, DefaultIndexType) noexcept;
+        template<typename SomeMetricSpaceType, typename SomeScalarType, typename> friend decltype(auto) scalar(SomeMetricSpaceType const *, SomeScalarType const &) noexcept;
 
         template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType> friend constexpr decltype(auto) addition(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &) noexcept;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) conjugate(FactoredMultivector<SomeScalarType, OuterProduct<SomeMetricSpaceType> > const &) noexcept;

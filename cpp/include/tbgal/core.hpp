@@ -128,13 +128,13 @@ namespace tbgal {
 
         template<typename ScalarType, typename FactoringProductType>
         constexpr decltype(auto) space_ptr(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
-            return &arg.space();
+            return arg.space_ptr();
         }
 
         template<typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
         constexpr decltype(auto) space_ptr(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
-            assert(space_ptr(args...) == &arg1.space() || space_ptr(args...) == nullptr);
-            return &arg1.space();
+            assert(space_ptr(args...) == arg1.space_ptr() || space_ptr(args...) == nullptr);
+            return arg1.space_ptr();
         }
 
         template<typename FirstScalarType, typename... NextTypes>

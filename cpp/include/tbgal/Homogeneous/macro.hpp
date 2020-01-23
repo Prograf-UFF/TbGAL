@@ -27,32 +27,32 @@
     \
     template<typename... ScalarTypes, typename = std::enable_if_t<std::disjunction_v<std::bool_constant<!detail::is_iterator_v<ScalarTypes> >...> > > \
     constexpr decltype(auto) direction(ScalarTypes &&... coords) noexcept { \
-        return tbgal::detail::make_vector(METRIC_SPACE, std::move(coords)..., 0); \
+        return tbgal::detail::make_vector(&METRIC_SPACE, std::move(coords)..., 0); \
     } \
     \
     template<typename IteratorType, typename = std::enable_if_t<detail::is_iterator_v<IteratorType> > > \
     constexpr decltype(auto) direction(IteratorType begin, IteratorType end) noexcept { \
-        return tbgal::detail::make_vector_using_iterator(METRIC_SPACE, begin, end, 0); \
+        return tbgal::detail::make_vector_using_iterator(&METRIC_SPACE, begin, end, 0); \
     } \
     \
     template<typename... ScalarTypes, typename = std::enable_if_t<std::disjunction_v<std::bool_constant<!detail::is_iterator_v<ScalarTypes> >...> > > \
     constexpr decltype(auto) euclidean_vector(ScalarTypes &&... coords) noexcept { \
-        return tbgal::detail::make_vector(METRIC_SPACE, std::move(coords)..., 0); \
+        return tbgal::detail::make_vector(&METRIC_SPACE, std::move(coords)..., 0); \
     } \
     \
     template<typename IteratorType, typename = std::enable_if_t<detail::is_iterator_v<IteratorType> > > \
     constexpr decltype(auto) euclidean_vector(IteratorType begin, IteratorType end) noexcept { \
-        return tbgal::detail::make_vector_using_iterator(METRIC_SPACE, begin, end, 0); \
+        return tbgal::detail::make_vector_using_iterator(&METRIC_SPACE, begin, end, 0); \
     } \
     \
     template<typename... ScalarTypes, typename = std::enable_if_t<std::disjunction_v<std::bool_constant<!detail::is_iterator_v<ScalarTypes> >...> > > \
     constexpr decltype(auto) point(ScalarTypes &&... coords) noexcept { \
-        return tbgal::detail::make_vector(METRIC_SPACE, std::move(coords)..., 1); \
+        return tbgal::detail::make_vector(&METRIC_SPACE, std::move(coords)..., 1); \
     } \
     \
     template<typename IteratorType, typename = std::enable_if_t<detail::is_iterator_v<IteratorType> > > \
     constexpr decltype(auto) point(IteratorType begin, IteratorType end) noexcept { \
-        return tbgal::detail::make_vector_using_iterator(METRIC_SPACE, begin, end, 1); \
+        return tbgal::detail::make_vector_using_iterator(&METRIC_SPACE, begin, end, 1); \
     }
 
 //TODO [NEXT] Inclue other helpers.

@@ -31,7 +31,7 @@ namespace tbgal {
     namespace detail {
 
         template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType QDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
-        constexpr decltype(auto) apply_signed_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &, MatrixType &&) noexcept;
+        constexpr decltype(auto) apply_signed_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const *, MatrixType &&) noexcept;
 
     }
 
@@ -88,7 +88,7 @@ namespace tbgal {
 
         detail::diagonal_matrix_type_t<ScalarType, DimensionsAtCompileTime, MaxDimensionsAtCompileTime> signed_metric_;
 
-        template<DefaultIndexType SomePDimensionsAtCompileTime, DefaultIndexType SomeQDimensionsAtCompileTime, DefaultIndexType SomeMaxDimensionsAtCompileTime, typename SomeMatrixType> friend constexpr decltype(auto) detail::apply_signed_metric(BaseSignedMetricSpace<SomePDimensionsAtCompileTime, SomeQDimensionsAtCompileTime, SomeMaxDimensionsAtCompileTime> const &, SomeMatrixType &&) noexcept;
+        template<DefaultIndexType SomePDimensionsAtCompileTime, DefaultIndexType SomeQDimensionsAtCompileTime, DefaultIndexType SomeMaxDimensionsAtCompileTime, typename SomeMatrixType> friend constexpr decltype(auto) detail::apply_signed_metric(BaseSignedMetricSpace<SomePDimensionsAtCompileTime, SomeQDimensionsAtCompileTime, SomeMaxDimensionsAtCompileTime> const *, SomeMatrixType &&) noexcept;
     };
 
     template<DefaultIndexType PDimensionsAtCompileTime_, DefaultIndexType MaxDimensionsAtCompileTime_>
@@ -138,50 +138,50 @@ namespace tbgal {
     namespace detail {
 
         template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType QDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
-        constexpr decltype(auto) apply_signed_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &space, MatrixType &&factors_in_signed_metric) noexcept {
-            return prod(space.signed_metric_, std::move(factors_in_signed_metric));
+        constexpr decltype(auto) apply_signed_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const *space_ptr, MatrixType &&factors_in_signed_metric) noexcept {
+            return prod(space_ptr->signed_metric_, std::move(factors_in_signed_metric));
         }
 
         template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
-        constexpr decltype(auto) apply_signed_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const &, MatrixType &&factors_in_signed_metric) noexcept {
+        constexpr decltype(auto) apply_signed_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const *, MatrixType &&factors_in_signed_metric) noexcept {
             return std::move(factors_in_signed_metric);
         }
 
         template<typename MetricSpaceType, typename MatrixType, typename = std::enable_if_t<MetricSpaceType::QDimensionsAtCompileTime != 0> >
-        constexpr decltype(auto) from_actual_to_signed_metric(MetricSpaceType const &space, MatrixType &&factors_in_actual_metric) noexcept {
-            return from_actual_to_signed_metric_impl<MetricSpaceType>::eval(space, std::move(factors_in_actual_metric));
+        constexpr decltype(auto) from_actual_to_signed_metric(MetricSpaceType const *space_ptr, MatrixType &&factors_in_actual_metric) noexcept {
+            return from_actual_to_signed_metric_impl<MetricSpaceType>::eval(space_ptr, std::move(factors_in_actual_metric));
         }
 
         template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
-        constexpr decltype(auto) from_actual_to_signed_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const &, MatrixType &&factors_in_actual_metric) noexcept {
+        constexpr decltype(auto) from_actual_to_signed_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const *, MatrixType &&factors_in_actual_metric) noexcept {
             return std::move(factors_in_actual_metric);
         }
 
         template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType QDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
-        constexpr decltype(auto) from_outer_to_geometric_factors(BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &space, MatrixType &&factors_in_signed_metric) noexcept {
-            auto new_factors_in_signed_metric = evaluate(prod(factors_in_signed_metric, es_eigenvectors_matrix(evaluate(prod(transpose(factors_in_signed_metric), apply_signed_metric(space, factors_in_signed_metric))))));
+        constexpr decltype(auto) from_outer_to_geometric_factors(BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const *space_ptr, MatrixType &&factors_in_signed_metric) noexcept {
+            auto new_factors_in_signed_metric = evaluate(prod(factors_in_signed_metric, es_eigenvectors_matrix(evaluate(prod(transpose(factors_in_signed_metric), apply_signed_metric(space_ptr, factors_in_signed_metric))))));
             return std::make_tuple(determinant(prod(transpose(new_factors_in_signed_metric), factors_in_signed_metric)), new_factors_in_signed_metric);
         }
 
         template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
-        constexpr decltype(auto) from_outer_to_geometric_factors(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const &, MatrixType &&factors_in_signed_metric) noexcept {
+        constexpr decltype(auto) from_outer_to_geometric_factors(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const *, MatrixType &&factors_in_signed_metric) noexcept {
             using MetricSpaceType = BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime>;
             using ResultingScalarType = std::common_type_t<scalar_type_t<MatrixType>, typename MetricSpaceType::ScalarType>;
             return std::make_tuple(ResultingScalarType(1), std::move(factors_in_signed_metric));
         }
 
         template<typename MetricSpaceType, typename MatrixType, typename = std::enable_if_t<MetricSpaceType::QDimensionsAtCompileTime != 0> >
-        constexpr decltype(auto) from_signed_to_actual_metric(MetricSpaceType const &space, MatrixType &&factors_in_signed_metric) noexcept {
-            return from_signed_to_actual_metric_impl<MetricSpaceType>::eval(space, std::move(factors_in_signed_metric));
+        constexpr decltype(auto) from_signed_to_actual_metric(MetricSpaceType const *space_ptr, MatrixType &&factors_in_signed_metric) noexcept {
+            return from_signed_to_actual_metric_impl<MetricSpaceType>::eval(space_ptr, std::move(factors_in_signed_metric));
         }
 
         template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
-        constexpr decltype(auto) from_signed_to_actual_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const &, MatrixType &&factors_in_signed_metric) noexcept {
+        constexpr decltype(auto) from_signed_to_actual_metric(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const *, MatrixType &&factors_in_signed_metric) noexcept {
             return std::move(factors_in_signed_metric);
         }
 
         template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType QDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
-        constexpr decltype(auto) metric_factor(BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const &space, MatrixType &&factors_in_signed_metric) noexcept {
+        constexpr decltype(auto) metric_factor(BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime> const *space_ptr, MatrixType &&factors_in_signed_metric) noexcept {
             using MetricSpaceType = BaseSignedMetricSpace<PDimensionsAtCompileTime, QDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
             using ResulingScalarType = std::common_type_t<scalar_type_t<MatrixType>, typename MetricSpaceType::ScalarType>;
             using IndexType = index_type_t<MatrixType>;
@@ -190,14 +190,14 @@ namespace tbgal {
 
             ResulingScalarType result = 1;
             for (IndexType col = 0, col_end = cols(factors_in_signed_metric); col != col_end; ++col) {
-                auto column = block<DimensionsAtCompileTime, 1>(factors_in_signed_metric, 0, col, space.dimensions(), 1);
-                result *= coeff(prod(transpose(column), apply_signed_metric(space, column)), 0, 0);
+                auto column = block<DimensionsAtCompileTime, 1>(factors_in_signed_metric, 0, col, space_ptr->dimensions(), 1);
+                result *= coeff(prod(transpose(column), apply_signed_metric(space_ptr, column)), 0, 0);
             }
             return result;
         }
 
         template<DefaultIndexType PDimensionsAtCompileTime, DefaultIndexType MaxDimensionsAtCompileTime, typename MatrixType>
-        constexpr decltype(auto) metric_factor(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const &space, MatrixType &&factors_in_signed_metric) noexcept {
+        constexpr decltype(auto) metric_factor(BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime> const *space_ptr, MatrixType &&factors_in_signed_metric) noexcept {
             using MetricSpaceType = BaseSignedMetricSpace<PDimensionsAtCompileTime, 0, MaxDimensionsAtCompileTime>;
             using ResulingScalarType = std::common_type_t<scalar_type_t<MatrixType>, typename MetricSpaceType::ScalarType>;
             return ResulingScalarType(1);

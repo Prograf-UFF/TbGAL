@@ -34,7 +34,7 @@ namespace tbgal {
             }
             return rcont(arg1, arg2);
         }
-        return ResultingFactoredMultivectorType(*detail::space_ptr(arg1, arg2), 0);
+        return ResultingFactoredMultivectorType(detail::space_ptr(arg1, arg2), 0);
     }
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >

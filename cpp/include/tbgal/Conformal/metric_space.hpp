@@ -106,16 +106,16 @@ namespace tbgal {
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
         struct from_actual_to_signed_metric_impl<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &space, MatrixType &&factors_in_actual_metric) noexcept {
-                return detail::prod(space.from_actual_to_signed_metric_, std::move(factors_in_actual_metric));
+            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const *space_ptr, MatrixType &&factors_in_actual_metric) noexcept {
+                return detail::prod(space_ptr->from_actual_to_signed_metric_, std::move(factors_in_actual_metric));
             }
         };
 
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
         struct from_signed_to_actual_metric_impl<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const &space, MatrixType &&factors_in_signed_metric) noexcept {
-                return detail::prod(space.from_signed_to_actual_metric_, std::move(factors_in_signed_metric));
+            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const *space_ptr, MatrixType &&factors_in_signed_metric) noexcept {
+                return detail::prod(space_ptr->from_signed_to_actual_metric_, std::move(factors_in_signed_metric));
             }
         };
 

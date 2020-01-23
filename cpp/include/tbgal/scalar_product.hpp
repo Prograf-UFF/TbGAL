@@ -34,7 +34,7 @@ namespace tbgal {
         using ResultingScalarType = std::common_type_t<FirstScalarType, SecondScalarType, typename MetricSpaceType::ScalarType>;
         assert(is_blade(arg1) && is_blade(arg2));
         if (arg1.factors_count() == arg2.factors_count()) {
-            return (((arg1.factors_count() * (arg1.factors_count() - 1)) & 2) ? -arg1.scalar() : arg1.scalar()) * arg2.scalar() * detail::determinant(detail::prod(detail::transpose(arg1.factors_in_signed_metric()), detail::apply_signed_metric(arg2.space(), arg2.factors_in_signed_metric())));
+            return (((arg1.factors_count() * (arg1.factors_count() - 1)) & 2) ? -arg1.scalar() : arg1.scalar()) * arg2.scalar() * detail::determinant(detail::prod(detail::transpose(arg1.factors_in_signed_metric()), detail::apply_signed_metric(arg2.space_ptr(), arg2.factors_in_signed_metric())));
         }
         return ResultingScalarType(0);
     }

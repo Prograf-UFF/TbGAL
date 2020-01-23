@@ -31,7 +31,7 @@ namespace tbgal {
         if (!is_blade(arg1) || !is_blade(arg2) || (arg1.factors_count() <= arg2.factors_count())) {
             return undual(op(arg1, dual(arg2)));
         }
-        return ResultingFactoredMultivectorType(*detail::space_ptr(arg1, arg2), 0);
+        return ResultingFactoredMultivectorType(detail::space_ptr(arg1, arg2), 0);
     }
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
@@ -47,9 +47,9 @@ namespace tbgal {
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
         auto resulting_scalar = arg1 * arg2.scalar();
         if (!is_zero(resulting_scalar)) {
-            return ResultingFactoredMultivectorType(arg2.space(), resulting_scalar, arg2.factors_in_signed_metric());
+            return ResultingFactoredMultivectorType(arg2.space_ptr(), resulting_scalar, arg2.factors_in_signed_metric());
         }
-        return ResultingFactoredMultivectorType(arg2.space(), 0);
+        return ResultingFactoredMultivectorType(arg2.space_ptr(), 0);
     }
 
     template<typename FirstScalarType, typename SecondScalarType, typename SecondMetricSpaceType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
@@ -59,9 +59,9 @@ namespace tbgal {
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
         auto resulting_scalar = arg1 * arg2.scalar();
         if (!is_zero(resulting_scalar)) {
-            return ResultingFactoredMultivectorType(arg2.space(), resulting_scalar, arg2.factors_and_complement_in_signed_metric(), arg2.factors_count());
+            return ResultingFactoredMultivectorType(arg2.space_ptr(), resulting_scalar, arg2.factors_and_complement_in_signed_metric(), arg2.factors_count());
         }
-        return ResultingFactoredMultivectorType(arg2.space(), 0);
+        return ResultingFactoredMultivectorType(arg2.space_ptr(), 0);
     }
 
     template<typename FirstScalarType, typename SecondScalarType, typename = std::enable_if_t<!(is_multivector_v<FirstScalarType> || is_multivector_v<SecondScalarType>)> >

@@ -28,7 +28,7 @@ namespace tbgal {
     template<typename ScalarType, typename MetricSpaceType>
     constexpr decltype(auto) rnorm_sqr(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) {
         if (arg.factors_count() > 0) {
-            return arg.scalar() * arg.scalar() * detail::metric_factor(arg.space(), arg.factors_in_signed_metric());
+            return arg.scalar() * arg.scalar() * detail::metric_factor(arg.space_ptr(), arg.factors_in_signed_metric());
         }
         else {
             return arg.scalar() * arg.scalar();
@@ -38,8 +38,8 @@ namespace tbgal {
     template<typename ScalarType, typename MetricSpaceType>
     constexpr decltype(auto) rnorm_sqr(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) {
         if (arg.factors_count() > 0) {
-            auto factors_tuple = detail::from_outer_to_geometric_factors(arg.space(), arg.factors_in_signed_metric());
-            return arg.scalar() * arg.scalar() * std::get<0>(factors_tuple) * std::get<0>(factors_tuple) * detail::metric_factor(arg.space(), std::get<1>(factors_tuple));
+            auto factors_tuple = detail::from_outer_to_geometric_factors(arg.space_ptr(), arg.factors_in_signed_metric());
+            return arg.scalar() * arg.scalar() * std::get<0>(factors_tuple) * std::get<0>(factors_tuple) * detail::metric_factor(arg.space_ptr(), std::get<1>(factors_tuple));
         }
         else {
             return arg.scalar() * arg.scalar();

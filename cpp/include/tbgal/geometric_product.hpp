@@ -37,35 +37,35 @@ namespace tbgal {
             
             template<typename ScalarType, typename MetricSpaceType>
             constexpr static decltype(auto) to_geometric_factors(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) noexcept {
-                auto factors_tuple = from_outer_to_geometric_factors(arg.space(), arg.factors_in_signed_metric());
+                auto factors_tuple = from_outer_to_geometric_factors(arg.space_ptr(), arg.factors_in_signed_metric());
                 return std::make_tuple(arg.scalar() * std::get<0>(factors_tuple), std::get<1>(factors_tuple));
             }
             
             template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType, typename ColumnMatrixType>
-            constexpr static void update_factors(MetricSpaceType const &, ScalarType &, FactorsMatrixType const &, DynamicSquareMatrixType const &, FactorsMatrixType const &, TwoByTwoMatrixType const &, TwoByTwoMatrixType const &, DynamicColumnMatrixType const &, ColumnMatrixType const &) noexcept {
+            constexpr static void update_factors(MetricSpaceType const *, ScalarType &, FactorsMatrixType const &, DynamicSquareMatrixType const &, FactorsMatrixType const &, TwoByTwoMatrixType const &, TwoByTwoMatrixType const &, DynamicColumnMatrixType const &, ColumnMatrixType const &) noexcept {
             }
 
             template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType, typename ColumnMatrixType, typename FirstScalarType, typename... NextTypes>
-            constexpr static void update_factors(MetricSpaceType const &space, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, TwoByTwoMatrixType &inv_T, DynamicColumnMatrixType &x, ColumnMatrixType &z, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
+            constexpr static void update_factors(MetricSpaceType const *space_ptr, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, TwoByTwoMatrixType &inv_T, DynamicColumnMatrixType &x, ColumnMatrixType &z, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
                 constexpr DefaultIndexType DimensionsAtCompileTime = MetricSpaceType::DimensionsAtCompileTime;
                 constexpr DefaultIndexType MaxDimensionsAtCompileTime = MetricSpaceType::MaxDimensionsAtCompileTime;
 
                 alpha *= arg1;
                 if (is_zero(alpha)) {
-                    A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), 0);
+                    A = make_zero_matrix<ScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space_ptr->dimensions(), 0);
                     return;
                 }
-                update_factors(space, alpha, A, MA, QA, T, inv_T, x, z, args...);
+                update_factors(space_ptr, alpha, A, MA, QA, T, inv_T, x, z, args...);
             }
 
             template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType, typename ColumnMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-            constexpr static void update_factors(MetricSpaceType const &space, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, TwoByTwoMatrixType &inv_T, DynamicColumnMatrixType &x, ColumnMatrixType &z, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
+            constexpr static void update_factors(MetricSpaceType const *space_ptr, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, TwoByTwoMatrixType &inv_T, DynamicColumnMatrixType &x, ColumnMatrixType &z, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
                 using IndexType = typename MetricSpaceType::IndexType;
 
                 constexpr DefaultIndexType DimensionsAtCompileTime = MetricSpaceType::DimensionsAtCompileTime;
                 constexpr DefaultIndexType MaxDimensionsAtCompileTime = MetricSpaceType::MaxDimensionsAtCompileTime;
 
-                IndexType const n = space.dimensions();
+                IndexType const n = space_ptr->dimensions();
 
                 auto column = [&](auto const &F, IndexType const col) -> auto {
                     return block<MetricSpaceType::DimensionsAtCompileTime, 1>(F, 0, col, n, 1);
@@ -92,7 +92,7 @@ namespace tbgal {
                     if (r != 0) {
                         for (IndexType k = 0; k != s; ++k) {
                             auto b = column(B, k);
-                            auto b_metric = apply_signed_metric(space, b);
+                            auto b_metric = apply_signed_metric(space_ptr, b);
 
                             x = prod(transpose(QA), b_metric); // Projection of b onto A using reciprocal frame vectors (thus, b = A . x)
                             z = subtract(b, prod(A, x));
@@ -149,7 +149,7 @@ namespace tbgal {
                                                 assign_block<1, Dynamic>(transpose(MA), i + 1, 0, MA, i + 1, 0, 1, r);
 
                                                 assign_block<DimensionsAtCompileTime, 1>(A, 0, i + 1, QA, 0, i + 1, n, 1);
-                                                assign_block<DimensionsAtCompileTime, 1>(apply_signed_metric(space, column(A, i + 1)), A, 0, i + 1, n, 1);
+                                                assign_block<DimensionsAtCompileTime, 1>(apply_signed_metric(space_ptr, column(A, i + 1)), A, 0, i + 1, n, 1);
                                             }
                                         }
                                     }
@@ -182,7 +182,7 @@ namespace tbgal {
                     }
                     else {
                         A = B;
-                        MA = prod(transpose(A), apply_signed_metric(space, A)); // Metric matrix of A
+                        MA = prod(transpose(A), apply_signed_metric(space_ptr, A)); // Metric matrix of A
                         QA = prod(A, inverse(MA)); // Reciprocal frame vectors of A
                     }
                 }
@@ -193,7 +193,7 @@ namespace tbgal {
                         return;
                     }
                 }
-                update_factors(space, alpha, A, MA, QA, T, inv_T, x, z, args...);
+                update_factors(space_ptr, alpha, A, MA, QA, T, inv_T, x, z, args...);
             }
 
         public:
@@ -214,19 +214,19 @@ namespace tbgal {
                 using FactorsMatrixType = matrix_type_t<ResultingScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>;
                 using TwoByTwoMatrixType = matrix_type_t<ResultingScalarType, 2, 2, 2, 2>;
 
-                auto const &space = *space_ptr(args...);
+                auto const *space_ptr = detail::space_ptr(args...);
 
                 ResultingScalarType alpha = 1;
-                FactorsMatrixType A = make_matrix<ResultingScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space.dimensions(), 0);
+                FactorsMatrixType A = make_matrix<ResultingScalarType, DimensionsAtCompileTime, Dynamic, MaxDimensionsAtCompileTime, MaxDimensionsAtCompileTime>(space_ptr->dimensions(), 0);
                 
                 FactorsMatrixType QA;
                 TwoByTwoMatrixType T, inv_T;
                 DynamicSquareMatrixType MA;
                 DynamicColumnMatrixType x;
                 ColumnMatrixType z;
-                update_factors(space, alpha, A, MA, QA, T, inv_T, x, z, args...);
+                update_factors(space_ptr, alpha, A, MA, QA, T, inv_T, x, z, args...);
 
-                return ResultingFactoredMultivectorType(space, alpha, A);
+                return ResultingFactoredMultivectorType(space_ptr, alpha, A);
             }
         };
 
