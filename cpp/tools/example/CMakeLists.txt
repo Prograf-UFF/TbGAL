@@ -21,25 +21,27 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-set(VERSION_MAJOR 1)
-set(VERSION_MINOR 0)
-set(VERSION_PATCH 20200123)
+project(TbGAL-Example)
 
-project(TbGAL
-  VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
-  DESCRIPTION "TbGAL: Tensor-based Geometric Algebra Library"
-  LANGUAGES CXX
-)
+find_package(TbGAL REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Eigen3 3.3 NO_MODULE REQUIRED)
+set(target_prefix TbGAL_example_)
 
-file(INSTALL "./cpp/include" DESTINATION "${CMAKE_INSTALL_PREFIX}" FILES_MATCHING PATTERN "*.hpp")
+set(example_groups
+  basic
+)
 
-configure_file("./cmake/TbGALConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/TbGALConfig.cmake" @ONLY NEWLINE_STYLE UNIX)
-file(INSTALL "${CMAKE_CURRENT_BINARY_DIR}/TbGALConfig.cmake" DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/tbgal")
+include_directories(${TbGAL_INCLUDE_DIRS})
 
-configure_file("./cmake/TbGALConfigVersion.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/TbGALConfigVersion.cmake" @ONLY NEWLINE_STYLE UNIX)
-file(INSTALL "${CMAKE_CURRENT_BINARY_DIR}/TbGALConfigVersion.cmake" DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/tbgal")
+foreach(example_group ${example_groups})
+  file(GLOB example_filenames RELATIVE "${PROJECT_SOURCE_DIR}/${example_group}" ${PROJECT_SOURCE_DIR}/${example_group}/*.cpp)
+  foreach(example_filename ${example_filenames})
+    string(REPLACE ".cpp" "" example_name ${example_filename})
+    add_executable(${target_prefix}${example_group}_${example_name} "${PROJECT_SOURCE_DIR}/${example_group}/${example_filename}")
+    target_include_directories(${target_prefix}${example_group}_${example_name} PUBLIC ${PROJECT_SOURCE_DIR}/${example_group})
+    target_link_libraries(${target_prefix}${example_group}_${example_name})
+  endforeach()
+endforeach()
