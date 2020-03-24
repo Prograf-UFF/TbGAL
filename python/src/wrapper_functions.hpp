@@ -1,3 +1,28 @@
+/* Copyright (C) Eduardo Vera Sousa and Leandro Augusto Frata Fernandes
+ * 
+ * authors    : Sousa, Eduardo V.
+ *              Fernandes, Leandro A. F.
+ * repository : https://github.com/Prograf-UFF/TbGAL
+ * 
+ * This file is part of the Tensor-based Geometric Algebra Library (TbGAL).
+ * 
+ * TbGAL is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * TbGAL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with TbGAL. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#ifndef __TBGAL_PYTHON_WRAPPER_FUNCTIONS_HPP__
+#define __TBGAL_PYTHON_WRAPPER_FUNCTIONS_HPP__
+
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
 
@@ -12,28 +37,6 @@
 
 using namespace tbgal;
 namespace python = boost::python;
-
-/*
-
-Hestenes' inner product         - ok
-Dot product                     - ok
-left contraction                - ok
-right contraction               - ok
-Reversion                       - ok
-Inversion                       - ok
-Reverse norm                    - ok
-Squared reverse norm            - ok
-Dualization                     - ok
-Undualization                   - ok
-Scalar product                  - ok
-Outer product                   - ok
-Geometric product               - ok
-Addition                        - ok?
-Subtraction                     - ok?
-Unary plus                      - ok
-Unary minus                     - ok
-
-*/
 
 template<typename T>
 inline
@@ -97,3 +100,5 @@ template<typename T>
 double py_sp(const T &lhs, const T &rhs) {
     return tbgal::sp(lhs, rhs);
 }
+
+#endif
