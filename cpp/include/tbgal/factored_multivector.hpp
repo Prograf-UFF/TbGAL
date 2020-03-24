@@ -23,6 +23,10 @@
 #ifndef __TBGAL_MULTIVECTOR_HPP__
 #define __TBGAL_MULTIVECTOR_HPP__
 
+#include <sstream>
+#include <string>
+
+
 namespace tbgal {
 
     template<typename ScalarType_, typename MetricSpaceType_>
@@ -76,6 +80,13 @@ namespace tbgal {
         constexpr ScalarType const & scalar() const noexcept {
             return scalar_;
         }
+
+        std::string repr() const {
+            std::stringstream s;
+            s << *this;
+            return s.str();
+        }
+
 
         constexpr decltype(auto) factors_in_actual_metric() const noexcept {
             return detail::evaluate(detail::from_signed_to_actual_metric(space_ptr_, factors_in_signed_metric_));
@@ -144,6 +155,13 @@ namespace tbgal {
         constexpr FactoredMultivector(MetricSpaceType const *space_ptr) noexcept :
             FactoredMultivector(space_ptr, 0, detail::make_identity_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(space_ptr->dimensions()), 0) {
         }
+
+        std::string repr() const {
+            std::stringstream s;
+            s << *this;
+            return s.str();
+        }
+
 
         template<typename OtherScalarType>
         constexpr FactoredMultivector(MetricSpaceType const *space_ptr, OtherScalarType &&scalar) noexcept :
