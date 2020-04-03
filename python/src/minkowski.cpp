@@ -21,7 +21,7 @@
  */
 
 #include "../../cpp/include/tbgal/using_Eigen.hpp"
-#include "../../cpp/include/tbgal/assuming_EuclideanD.hpp"
+#include "../../cpp/include/tbgal/assuming_MinkowskiD.hpp"
 #include "wrapper_functions.hpp"
 #include "macros.hpp"
 
@@ -30,23 +30,25 @@ namespace py_tbgal {
     namespace python = boost::python;
 
     auto py_vector(python::tuple args, python::dict kwargs) {
-        tbgal::EuclideanD::SPACE = EuclideanMetricSpace<Dynamic, Dynamic>(len(args));
+        tbgal::MinkowskiD::SPACE = MinkowskiMetricSpace<Dynamic, Dynamic>(len(args));
         std::vector<std::double_t> args_as_container = py_list_to_std_vector<std::double_t>(args);
-        auto a = tbgal::EuclideanD::vector(args_as_container.begin(), args_as_container.end());
+        auto a = tbgal::MinkowskiD::vector(args_as_container.begin(), args_as_container.end());
         return a;
     }
 
-    BOOST_PYTHON_MODULE(euclidean) {
+    BOOST_PYTHON_MODULE(minkowski) {
 
-        using OP = tbgal::OuterProduct<tbgal::EuclideanMetricSpace<Dynamic, Dynamic>>;
-        using GP = tbgal::GeometricProduct<tbgal::EuclideanMetricSpace<Dynamic, Dynamic>>;
+        using OP = tbgal::OuterProduct<tbgal::MinkowskiMetricSpace<Dynamic, Dynamic>>;
+        using GP = tbgal::GeometricProduct<tbgal::MinkowskiMetricSpace<Dynamic, Dynamic>>;
 
         _DECLARE_FACTORED_MULTIVECTOR_PYTHON(std::double_t, OP, std::double_t, GP);
         _DECLARE_ALL_OPERATIONS(std::double_t, OP, std::double_t, GP);
 
         python::def("vector", python::raw_function(py_vector) );
 
+        python::def("ep", &tbgal::MinkowskiD::ep);
 
+        python::def("em", &tbgal::MinkowskiD::em);
 
     }
 

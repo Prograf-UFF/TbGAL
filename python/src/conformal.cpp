@@ -31,7 +31,7 @@ namespace py_tbgal {
 
     auto py_vector(python::tuple args, python::dict kwargs) {
         tbgal::ConformalD::SPACE = ConformalMetricSpace<Dynamic, Dynamic>(len(args));
-        std::vector<double> args_as_container = py_list_to_std_vector<double>(args);
+        std::vector<std::double_t> args_as_container = py_list_to_std_vector<std::double_t>(args);
         auto a = tbgal::ConformalD::vector(args_as_container.begin(), args_as_container.end());
         return a;
     }
@@ -42,103 +42,9 @@ namespace py_tbgal {
         using GP = tbgal::GeometricProduct<tbgal::ConformalMetricSpace<Dynamic, Dynamic>>;
 
         _DECLARE_FACTORED_MULTIVECTOR_PYTHON(std::double_t, OP, std::double_t, GP);
+        _DECLARE_ALL_OPERATIONS(std::double_t, OP, std::double_t, GP);
 
         python::def("vector", python::raw_function(py_vector) );
-
-        python::def("hip", +[](
-            const tbgal::FactoredMultivector<double, OP> &lhs, 
-            const tbgal::FactoredMultivector<double, OP> &rhs) {
-                return hip(lhs, rhs); 
-                }
-            );
-
-        python::def("dot", +[](
-            const tbgal::FactoredMultivector<double, OP> &lhs, 
-            const tbgal::FactoredMultivector<double, OP> &rhs) {
-                return dot(lhs, rhs); 
-                }
-            );
-        python::def("lcont", +[](
-            const tbgal::FactoredMultivector<double, OP> &lhs, 
-            const tbgal::FactoredMultivector<double, OP> &rhs) {
-                return lcont(lhs, rhs); 
-                }
-            );
-
-        python::def("rcont", +[](
-            const tbgal::FactoredMultivector<double, OP> &lhs, 
-            const tbgal::FactoredMultivector<double, OP> &rhs) {
-                return rcont(lhs, rhs); 
-                }
-            );
-
-        python::def("reverse", +[](
-            const tbgal::FactoredMultivector<double, OP> &mv) {
-                return reverse(mv);
-                }
-            );
-
-        python::def("reverse", +[](
-            const tbgal::FactoredMultivector<double, GP> &mv) {
-                return reverse(mv);
-                }
-            );
-
-        python::def("inverse", +[](
-            const tbgal::FactoredMultivector<double, OP> &mv) {
-                return inverse(mv);
-                }
-            );
-
-        python::def("reverse", +[](
-            const tbgal::FactoredMultivector<double, GP> &mv) {
-                return inverse(mv);
-                }
-            );
-
-        python::def("rnorm", +[](
-            const tbgal::FactoredMultivector<double, OP> &mv) {
-                return rnorm(mv);
-                }
-            );
-
-        python::def("rnorm", +[](
-            const tbgal::FactoredMultivector<double, GP> &mv) {
-                return rnorm(mv);
-                }
-            );
-
-        python::def("rnorm_sqr", +[](
-            const tbgal::FactoredMultivector<double, OP> &mv) {
-                return rnorm_sqr(mv);
-                }
-            );
-
-        python::def("rnorm_sqr", +[](
-            const tbgal::FactoredMultivector<double, GP> &mv) {
-                return rnorm_sqr(mv);
-                }
-            );
-
-        python::def("dual", +[](
-            const tbgal::FactoredMultivector<double, OP> &mv) {
-                return dual(mv);
-                }
-            );
-
-        python::def("undual", +[](
-            const tbgal::FactoredMultivector<double, OP> &mv) {
-                return undual(mv);
-                }
-            );
-
-        python::def("sp", +[](
-            const tbgal::FactoredMultivector<double, OP> &lhs, 
-            const tbgal::FactoredMultivector<double, OP> &rhs) {
-                return sp(lhs, rhs); 
-                }
-            );
-
 
         python::def("no", &tbgal::ConformalD::no);
 

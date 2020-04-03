@@ -52,6 +52,8 @@ namespace py_tbgal {
             .def(python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>>() + python::self)\
             .def(python::self - python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>>())\
             .def(python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>>() - python::self)\
+            .def(python::self / python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>>())\
+            .def(python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>>() / python::self)\
 
     #define _DECLARE_FACTORED_MULTIVECTOR_CLASS(SCALAR_TYPE, FACTORING_PRODUCT_TYPE)\
         python::class_< tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE> >("FactoredMultivector")\
@@ -63,6 +65,7 @@ namespace py_tbgal {
             _DECLARE_FACTORED_MULTIVECTOR_SCALAR_OPERATIONS(std::float_t)\
             .def(python::self ^ python::self)\
             .def(python::self * python::self)\
+            .def(python::self / python::self)\
             .def(+python::self)\
             .def(-python::self)\
             .def(python::self + python::self)\
@@ -81,6 +84,163 @@ namespace py_tbgal {
         _DECLARE_FACTORED_MULTIVECTOR_SELF_OPERATIONS(FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE)\
         _DECLARE_FACTORED_MULTIVECTOR_SELF_OPERATIONS(std::double_t, FIRST_FACTORING_PRODUCT_TYPE)\
         ;\
+
+    #define _DECLARE_ALL_OPERATIONS(FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE, SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE)\
+            namespace python = boost::python;\
+            python::def("gp", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return gp(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("gp", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return gp(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("gp", +[]( \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return gp(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("gp", +[]( \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return gp(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("igp", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return igp(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("igp", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return igp(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("igp", +[]( \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return igp(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("igp", +[]( \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return igp(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("op", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return op(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("op", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return op(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("op", +[]( \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return op(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("op", +[]( \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return op(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("hip", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return hip(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("dot", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return dot(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("lcont", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return lcont(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("rcont", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return rcont(lhs, rhs);  \
+                    } \
+                ); \
+            python::def("reverse", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &mv) { \
+                    return reverse(mv); \
+                    } \
+                ); \
+            python::def("reverse", +[]( \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &mv) { \
+                    return reverse(mv); \
+                    } \
+                ); \
+            python::def("inverse", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &mv) { \
+                    return inverse(mv); \
+                    } \
+                ); \
+            python::def("reverse", +[]( \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &mv) { \
+                    return inverse(mv); \
+                    } \
+                ); \
+            python::def("rnorm", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &mv) { \
+                    return rnorm(mv); \
+                    } \
+                ); \
+            python::def("rnorm", +[]( \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &mv) { \
+                    return rnorm(mv); \
+                    } \
+                ); \
+            python::def("rnorm_sqr", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &mv) { \
+                    return rnorm_sqr(mv); \
+                    } \
+                ); \
+            python::def("rnorm_sqr", +[]( \
+                const tbgal::FactoredMultivector<SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE> &mv) { \
+                    return rnorm_sqr(mv); \
+                    } \
+                ); \
+            python::def("dual", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &mv) { \
+                    return dual(mv); \
+                    } \
+                ); \
+            python::def("undual", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &mv) { \
+                    return undual(mv); \
+                    } \
+                ); \
+            python::def("sp", +[]( \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &lhs,  \
+                const tbgal::FactoredMultivector<FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE> &rhs) { \
+                    return sp(lhs, rhs);  \
+                    } \
+                );
+
+
 
 }
 

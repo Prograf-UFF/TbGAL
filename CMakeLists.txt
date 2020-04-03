@@ -74,14 +74,17 @@ endif()
 python_add_module(conformal ./python/src/conformal.cpp)
 python_add_module(euclidean ./python/src/euclidean.cpp)
 python_add_module(homogeneous ./python/src/homogeneous.cpp)
+python_add_module(minkowski ./python/src/minkowski.cpp)
 
 target_link_libraries(conformal PUBLIC Boost::${_boost_component_found} ${PYTHON_LIBRARIES})
 target_link_libraries(euclidean PUBLIC Boost::${_boost_component_found} ${PYTHON_LIBRARIES})
 target_link_libraries(homogeneous PUBLIC Boost::${_boost_component_found} ${PYTHON_LIBRARIES})
+target_link_libraries(minkowski PUBLIC Boost::${_boost_component_found} ${PYTHON_LIBRARIES})
 
 target_include_directories(conformal PRIVATE ${PYTHON_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
 target_include_directories(euclidean PRIVATE ${PYTHON_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
 target_include_directories(homogeneous PRIVATE ${PYTHON_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+target_include_directories(minkowski PRIVATE ${PYTHON_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
 
 set_target_properties(conformal
   PROPERTIES
@@ -107,6 +110,13 @@ set_target_properties(euclidean
     RUNTIME_OUTPUT_DIRECTORY "tbgal"
   )
 
+set_target_properties(minkowski
+  PROPERTIES
+    PREFIX ""
+    ARCHIVE_OUTPUT_DIRECTORY "tbgal"
+    LIBRARY_OUTPUT_DIRECTORY "tbgal"
+    RUNTIME_OUTPUT_DIRECTORY "tbgal"
+  )
 
 add_custom_command(TARGET conformal PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory tbgal)
 add_custom_command(TARGET conformal PRE_BUILD COMMAND ${CMAKE_COMMAND} -E touch tbgal/__init.py__)
@@ -114,16 +124,20 @@ add_custom_command(TARGET homogeneous PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make
 add_custom_command(TARGET homogeneous PRE_BUILD COMMAND ${CMAKE_COMMAND} -E touch tbgal/__init.py__)
 add_custom_command(TARGET euclidean PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory tbgal)
 add_custom_command(TARGET euclidean PRE_BUILD COMMAND ${CMAKE_COMMAND} -E touch tbgal/__init.py__)
+add_custom_command(TARGET minkowski PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory tbgal)
+add_custom_command(TARGET minkowski PRE_BUILD COMMAND ${CMAKE_COMMAND} -E touch tbgal/__init.py__)
 
-if ( CMAKE_COMPILER_IS_GNUCC )
-    target_compile_options(conformal PRIVATE "-Wall -Wextra")
-    target_compile_options(homogeneous PRIVATE "-Wall -Wextra")
-    target_compile_options(euclidean PRIVATE "-Wall -Wextra")
+if ( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" )
+    target_compile_options(conformal PRIVATE "-Wall")
+    target_compile_options(homogeneous PRIVATE "-Wall")
+    target_compile_options(euclidean PRIVATE "-Wall")
+    target_compile_options(minkowski PRIVATE "-Wall")
 endif()
-if ( MSVC )
+if ( CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" )
     target_compile_options(conformal PRIVATE "/W4")
     target_compile_options(homogeneous PRIVATE "/W4")
     target_compile_options(euclidean PRIVATE "/W4")
+    target_compile_options(minkowski PRIVATE "/W4")
 endif()
 
 message(STATUS "Eigen3_DIR = ${EIGEN3_INCLUDE_DIR}")
