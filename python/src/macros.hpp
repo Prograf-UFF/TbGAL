@@ -35,26 +35,53 @@
 #include "boost/python/stl_iterator.hpp" 
 #include <boost/python/raw_function.hpp> 
 
-#define _BUILD_FACTORED_MULTIVECTOR_PYTHON(PRODUCT, OTHER_PRODUCT, METRIC, SCALAR_MAIN, SCALAR_EXTRA) \
-    namespace python = boost::python; \
-    python::class_< tbgal::FactoredMultivector<SCALAR_MAIN, PRODUCT<METRIC<Dynamic, Dynamic>>> >("FactoredMultivector")  \ 
-        .def("__repr__", &tbgal::FactoredMultivector<SCALAR_MAIN, PRODUCT<METRIC<Dynamic, Dynamic>> >::repr)  \ 
-        .def(python::self ^ python::other<tbgal::FactoredMultivector<SCALAR_MAIN, OTHER_PRODUCT<METRIC<Dynamic, Dynamic>> >>())  \ 
-        .def(python::self ^ python::self)  \ 
-        .def(python::self ^ python::other<SCALAR_EXTRA>())  \ 
-        .def(python::other<SCALAR_EXTRA>() ^ python::self)  \ 
-        .def(python::self ^ python::other<SCALAR_MAIN>())  \ 
-        .def(python::other<SCALAR_MAIN>() ^ python::self)  \ 
-        .def(python::self * python::other<tbgal::FactoredMultivector<SCALAR_MAIN, OTHER_PRODUCT<METRIC<Dynamic, Dynamic>> >>())  \ 
-        .def(python::self * python::self)  \ 
-        .def(python::self * python::other<SCALAR_EXTRA>())  \ 
-        .def(python::other<SCALAR_EXTRA>() * python::self)  \ 
-        .def(python::self * python::other<SCALAR_MAIN>())  \ 
-        .def(python::other<SCALAR_MAIN>() * python::self)  \ 
-		.def(+python::self)  \ 
-		.def(-python::self)  \ 
-		.def(python::self + python::self)  \ 
-        .def(python::self + python::other<tbgal::FactoredMultivector<SCALAR_MAIN, OTHER_PRODUCT<METRIC<Dynamic, Dynamic>> > >())  \ 
-        .def(~python::self);  \ 
+namespace py_tbgal {
 
-#endif
+    #define _DECLARE_FACTORED_MULTIVECTOR_SCALAR_OPERATIONS(SCALAR)\
+            .def(python::self ^ python::other<SCALAR>())\
+            .def(python::other<SCALAR>() ^ python::self)\
+            .def(python::self * python::other<SCALAR>())\
+            .def(python::other<SCALAR>() * python::self)\
+
+    #define _DECLARE_FACTORED_MULTIVECTOR_SELF_OPERATIONS(SCALAR_TYPE, FACTORING_PRODUCT_TYPE)\
+            .def(python::self ^ python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE> >())\
+            .def(python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>>() ^ python::self)\
+            .def(python::self * python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>>())\
+            .def(python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>>() * python::self)\
+            .def(python::self + python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>>())\
+            .def(python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>>() + python::self)\
+            .def(python::self - python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>>())\
+            .def(python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>>() - python::self)\
+
+    #define _DECLARE_FACTORED_MULTIVECTOR_CLASS(SCALAR_TYPE, FACTORING_PRODUCT_TYPE)\
+        python::class_< tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE> >("FactoredMultivector")\
+            .def("__repr__", &tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>::repr)\
+            _DECLARE_FACTORED_MULTIVECTOR_SCALAR_OPERATIONS(std::double_t)\
+            _DECLARE_FACTORED_MULTIVECTOR_SCALAR_OPERATIONS(std::int16_t)\
+            _DECLARE_FACTORED_MULTIVECTOR_SCALAR_OPERATIONS(std::int32_t)\
+            _DECLARE_FACTORED_MULTIVECTOR_SCALAR_OPERATIONS(std::int64_t)\
+            _DECLARE_FACTORED_MULTIVECTOR_SCALAR_OPERATIONS(std::float_t)\
+            .def(python::self ^ python::self)\
+            .def(python::self * python::self)\
+            .def(+python::self)\
+            .def(-python::self)\
+            .def(python::self + python::self)\
+            .def(python::self - python::self)\
+            .def(~python::self)\
+
+
+
+    #define _DECLARE_FACTORED_MULTIVECTOR_PYTHON(FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE, SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE)\
+        namespace python = boost::python;\
+        _DECLARE_FACTORED_MULTIVECTOR_CLASS(FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE)\
+        _DECLARE_FACTORED_MULTIVECTOR_SELF_OPERATIONS(SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE)\
+        _DECLARE_FACTORED_MULTIVECTOR_SELF_OPERATIONS(std::double_t, SECOND_FACTORING_PRODUCT_TYPE)\
+        ;\
+        _DECLARE_FACTORED_MULTIVECTOR_CLASS(SECOND_SCALAR_TYPE, SECOND_FACTORING_PRODUCT_TYPE)\
+        _DECLARE_FACTORED_MULTIVECTOR_SELF_OPERATIONS(FIRST_SCALAR_TYPE, FIRST_FACTORING_PRODUCT_TYPE)\
+        _DECLARE_FACTORED_MULTIVECTOR_SELF_OPERATIONS(std::double_t, FIRST_FACTORING_PRODUCT_TYPE)\
+        ;\
+
+}
+
+    #endif

@@ -20,53 +20,128 @@
  * along with TbGAL. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../cpp/include/tbgal/using_Eigen.hpp"
-#include "../cpp/include/tbgal/assuming_HomogeneousD.hpp"
+#include "../../cpp/include/tbgal/using_Eigen.hpp"
+#include "../../cpp/include/tbgal/assuming_HomogeneousD.hpp"
 #include "wrapper_functions.hpp"
 #include "macros.hpp"
 
-namespace python = boost::python;
+namespace py_tbgal {
 
-auto py_vector(python::tuple args, python::dict kwargs) {
-    tbgal::HomogeneousD::SPACE = HomogeneousMetricSpace<Dynamic, Dynamic>(len(args));
-    std::vector<double> args_as_container = py_list_to_std_vector<double>(args);
-    auto a = tbgal::HomogeneousD::vector(args_as_container.begin(), args_as_container.end());
-    return a;
-}
+    namespace python = boost::python;
 
-BOOST_PYTHON_MODULE(homogeneous) {
+    auto py_vector(python::tuple args, python::dict kwargs) {
+        tbgal::HomogeneousD::SPACE = HomogeneousMetricSpace<Dynamic, Dynamic>(len(args));
+        std::vector<double> args_as_container = py_list_to_std_vector<double>(args);
+        auto a = tbgal::HomogeneousD::vector(args_as_container.begin(), args_as_container.end());
+        return a;
+    }
 
-    _BUILD_FACTORED_MULTIVECTOR_PYTHON(tbgal::OuterProduct, tbgal::GeometricProduct, tbgal::HomogeneousMetricSpace, double, int);
-    _BUILD_FACTORED_MULTIVECTOR_PYTHON(tbgal::GeometricProduct, tbgal::OuterProduct, tbgal::HomogeneousMetricSpace, double, int);
 
-    python::def("vector", python::raw_function(py_vector) );
+    BOOST_PYTHON_MODULE(homogeneous) {
 
-    python::def("hip", &py_hip< tbgal::FactoredMultivector<double, tbgal::OuterProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
+        using OP = tbgal::OuterProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>;
+        using GP = tbgal::GeometricProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>;
 
-    python::def("dot", &py_dot< tbgal::FactoredMultivector<double, tbgal::OuterProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
+        _DECLARE_FACTORED_MULTIVECTOR_PYTHON(std::double_t, OP, std::double_t, GP);
 
-    python::def("lcont", &py_lcont< tbgal::FactoredMultivector<double, tbgal::OuterProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
+        python::def("vector", python::raw_function(py_vector) );
 
-    python::def("rcont", &py_rcont< tbgal::FactoredMultivector<double, tbgal::OuterProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
+        python::def("hip", +[](
+            const tbgal::FactoredMultivector<double, OP> &lhs, 
+            const tbgal::FactoredMultivector<double, OP> &rhs) {
+                return hip(lhs, rhs); 
+                }
+            );
 
-    python::def("reverse", &py_reverse< tbgal::FactoredMultivector<double, tbgal::OuterProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
-    python::def("reverse", &py_reverse< tbgal::FactoredMultivector<double, tbgal::GeometricProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
+        python::def("dot", +[](
+            const tbgal::FactoredMultivector<double, OP> &lhs, 
+            const tbgal::FactoredMultivector<double, OP> &rhs) {
+                return dot(lhs, rhs); 
+                }
+            );
+        python::def("lcont", +[](
+            const tbgal::FactoredMultivector<double, OP> &lhs, 
+            const tbgal::FactoredMultivector<double, OP> &rhs) {
+                return lcont(lhs, rhs); 
+                }
+            );
 
-    python::def("inverse", &py_inverse< tbgal::FactoredMultivector<double, tbgal::OuterProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
-    python::def("inverse", &py_inverse< tbgal::FactoredMultivector<double, tbgal::GeometricProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
+        python::def("rcont", +[](
+            const tbgal::FactoredMultivector<double, OP> &lhs, 
+            const tbgal::FactoredMultivector<double, OP> &rhs) {
+                return rcont(lhs, rhs); 
+                }
+            );
 
-    python::def("rnorm", &py_rnorm< tbgal::FactoredMultivector<double, tbgal::OuterProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
-    python::def("rnorm", &py_rnorm< tbgal::FactoredMultivector<double, tbgal::GeometricProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
+        python::def("reverse", +[](
+            const tbgal::FactoredMultivector<double, OP> &mv) {
+                return reverse(mv);
+                }
+            );
 
-    python::def("rnorm_sqr", &py_rnorm_sqr< tbgal::FactoredMultivector<double, tbgal::OuterProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
-    python::def("rnorm_sqr", &py_rnorm_sqr< tbgal::FactoredMultivector<double, tbgal::GeometricProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
+        python::def("reverse", +[](
+            const tbgal::FactoredMultivector<double, GP> &mv) {
+                return reverse(mv);
+                }
+            );
 
-    python::def("dual", &py_dual< tbgal::FactoredMultivector<double, tbgal::OuterProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
+        python::def("inverse", +[](
+            const tbgal::FactoredMultivector<double, OP> &mv) {
+                return inverse(mv);
+                }
+            );
 
-    python::def("undual", &py_undual< tbgal::FactoredMultivector<double, tbgal::OuterProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
+        python::def("reverse", +[](
+            const tbgal::FactoredMultivector<double, GP> &mv) {
+                return inverse(mv);
+                }
+            );
 
-    python::def("sp", &py_sp< tbgal::FactoredMultivector<double, tbgal::OuterProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>> >);
+        python::def("rnorm", +[](
+            const tbgal::FactoredMultivector<double, OP> &mv) {
+                return rnorm(mv);
+                }
+            );
 
-    python::def("ep", &tbgal::HomogeneousD::ep);
+        python::def("rnorm", +[](
+            const tbgal::FactoredMultivector<double, GP> &mv) {
+                return rnorm(mv);
+                }
+            );
+
+        python::def("rnorm_sqr", +[](
+            const tbgal::FactoredMultivector<double, OP> &mv) {
+                return rnorm_sqr(mv);
+                }
+            );
+
+        python::def("rnorm_sqr", +[](
+            const tbgal::FactoredMultivector<double, GP> &mv) {
+                return rnorm_sqr(mv);
+                }
+            );
+
+        python::def("dual", +[](
+            const tbgal::FactoredMultivector<double, OP> &mv) {
+                return dual(mv);
+                }
+            );
+
+        python::def("undual", +[](
+            const tbgal::FactoredMultivector<double, OP> &mv) {
+                return undual(mv);
+                }
+            );
+
+        python::def("sp", +[](
+            const tbgal::FactoredMultivector<double, OP> &lhs, 
+            const tbgal::FactoredMultivector<double, OP> &rhs) {
+                return sp(lhs, rhs); 
+                }
+            );
+
+        python::def("ep", &tbgal::HomogeneousD::ep);
+
+    }
 
 }
