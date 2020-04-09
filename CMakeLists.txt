@@ -71,74 +71,47 @@ if(_boost_component_found STREQUAL "")
   message(FATAL_ERROR "No matching Boost.Python component found")
 endif()
 
-python_add_module(conformal ./python/src/conformal.cpp)
-python_add_module(euclidean ./python/src/euclidean.cpp)
-python_add_module(homogeneous ./python/src/homogeneous.cpp)
-python_add_module(minkowski ./python/src/minkowski.cpp)
+list(
+  APPEND _py_dims 1 2 3 D
+    )
 
-target_link_libraries(conformal PUBLIC Boost::${_boost_component_found} ${PYTHON_LIBRARIES})
-target_link_libraries(euclidean PUBLIC Boost::${_boost_component_found} ${PYTHON_LIBRARIES})
-target_link_libraries(homogeneous PUBLIC Boost::${_boost_component_found} ${PYTHON_LIBRARIES})
-target_link_libraries(minkowski PUBLIC Boost::${_boost_component_found} ${PYTHON_LIBRARIES})
+list(
+  APPEND _py_metrics euclidean homogeneous conformal minkowski
+    )
 
-target_include_directories(conformal PRIVATE ${PYTHON_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
-target_include_directories(euclidean PRIVATE ${PYTHON_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
-target_include_directories(homogeneous PRIVATE ${PYTHON_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
-target_include_directories(minkowski PRIVATE ${PYTHON_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+foreach(_metric IN ITEMS ${_py_metrics})
+  foreach(_dim IN ITEMS ${_py_dims})
+    message(Building\ ${_metric}${_dim})
+    python_add_module(${_metric}${_dim} ./python/src/${_metric}/${_metric}${_dim}.cpp)
+    target_link_libraries(${_metric}${_dim} PUBLIC Boost::${_boost_component_found} ${PYTHON_LIBRARIES})
+    target_include_directories(${_metric}${_dim} PRIVATE ${PYTHON_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+    set_target_properties(${_metric}${_dim} 
+      PROPERTIES
+      PREFIX ""
+      ARCHIVE_OUTPUT_DIRECTORY "tbgal/${_metric}"
+      LIBRARY_OUTPUT_DIRECTORY "tbgal/${_metric}"
+      RUNTIME_OUTPUT_DIRECTORY "tbgal/${_metric}"
+    )
+  add_custom_command(TARGET ${_metric}${_dim} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory tbgal)
+  add_custom_command(TARGET ${_metric}${_dim} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E touch tbgal/__init__.py)
+  endforeach()
+endforeach()
 
-set_target_properties(conformal
+
+message(Building\ SignedPQ)
+python_add_module(PQ ./python/src/signed/PQ.cpp)
+target_link_libraries(PQ PUBLIC Boost::${_boost_component_found} ${PYTHON_LIBRARIES})
+target_include_directories(PQ PRIVATE ${PYTHON_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+set_target_properties(PQ 
   PROPERTIES
-    PREFIX ""
-    ARCHIVE_OUTPUT_DIRECTORY "tbgal"
-    LIBRARY_OUTPUT_DIRECTORY "tbgal"
-    RUNTIME_OUTPUT_DIRECTORY "tbgal"
-  )
+  PREFIX ""
+  ARCHIVE_OUTPUT_DIRECTORY "tbgal/signed"
+  LIBRARY_OUTPUT_DIRECTORY "tbgal/signed"
+  RUNTIME_OUTPUT_DIRECTORY "tbgal/signed"
+)
+add_custom_command(TARGET PQ PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory tbgal)
+add_custom_command(TARGET PQ PRE_BUILD COMMAND ${CMAKE_COMMAND} -E touch tbgal/__init__.py)
 
-set_target_properties(homogeneous
-  PROPERTIES
-    PREFIX ""
-    ARCHIVE_OUTPUT_DIRECTORY "tbgal"
-    LIBRARY_OUTPUT_DIRECTORY "tbgal"
-    RUNTIME_OUTPUT_DIRECTORY "tbgal"
-  )
-
-set_target_properties(euclidean
-  PROPERTIES
-    PREFIX ""
-    ARCHIVE_OUTPUT_DIRECTORY "tbgal"
-    LIBRARY_OUTPUT_DIRECTORY "tbgal"
-    RUNTIME_OUTPUT_DIRECTORY "tbgal"
-  )
-
-set_target_properties(minkowski
-  PROPERTIES
-    PREFIX ""
-    ARCHIVE_OUTPUT_DIRECTORY "tbgal"
-    LIBRARY_OUTPUT_DIRECTORY "tbgal"
-    RUNTIME_OUTPUT_DIRECTORY "tbgal"
-  )
-
-add_custom_command(TARGET conformal PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory tbgal)
-add_custom_command(TARGET conformal PRE_BUILD COMMAND ${CMAKE_COMMAND} -E touch tbgal/__init.py__)
-add_custom_command(TARGET homogeneous PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory tbgal)
-add_custom_command(TARGET homogeneous PRE_BUILD COMMAND ${CMAKE_COMMAND} -E touch tbgal/__init.py__)
-add_custom_command(TARGET euclidean PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory tbgal)
-add_custom_command(TARGET euclidean PRE_BUILD COMMAND ${CMAKE_COMMAND} -E touch tbgal/__init.py__)
-add_custom_command(TARGET minkowski PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory tbgal)
-add_custom_command(TARGET minkowski PRE_BUILD COMMAND ${CMAKE_COMMAND} -E touch tbgal/__init.py__)
-
-if ( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" )
-    target_compile_options(conformal PRIVATE "-Wall")
-    target_compile_options(homogeneous PRIVATE "-Wall")
-    target_compile_options(euclidean PRIVATE "-Wall")
-    target_compile_options(minkowski PRIVATE "-Wall")
-endif()
-if ( CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" )
-    target_compile_options(conformal PRIVATE "/W4")
-    target_compile_options(homogeneous PRIVATE "/W4")
-    target_compile_options(euclidean PRIVATE "/W4")
-    target_compile_options(minkowski PRIVATE "/W4")
-endif()
 
 message(STATUS "Eigen3_DIR = ${EIGEN3_INCLUDE_DIR}")
 message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")

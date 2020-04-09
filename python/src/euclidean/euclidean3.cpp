@@ -20,35 +20,42 @@
  * along with TbGAL. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../../cpp/include/tbgal/using_Eigen.hpp"
-#include "../../cpp/include/tbgal/assuming_HomogeneousD.hpp"
-#include "wrapper_functions.hpp"
-#include "macros.hpp"
+#include "../../../cpp/include/tbgal/using_Eigen.hpp"
+#include "../../../cpp/include/tbgal/assuming_Euclidean3.hpp"
+#include "../wrapper_functions.hpp"
+#include "../macros.hpp"
 
 namespace py_tbgal {
 
     namespace python = boost::python;
 
     auto py_vector(python::tuple args, python::dict kwargs) {
-        tbgal::HomogeneousD::SPACE = HomogeneousMetricSpace<Dynamic, Dynamic>(len(args));
         std::vector<std::double_t> args_as_container = py_list_to_std_vector<std::double_t>(args);
-        auto a = tbgal::HomogeneousD::vector(args_as_container.begin(), args_as_container.end());
+        auto a = tbgal::Euclidean3::vector(args_as_container.begin(), args_as_container.end());
         return a;
     }
 
+    auto py_euclidean_vector(python::tuple args, python::dict kwargs) {
+        std::vector<std::double_t> args_as_container = py_list_to_std_vector<std::double_t>(args);
+        auto a = tbgal::Euclidean3::euclidean_vector(args_as_container.begin(), args_as_container.end());
+        return a;
+    }
 
-    BOOST_PYTHON_MODULE(homogeneous) {
+    BOOST_PYTHON_MODULE(euclidean3) {
 
-        using OP = tbgal::OuterProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>;
-        using GP = tbgal::GeometricProduct<tbgal::HomogeneousMetricSpace<Dynamic, Dynamic>>;
+        using namespace tbgal::Euclidean3;
+
+        using OP = tbgal::OuterProduct<tbgal::EuclideanMetricSpace<3>>;
+        using GP = tbgal::GeometricProduct<tbgal::EuclideanMetricSpace<3>>;
 
         _DECLARE_FACTORED_MULTIVECTOR_PYTHON(std::double_t, OP, std::double_t, GP);
         _DECLARE_ALL_OPERATIONS(std::double_t, OP, std::double_t, GP);
 
-        python::def("vector", python::raw_function(py_vector) );
-
-        python::def("ep", &tbgal::HomogeneousD::ep);
+        python::def("vector", python::raw_function(py_vector));
+        python::def("euclidean_vector", python::raw_function(py_euclidean_vector));
+        python::def("e", &tbgal::Euclidean3::e);
 
     }
+
 
 }

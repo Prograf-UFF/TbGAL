@@ -20,23 +20,39 @@
  * along with TbGAL. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../../cpp/include/tbgal/using_Eigen.hpp"
-#include "../../cpp/include/tbgal/assuming_ConformalD.hpp"
-#include "wrapper_functions.hpp"
-#include "macros.hpp"
+#include "../../../cpp/include/tbgal/using_Eigen.hpp"
+#include "../../../cpp/include/tbgal/assuming_ConformalD.hpp"
+#include "../wrapper_functions.hpp"
+#include "../macros.hpp"
 
 namespace py_tbgal {
 
     namespace python = boost::python;
 
     auto py_vector(python::tuple args, python::dict kwargs) {
-        tbgal::ConformalD::SPACE = ConformalMetricSpace<Dynamic, Dynamic>(len(args));
         std::vector<std::double_t> args_as_container = py_list_to_std_vector<std::double_t>(args);
         auto a = tbgal::ConformalD::vector(args_as_container.begin(), args_as_container.end());
         return a;
     }
 
-    BOOST_PYTHON_MODULE(conformal) {
+    auto py_euclidean_vector(python::tuple args, python::dict kwargs) {
+        std::vector<std::double_t> args_as_container = py_list_to_std_vector<std::double_t>(args);
+        auto a = tbgal::ConformalD::euclidean_vector(args_as_container.begin(), args_as_container.end());
+        return a;
+    }
+
+    auto py_point(python::tuple args, python::dict kwargs) {
+        std::vector<std::double_t> args_as_container = py_list_to_std_vector<std::double_t>(args);
+        auto a = tbgal::ConformalD::point(args_as_container.begin(), args_as_container.end());
+        return a;
+    }
+
+    void set_base_space_dimensions(const int &dims) {
+        tbgal::ConformalD::SPACE.set_base_space_dimensions(dims);
+    }
+
+    BOOST_PYTHON_MODULE(conformalD) {
+        tbgal::ConformalD::SPACE = ConformalMetricSpace<Dynamic, Dynamic>();
 
         using OP = tbgal::OuterProduct<tbgal::ConformalMetricSpace<Dynamic, Dynamic>>;
         using GP = tbgal::GeometricProduct<tbgal::ConformalMetricSpace<Dynamic, Dynamic>>;
@@ -45,9 +61,13 @@ namespace py_tbgal {
         _DECLARE_ALL_OPERATIONS(std::double_t, OP, std::double_t, GP);
 
         python::def("vector", python::raw_function(py_vector) );
+        python::def("euclidean_vector", python::raw_function(py_euclidean_vector));
+        python::def("point", python::raw_function(py_point));
 
+        python::def("set_base_space_dimensions", &set_base_space_dimensions );
+
+        python::def("e", &tbgal::ConformalD::e);
         python::def("no", &tbgal::ConformalD::no);
-
         python::def("ni", &tbgal::ConformalD::ni);
 
 
