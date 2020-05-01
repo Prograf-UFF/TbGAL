@@ -35,12 +35,12 @@
     } \
     \
     template<typename... ScalarTypes, typename = std::enable_if_t<std::disjunction_v<std::bool_constant<!detail::is_iterator_v<ScalarTypes> >...> > > \
-    decltype(auto) vector(ScalarTypes &&... coords) noexcept { \
+    decltype(auto) vector(ScalarTypes &&... coords) { \
         return tbgal::vector(&METRIC_SPACE, std::move(coords)...); \
     } \
     \
     template<typename IteratorType, typename = std::enable_if_t<detail::is_iterator_v<IteratorType> > > \
-    decltype(auto) vector(IteratorType begin, IteratorType end) noexcept { \
+    decltype(auto) vector(IteratorType begin, IteratorType end) { \
         return tbgal::vector(&METRIC_SPACE, begin, end); \
     }
 

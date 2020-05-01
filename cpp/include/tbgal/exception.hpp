@@ -26,15 +26,24 @@
 namespace tbgal {
 
     class NotSupportedError : public std::logic_error {
+
+    // private:
+    //     const char *what_msg;
+
     public:
 
         explicit NotSupportedError(const std::string &what_arg) :
             std::logic_error(what_arg) {
+                // this->what_msg = what_arg.c_str();
         }
 
         explicit NotSupportedError(const char *what_arg) :
             std::logic_error(what_arg) {
+                // this->what_msg = what_arg;
         }
+
+        // char const* what() const throw() { return this->what_msg; }
+
     };
 
 }

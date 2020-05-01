@@ -56,6 +56,7 @@ namespace py_tbgal {
             .def(python::other<tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>>() / python::self)\
 
     #define _DECLARE_FACTORED_MULTIVECTOR_CLASS(SCALAR_TYPE, FACTORING_PRODUCT_TYPE)\
+        python::register_exception_translator<tbgal::NotSupportedError>(&translate_exception<tbgal::NotSupportedError>);\
         python::class_< tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE> >("FactoredMultivector")\
             .def("__repr__", &tbgal::FactoredMultivector<SCALAR_TYPE, FACTORING_PRODUCT_TYPE>::repr)\
             _DECLARE_FACTORED_MULTIVECTOR_SCALAR_OPERATIONS(std::double_t)\

@@ -41,6 +41,12 @@ namespace py_tbgal {
     namespace python = boost::python;
 
     template<typename T>
+    void translate_exception(T const& e)
+    {
+        PyErr_SetString(PyExc_RuntimeError, e.what());
+    }
+
+    template<typename T>
     inline
     std::vector< T > py_list_to_std_vector( const boost::python::object& iterable )
     {

@@ -76,7 +76,7 @@ list(
     )
 
 list(
-  APPEND _py_metrics euclidean homogeneous conformal minkowski
+  APPEND _py_metrics euclidean conformal homogeneous minkowski
     )
 
 foreach(_metric IN ITEMS ${_py_metrics})

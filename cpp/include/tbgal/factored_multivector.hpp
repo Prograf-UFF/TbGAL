@@ -120,14 +120,14 @@ namespace tbgal {
         friend struct detail::gp_impl;
         friend struct detail::op_impl;
 
-        template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType> friend constexpr decltype(auto) addition(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &) noexcept;
+        template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType> friend constexpr decltype(auto) addition(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &) ;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) conjugate(FactoredMultivector<SomeScalarType, GeometricProduct<SomeMetricSpaceType> > const &) noexcept;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) inverse(FactoredMultivector<SomeScalarType, GeometricProduct<SomeMetricSpaceType> > const &) noexcept;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) involute(FactoredMultivector<SomeScalarType, GeometricProduct<SomeMetricSpaceType> > const &) noexcept;
         template<typename FirstScalarType, typename SecondScalarType, typename SecondMetricSpaceType, typename> friend constexpr decltype(auto) lcont(FirstScalarType const &, FactoredMultivector<SecondScalarType, GeometricProduct<SecondMetricSpaceType> > const &) noexcept;
         template<typename FirstScalarType, typename FirstMetricSpaceType, typename SecondScalarType, typename> friend constexpr decltype(auto) rcont(FactoredMultivector<FirstScalarType, GeometricProduct<FirstMetricSpaceType> > const &, SecondScalarType const &) noexcept;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) reverse(FactoredMultivector<SomeScalarType, GeometricProduct<SomeMetricSpaceType> > const &) noexcept;
-        template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType> friend constexpr decltype(auto) subtraction(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &) noexcept;
+        template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType> friend constexpr decltype(auto) subtraction(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &);
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) unary_minus(FactoredMultivector<SomeScalarType, GeometricProduct<SomeMetricSpaceType> > const &) noexcept;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) unit(FactoredMultivector<SomeScalarType, GeometricProduct<SomeMetricSpaceType> > const &arg) noexcept;
     };
@@ -229,13 +229,13 @@ namespace tbgal {
         friend struct detail::gp_impl;
         friend struct detail::op_impl;
 
-        template<typename SomeMetricSpaceType, typename... SomeScalarTypes> friend constexpr decltype(auto) detail::make_vector(SomeMetricSpaceType const *, SomeScalarTypes &&...) noexcept;
-        template<typename SomeMetricSpaceType, typename SomeIteratorType, typename... SomeExtraScalarTypes> friend constexpr decltype(auto) detail::make_vector_using_iterator(SomeMetricSpaceType const *, SomeIteratorType, SomeIteratorType, SomeExtraScalarTypes &&...) noexcept;
+        template<typename SomeMetricSpaceType, typename... SomeScalarTypes> friend constexpr decltype(auto) detail::make_vector(SomeMetricSpaceType const *, SomeScalarTypes &&...);
+        template<typename SomeMetricSpaceType, typename SomeIteratorType, typename... SomeExtraScalarTypes> friend constexpr decltype(auto) detail::make_vector_using_iterator(SomeMetricSpaceType const *, SomeIteratorType, SomeIteratorType, SomeExtraScalarTypes &&...);
 
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend decltype(auto) e(SomeMetricSpaceType const *, DefaultIndexType) noexcept;
         template<typename SomeMetricSpaceType, typename SomeScalarType, typename> friend decltype(auto) scalar(SomeMetricSpaceType const *, SomeScalarType const &) noexcept;
 
-        template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType> friend constexpr decltype(auto) addition(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &) noexcept;
+        template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType> friend constexpr decltype(auto) addition(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &) ;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) conjugate(FactoredMultivector<SomeScalarType, OuterProduct<SomeMetricSpaceType> > const &) noexcept;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) dual(FactoredMultivector<SomeScalarType, OuterProduct<SomeMetricSpaceType> > const &) noexcept;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) inverse(FactoredMultivector<SomeScalarType, OuterProduct<SomeMetricSpaceType> > const &) noexcept;
@@ -243,7 +243,7 @@ namespace tbgal {
         template<typename FirstScalarType, typename SecondScalarType, typename SecondMetricSpaceType, typename> friend constexpr decltype(auto) lcont(FirstScalarType const &, FactoredMultivector<SecondScalarType, OuterProduct<SecondMetricSpaceType> > const &) noexcept;
         template<typename FirstScalarType, typename FirstMetricSpaceType, typename SecondScalarType, typename> friend constexpr decltype(auto) rcont(FactoredMultivector<FirstScalarType, OuterProduct<FirstMetricSpaceType> > const &, SecondScalarType const &) noexcept;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) reverse(FactoredMultivector<SomeScalarType, OuterProduct<SomeMetricSpaceType> > const &) noexcept;
-        template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType> friend constexpr decltype(auto) subtraction(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &) noexcept;
+        template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType> friend constexpr decltype(auto) subtraction(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &);
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) unary_minus(FactoredMultivector<SomeScalarType, OuterProduct<SomeMetricSpaceType> > const &) noexcept;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) undual(FactoredMultivector<SomeScalarType, OuterProduct<SomeMetricSpaceType> > const &) noexcept;
         template<typename SomeScalarType, typename SomeMetricSpaceType> friend constexpr decltype(auto) unit(FactoredMultivector<SomeScalarType, OuterProduct<SomeMetricSpaceType> > const &arg) noexcept;

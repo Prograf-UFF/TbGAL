@@ -24,6 +24,8 @@
 #include "../../../cpp/include/tbgal/assuming_Homogeneous1.hpp"
 #include "../wrapper_functions.hpp"
 #include "../macros.hpp"
+#include "../../../cpp/include/tbgal/exception.hpp"
+#include <boost/python/exception_translator.hpp>
 
 namespace py_tbgal {
 
