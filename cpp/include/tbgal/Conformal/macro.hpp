@@ -26,22 +26,22 @@
 #define _TBGAL_OVERLOAD_CONFORMAL_UTILS(METRIC_SPACE) \
     \
     template<typename... ScalarTypes, typename = std::enable_if_t<std::disjunction_v<std::bool_constant<!detail::is_iterator_v<ScalarTypes> >...> > > \
-    constexpr decltype(auto) euclidean_vector(ScalarTypes &&... coords) noexcept { \
+    constexpr decltype(auto) euclidean_vector(ScalarTypes &&... coords) { \
         return tbgal::detail::make_vector(&METRIC_SPACE, std::move(coords)..., 0, 0); \
     } \
     \
     template<typename IteratorType, typename = std::enable_if_t<detail::is_iterator_v<IteratorType> > > \
-    constexpr decltype(auto) euclidean_vector(IteratorType begin, IteratorType end) noexcept { \
+    constexpr decltype(auto) euclidean_vector(IteratorType begin, IteratorType end) { \
         return tbgal::detail::make_vector_using_iterator(&METRIC_SPACE, begin, end, 0, 0); \
     } \
     \
     template<typename... ScalarTypes, typename = std::enable_if_t<std::disjunction_v<std::bool_constant<!detail::is_iterator_v<ScalarTypes> >...> > > \
-    constexpr decltype(auto) point(ScalarTypes &&... coords) noexcept { \
+    constexpr decltype(auto) point(ScalarTypes &&... coords) { \
         return tbgal::detail::make_vector(&METRIC_SPACE, std::move(coords)..., 1, ((std::move(coords) * std::move(coords)) + ... + 0) / 2); \
     } \
     \
     template<typename IteratorType, typename = std::enable_if_t<detail::is_iterator_v<IteratorType> > > \
-    constexpr decltype(auto) point(IteratorType begin, IteratorType end) noexcept { \
+    constexpr decltype(auto) point(IteratorType begin, IteratorType end) { \
         std::remove_cv_t<std::remove_reference_t<typename std::iterator_traits<IteratorType>::value_type> > aux = 0; \
         for (IteratorType itr = begin; itr != end; ++itr) { \
             aux += (*itr) * (*itr); \

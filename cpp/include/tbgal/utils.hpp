@@ -107,12 +107,15 @@ namespace tbgal {
     namespace detail {
 
         template<typename MetricSpaceType, typename... ScalarTypes>
-        constexpr decltype(auto) make_vector(MetricSpaceType const *space_ptr, ScalarTypes &&... coords) noexcept {
+        constexpr decltype(auto) make_vector(MetricSpaceType const *space_ptr, ScalarTypes &&... coords) {
             using ResultingScalarType = std::common_type_t<std::remove_cv_t<std::remove_reference_t<ScalarTypes> >...>;
             using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
             using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
             static_assert(MetricSpaceType::DimensionsAtCompileTime == Dynamic || MetricSpaceType::DimensionsAtCompileTime == sizeof...(ScalarTypes), "Invalid number of coordinates.");
             assert(space_ptr->dimensions() == sizeof...(ScalarTypes));
+            if (space_ptr->dimensions() != sizeof...(ScalarTypes)) {
+                throw tbgal::NotSupportedError("Incorrect number of components in the vector. Please check space dimensionality and try again.");
+            }
             auto input = detail::evaluate(detail::from_actual_to_signed_metric(space_ptr, detail::fill_column_matrix(std::move(coords)...)));
             auto qr_tuple = detail::qr_orthogonal_matrix(input);
             if (std::get<1>(qr_tuple) == 1) {
@@ -128,11 +131,14 @@ namespace tbgal {
         };
 
         template<typename MetricSpaceType, typename IteratorType, typename... ExtraScalarTypes>
-        constexpr decltype(auto) make_vector_using_iterator(MetricSpaceType const *space_ptr, IteratorType begin, IteratorType end, ExtraScalarTypes &&... extra_coords) noexcept {
+        constexpr decltype(auto) make_vector_using_iterator(MetricSpaceType const *space_ptr, IteratorType begin, IteratorType end, ExtraScalarTypes &&... extra_coords) {
             using ResultingScalarType = std::common_type_t<std::remove_cv_t<std::remove_reference_t<typename std::iterator_traits<IteratorType>::value_type> >, std::remove_cv_t<std::remove_reference_t<ExtraScalarTypes> >...>;
             using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
             using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
             assert(space_ptr->dimensions() == (std::distance(begin, end) + sizeof...(extra_coords)));
+            if (space_ptr->dimensions() != (std::distance(begin, end) + sizeof...(extra_coords))) {
+                throw tbgal::NotSupportedError("Incorrect number of components in the vector. Please check space dimensionality and try again.");
+            }
             auto input = detail::evaluate(detail::from_actual_to_signed_metric(space_ptr, detail::fill_column_matrix_using_iterator<MetricSpaceType::DimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(begin, end, std::move(extra_coords)...)));
             auto qr_tuple = detail::qr_orthogonal_matrix(input);
 
@@ -151,12 +157,12 @@ namespace tbgal {
     }
     
     template<typename MetricSpaceType, typename... ScalarTypes, typename = std::enable_if_t<std::disjunction_v<std::bool_constant<!detail::is_iterator_v<ScalarTypes> >...> > >
-    decltype(auto) vector(MetricSpaceType const *space_ptr, ScalarTypes &&... coords) noexcept {
+    decltype(auto) vector(MetricSpaceType const *space_ptr, ScalarTypes &&... coords) {
         return detail::make_vector(space_ptr, std::move(coords)...);
     }
 
     template<typename MetricSpaceType, typename IteratorType, typename = std::enable_if_t<detail::is_iterator_v<IteratorType> > >
-    decltype(auto) vector(MetricSpaceType const *space_ptr, IteratorType begin, IteratorType end) noexcept {
+    decltype(auto) vector(MetricSpaceType const *space_ptr, IteratorType begin, IteratorType end) {
         return detail::make_vector_using_iterator(space_ptr, begin, end);
     }
 

@@ -28,7 +28,7 @@ namespace tbgal {
     //TODO [FUTURE] Implement associativity.
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType>
-    constexpr decltype(auto) subtraction(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
+    constexpr decltype(auto) subtraction(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         using ResultingScalarType = std::common_type_t<FirstScalarType, SecondScalarType>;
         using ResultingFactoringProductType = OuterProduct<typename FirstFactoringProductType::MetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
@@ -46,7 +46,7 @@ namespace tbgal {
     }
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
-    constexpr decltype(auto) subtraction(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) noexcept {
+    constexpr decltype(auto) subtraction(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) {
         if (arg1.factors_count() == 0) {
             return scalar(arg1.space_ptr(), arg1.scalar() - arg2);
         }
@@ -54,7 +54,7 @@ namespace tbgal {
     }
 
     template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
-    constexpr decltype(auto) subtraction(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
+    constexpr decltype(auto) subtraction(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         if (arg2.factors_count() == 0) {
             return scalar(arg2.space_ptr(), arg1 - arg2.scalar());
         }
@@ -62,27 +62,27 @@ namespace tbgal {
     }
 
     template<typename FirstScalarType, typename SecondScalarType, typename = std::enable_if_t<!(is_multivector_v<FirstScalarType> || is_multivector_v<SecondScalarType>)> >
-    constexpr decltype(auto) subtraction(FirstScalarType const &arg1, SecondScalarType const &arg2) noexcept {
+    constexpr decltype(auto) subtraction(FirstScalarType const &arg1, SecondScalarType const &arg2) {
         return arg1 - arg2;
     }
 
     template<typename FirstType, typename SecondType>
-    constexpr decltype(auto) sub(FirstType const &arg1, SecondType const &arg2) noexcept {
+    constexpr decltype(auto) sub(FirstType const &arg1, SecondType const &arg2) {
         return subtraction(arg1, arg2);
     }
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType>
-    constexpr decltype(auto) operator-(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
+    constexpr decltype(auto) operator-(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         return subtraction(arg1, arg2);
     }
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
-    constexpr decltype(auto) operator-(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) noexcept {
+    constexpr decltype(auto) operator-(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) {
         return subtraction(arg1, arg2);
     }
 
     template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
-    constexpr decltype(auto) operator-(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
+    constexpr decltype(auto) operator-(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         return subtraction(arg1, arg2);
     }
 

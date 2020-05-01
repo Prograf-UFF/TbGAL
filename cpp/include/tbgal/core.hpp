@@ -143,10 +143,10 @@ namespace tbgal {
         }
 
         template<typename MetricSpaceType, typename... ScalarTypes>
-        constexpr decltype(auto) make_vector(MetricSpaceType const *, ScalarTypes &&...) noexcept;
+        constexpr decltype(auto) make_vector(MetricSpaceType const *, ScalarTypes &&...);
 
         template<typename MetricSpaceType, typename IteratorType, typename... ExtraScalarTypes>
-        constexpr decltype(auto) make_vector_using_iterator(MetricSpaceType const *, IteratorType, IteratorType, ExtraScalarTypes &&...) noexcept;
+        constexpr decltype(auto) make_vector_using_iterator(MetricSpaceType const *, IteratorType, IteratorType, ExtraScalarTypes &&...);
 
     }
 
