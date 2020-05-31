@@ -26,62 +26,62 @@
 namespace tbgal {
 
     template<typename VersorScalarType, typename VersorFactoringProductType, typename ScalarType, typename FactoringProductType>
-    constexpr decltype(auto) apply_even_versor(FactoredMultivector<VersorScalarType, VersorFactoringProductType> const &versor, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+    constexpr decltype(auto) apply_even_versor(FactoredMultivector<VersorScalarType, VersorFactoringProductType> const &versor, FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
         return gp(versor, arg, inverse(versor));
     }
 
-    template<typename VersorScalarType, typename VersorFactoringProductType, typename Type, typename = std::enable_if_t<!is_multivector_v<Type> > >
-    constexpr Type apply_even_versor(FactoredMultivector<VersorScalarType, VersorFactoringProductType> const &, Type const &arg) noexcept {
+    template<typename VersorScalarType, typename VersorFactoringProductType, typename Type, typename = std::enable_if_t<!is_multivector_v<Type>, int> >
+    constexpr Type apply_even_versor(FactoredMultivector<VersorScalarType, VersorFactoringProductType> const &, Type const &arg) {
         return arg;
     }
 
-    template<typename VersorType, typename ScalarType, typename FactoringProductType, typename = std::enable_if_t<!is_multivector_v<VersorType> > >
-    constexpr FactoredMultivector<ScalarType, FactoringProductType> apply_even_versor(VersorType const &, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+    template<typename VersorType, typename ScalarType, typename FactoringProductType, typename = std::enable_if_t<!is_multivector_v<VersorType>, int> >
+    constexpr FactoredMultivector<ScalarType, FactoringProductType> apply_even_versor(VersorType const &, FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
         return arg;
     }
 
-    template<typename VersorType, typename Type, typename = std::enable_if_t<!(is_multivector_v<VersorType> || is_multivector_v<Type>)> >
-    constexpr Type apply_even_versor(VersorType const &, Type const &arg) noexcept {
+    template<typename VersorType, typename Type, typename = std::enable_if_t<!(is_multivector_v<VersorType> || is_multivector_v<Type>), int> >
+    constexpr Type apply_even_versor(VersorType const &, Type const &arg) {
         return arg;
     }
 
     template<typename VersorScalarType, typename VersorFactoringProductType, typename ScalarType, typename FactoringProductType>
-    constexpr decltype(auto) apply_odd_versor(FactoredMultivector<VersorScalarType, VersorFactoringProductType> const &versor, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+    constexpr decltype(auto) apply_odd_versor(FactoredMultivector<VersorScalarType, VersorFactoringProductType> const &versor, FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
         return gp(versor, involute(arg), inverse(versor));
     }
 
-    template<typename VersorScalarType, typename VersorFactoringProductType, typename Type, typename = std::enable_if_t<!is_multivector_v<Type> > >
-    constexpr Type apply_odd_versor(FactoredMultivector<VersorScalarType, VersorFactoringProductType> const &, Type const &arg) noexcept {
+    template<typename VersorScalarType, typename VersorFactoringProductType, typename Type, typename = std::enable_if_t<!is_multivector_v<Type>, int> >
+    constexpr Type apply_odd_versor(FactoredMultivector<VersorScalarType, VersorFactoringProductType> const &, Type const &arg) {
         return arg;
     }
 
-    template<typename VersorType, typename ScalarType, typename FactoringProductType, typename = std::enable_if_t<!is_multivector_v<VersorType> > >
-    constexpr FactoredMultivector<ScalarType, FactoringProductType> apply_odd_versor(VersorType const &, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+    template<typename VersorType, typename ScalarType, typename FactoringProductType, typename = std::enable_if_t<!is_multivector_v<VersorType>, int> >
+    constexpr FactoredMultivector<ScalarType, FactoringProductType> apply_odd_versor(VersorType const &, FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
         return arg;
     }
 
-    template<typename VersorType, typename Type, typename = std::enable_if_t<!(is_multivector_v<VersorType> || is_multivector_v<Type>)> >
-    constexpr Type apply_odd_versor(VersorType const &, Type const &arg) noexcept {
+    template<typename VersorType, typename Type, typename = std::enable_if_t<!(is_multivector_v<VersorType> || is_multivector_v<Type>), int> >
+    constexpr Type apply_odd_versor(VersorType const &, Type const &arg) {
         return arg;
     }
 
     template<typename RotorScalarType, typename RotorFactoringProductType, typename ScalarType, typename FactoringProductType>
-    constexpr decltype(auto) apply_rotor(FactoredMultivector<RotorScalarType, RotorFactoringProductType> const &rotor, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+    constexpr decltype(auto) apply_rotor(FactoredMultivector<RotorScalarType, RotorFactoringProductType> const &rotor, FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
         return gp(rotor, arg, reverse(rotor));
     }
 
-    template<typename RotorScalarType, typename RotorFactoringProductType, typename Type, typename = std::enable_if_t<!is_multivector_v<Type> > >
-    constexpr Type apply_rotor(FactoredMultivector<RotorScalarType, RotorFactoringProductType> const &, Type const &arg) noexcept {
+    template<typename RotorScalarType, typename RotorFactoringProductType, typename Type, typename = std::enable_if_t<!is_multivector_v<Type>, int> >
+    constexpr Type apply_rotor(FactoredMultivector<RotorScalarType, RotorFactoringProductType> const &, Type const &arg) {
         return arg;
     }
 
-    template<typename RotorType, typename ScalarType, typename FactoringProductType, typename = std::enable_if_t<!is_multivector_v<RotorType> > >
-    constexpr FactoredMultivector<ScalarType, FactoringProductType> apply_rotor(RotorType const &, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+    template<typename RotorType, typename ScalarType, typename FactoringProductType, typename = std::enable_if_t<!is_multivector_v<RotorType>, int> >
+    constexpr FactoredMultivector<ScalarType, FactoringProductType> apply_rotor(RotorType const &, FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
         return arg;
     }
 
-    template<typename RotorType, typename Type, typename = std::enable_if_t<!(is_multivector_v<RotorType> || is_multivector_v<Type>)> >
-    constexpr Type apply_rotor(RotorType const &, Type const &arg) noexcept {
+    template<typename RotorType, typename Type, typename = std::enable_if_t<!(is_multivector_v<RotorType> || is_multivector_v<Type>), int> >
+    constexpr Type apply_rotor(RotorType const &, Type const &arg) {
         return arg;
     }
 

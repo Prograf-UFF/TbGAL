@@ -19,15 +19,16 @@
 # You should have received a copy of the GNU General Public License
 # along with TbGAL. If not, see <https://www.gnu.org/licenses/>.
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
-set(VERSION_PATCH 20200123)
+set(VERSION_PATCH 20200531)
 
 project(TbGAL
   VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
-  DESCRIPTION "TbGAL: Tensor-based Geometric Algebra Library"
+  DESCRIPTION "TbGAL: Tensor-Based Geometric Algebra Library"
+  HOMEPAGE_URL https://github.com/Prograf-UFF/TbGAL
   LANGUAGES CXX
 )
 
@@ -36,93 +37,56 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Eigen3 3.3 NO_MODULE REQUIRED)
 
-# for testing we will need the python interpreter
-find_package(PythonInterp REQUIRED)
+message(STATUS "Installing C++ front-end")
 
-# we require python development headers
-find_package(PythonLibs ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} EXACT REQUIRED)
+file(INSTALL ./cpp/include DESTINATION ${CMAKE_INSTALL_PREFIX} FILES_MATCHING PATTERN "*.hpp")
 
-#file(MAKE_DIRECTORY reports)
-#file(MAKE_DIRECTORY tbgal)
-#file(WRITE tbgal/__init.py__)
+configure_file(./cmake/TbGALConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/TbGALConfig.cmake @ONLY NEWLINE_STYLE UNIX)
+file(INSTALL ${CMAKE_CURRENT_BINARY_DIR}/TbGALConfig.cmake DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/tbgal)
 
-# now search for the boost component
-# depending on the boost version it is called either python,
-# python2, python27, python3, python36, python37, ...
+configure_file(./cmake/TbGALConfigVersion.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/TbGALConfigVersion.cmake @ONLY NEWLINE_STYLE UNIX)
+file(INSTALL ${CMAKE_CURRENT_BINARY_DIR}/TbGALConfigVersion.cmake DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/tbgal)
 
-list(
-  APPEND _components
-    python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}
-    python${PYTHON_VERSION_MAJOR}
-    python
-  )
+message(STATUS "Installing C++ front-end - done")
 
-set(_boost_component_found "")
+message(STATUS "Configuring Python front-end")
 
-foreach(_component IN ITEMS ${_components})
-  find_package(Boost COMPONENTS ${_component})
-  if(Boost_FOUND)
-    set(_boost_component_found ${_component})
-    break()
+find_package(Python COMPONENTS Interpreter Development NumPy)
+if(NOT Python_FOUND)
+  message(STATUS "Configuring Python front-end - error (Python.Interpreter, Python.Developmemnt, or Python.NumPy components found)")
+else()
+  if(WIN32)
+    set(Boost_USE_MULTITHREADED ON)
+    set(Boost_USE_STATIC_LIBS OFF)
+    add_definitions(-DBOOST_ALL_NO_LIB)
+    add_definitions(-DBOOST_ALL_DYN_LINK)
   endif()
-endforeach()
 
-if(_boost_component_found STREQUAL "")
-  message(FATAL_ERROR "No matching Boost.Python component found")
-endif()
-
-list(
-  APPEND _py_dims 1 2 3 D
-    )
-
-list(
-  APPEND _py_metrics euclidean conformal homogeneous minkowski
-    )
-
-foreach(_metric IN ITEMS ${_py_metrics})
-  foreach(_dim IN ITEMS ${_py_dims})
-    message(Building\ ${_metric}${_dim})
-    python_add_module(${_metric}${_dim} ./python/src/${_metric}/${_metric}${_dim}.cpp)
-    target_link_libraries(${_metric}${_dim} PUBLIC Boost::${_boost_component_found} ${PYTHON_LIBRARIES})
-    target_include_directories(${_metric}${_dim} PRIVATE ${PYTHON_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
-    set_target_properties(${_metric}${_dim} 
-      PROPERTIES
-      PREFIX ""
-      ARCHIVE_OUTPUT_DIRECTORY "tbgal/${_metric}"
-      LIBRARY_OUTPUT_DIRECTORY "tbgal/${_metric}"
-      RUNTIME_OUTPUT_DIRECTORY "tbgal/${_metric}"
-    )
-  add_custom_command(TARGET ${_metric}${_dim} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory tbgal)
-  add_custom_command(TARGET ${_metric}${_dim} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E touch tbgal/__init__.py)
+  foreach(_boost_python_suffix IN ITEMS "${Python_VERSION_MAJOR}${Python_VERSION_MINOR}" "${Python_VERSION_MAJOR}" "")
+    find_package(Boost COMPONENTS python${_boost_python_suffix} numpy${_boost_python_suffix})
+    if(Boost_FOUND)
+      set(_boost_python_suffix_found ${_boost_python_suffix})
+      break()
+    endif()
   endforeach()
-endforeach()
 
+  if(NOT Boost_FOUND)
+    message(STATUS "Configuring Python front-end - error (no matching Boost.Python or Boost.NumPy components found)")
+  else()
+    link_libraries(${Python_LIBRARIES} Boost::python${_boost_python_suffix_found} Boost::numpy${_boost_python_suffix_found} ${TbGAL_LIBRARIES})
+    include_directories(${PROJECT_SOURCE_DIR}/python/src ${EIGEN3_INCLUDE_DIRS} ${Python_INCLUDE_DIRS} ${Python_NumPy_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${TbGAL_INCLUDE_DIRS})
 
-message(Building\ SignedPQ)
-python_add_module(PQ ./python/src/signed/PQ.cpp)
-target_link_libraries(PQ PUBLIC Boost::${_boost_component_found} ${PYTHON_LIBRARIES})
-target_include_directories(PQ PRIVATE ${PYTHON_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
-set_target_properties(PQ 
-  PROPERTIES
-  PREFIX ""
-  ARCHIVE_OUTPUT_DIRECTORY "tbgal/signed"
-  LIBRARY_OUTPUT_DIRECTORY "tbgal/signed"
-  RUNTIME_OUTPUT_DIRECTORY "tbgal/signed"
-)
-add_custom_command(TARGET PQ PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory tbgal)
-add_custom_command(TARGET PQ PRE_BUILD COMMAND ${CMAKE_COMMAND} -E touch tbgal/__init__.py)
+    include(GNUInstallDirs)
 
+    file(GLOB module_filenames RELATIVE ${PROJECT_SOURCE_DIR}/python/src ${PROJECT_SOURCE_DIR}/python/src/*.cpp)
+    foreach(module_filename ${module_filenames})
+      string(REPLACE ".cpp" "" module_name ${module_filename})
+      Python_add_library(${module_name} ${PROJECT_SOURCE_DIR}/python/src/${module_filename})
+      install(TARGETS ${module_name} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/tbgal/python/${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/tbgal)
+    endforeach()
 
-message(STATUS "Eigen3_DIR = ${EIGEN3_INCLUDE_DIR}")
-message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
-message(STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
-message(STATUS "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
-message(STATUS "Boost_LIBRARIES = ${Boost_LIBRARIES}")
+    install(CODE "file(TOUCH \"${CMAKE_INSTALL_PREFIX}/lib/tbgal/python/${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/tbgal/__init__.py\")")
 
-file(INSTALL "./cpp/include" DESTINATION "${CMAKE_INSTALL_PREFIX}" FILES_MATCHING PATTERN "*.hpp")
-
-configure_file("./cmake/TbGALConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/TbGALConfig.cmake" @ONLY NEWLINE_STYLE UNIX)
-file(INSTALL "${CMAKE_CURRENT_BINARY_DIR}/TbGALConfig.cmake" DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/tbgal")
-
-configure_file("./cmake/TbGALConfigVersion.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/TbGALConfigVersion.cmake" @ONLY NEWLINE_STYLE UNIX)
-file(INSTALL "${CMAKE_CURRENT_BINARY_DIR}/TbGALConfigVersion.cmake" DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/tbgal")
+    message(STATUS "Configuring Python front-end - done")
+  endif()
+endif()

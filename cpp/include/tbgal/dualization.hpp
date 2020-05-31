@@ -26,11 +26,14 @@
 namespace tbgal {
 
     template<typename ScalarType, typename MetricSpaceType>
-    constexpr decltype(auto) dual(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg);
-    //TODO [FUTURE] Implement dualization for the general case (when the input multivector is not a blade).
+    constexpr decltype(auto) dual(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) {
+        //TODO [FUTURE] Implement dualization for the general case (when the input multivector is not a blade).
+        throw NotSupportedError("The dual of multivectors factored by the geometric product is not supported yet.");
+        return FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> >();
+    }
 
     template<typename ScalarType, typename MetricSpaceType>
-    constexpr decltype(auto) dual(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) noexcept {
+    constexpr decltype(auto) dual(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) {
         using ResultingScalarType = ScalarType;
         using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
@@ -43,11 +46,14 @@ namespace tbgal {
     }
 
     template<typename ScalarType, typename MetricSpaceType>
-    constexpr decltype(auto) undual(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg);
-    //TODO [FUTURE] Implement undualization for the general case (when the input multivector is not a blade).
+    constexpr decltype(auto) undual(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) {
+        //TODO [FUTURE] Implement undualization for the general case (when the input multivector is not a blade).
+        throw NotSupportedError("The undual of multivectors factored by the geometric product is not supported yet.");
+        return FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> >();
+    }
 
     template<typename ScalarType, typename MetricSpaceType>
-    constexpr decltype(auto) undual(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) noexcept {
+    constexpr decltype(auto) undual(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) {
         using ResultingScalarType = ScalarType;
         using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;

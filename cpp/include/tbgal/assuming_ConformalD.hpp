@@ -41,14 +41,14 @@ namespace tbgal {
 
         static MetricSpaceType SPACE;
         
-        _TBGAL_OVERLOAD_UTILS(SPACE)
-        _TBGAL_OVERLOAD_CONFORMAL_UTILS(SPACE)
+        TBGAL_OVERLOAD_UTILS(SPACE)
+        TBGAL_OVERLOAD_CONFORMAL_UTILS(SPACE)
 
-        inline decltype(auto) no() noexcept {
+        inline decltype(auto) no() {
             return e(SPACE.dimensions() - 1);
         }
 
-        inline decltype(auto) ni() noexcept {
+        inline decltype(auto) ni() {
             return e(SPACE.dimensions());
         }
 

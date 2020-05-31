@@ -34,6 +34,8 @@
 #include <string>
 #include <vector>
 
+#include "exception.hpp"
+
 namespace tbgal {
 
     template<typename ScalarType, typename FactoringProductType> class FactoredMultivector;
@@ -122,24 +124,31 @@ namespace tbgal {
             using type = typename FactoringProductType::MetricSpaceType;
         };
 
-        constexpr decltype(auto) space_ptr() noexcept {
+        constexpr decltype(auto) space_ptr() {
+            return nullptr;
+        }
+
+        template<typename ScalarType>
+        constexpr decltype(auto) space_ptr(ScalarType const &) {
             return nullptr;
         }
 
         template<typename ScalarType, typename FactoringProductType>
-        constexpr decltype(auto) space_ptr(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+        constexpr decltype(auto) space_ptr(FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
             return arg.space_ptr();
         }
 
-        template<typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-        constexpr decltype(auto) space_ptr(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
-            assert(space_ptr(args...) == arg1.space_ptr() || space_ptr(args...) == nullptr);
-            return arg1.space_ptr();
+        template<typename FirstScalarType, typename... NextTypes>
+        constexpr decltype(auto) space_ptr(FirstScalarType const &, NextTypes const &... args) {
+            return space_ptr(args...);
         }
 
-        template<typename FirstScalarType, typename... NextTypes>
-        constexpr decltype(auto) space_ptr(FirstScalarType const &, NextTypes const &... args) noexcept {
-            return space_ptr(args...);
+        template<typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
+        constexpr decltype(auto) space_ptr(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) {
+            if (space_ptr(args...) != arg1.space_ptr() && space_ptr(args...) != nullptr) {
+                throw NotSupportedError("Operations with multivectors from different models of geometry are not supported yet.");
+            }
+            return arg1.space_ptr();
         }
 
         template<typename MetricSpaceType, typename... ScalarTypes>
@@ -162,8 +171,6 @@ namespace tbgal {
     constexpr bool is_multivector_v = is_multivector<Type>::value;
 
 }
-
-#include "exception.hpp"
 
 #include "metric_space.hpp"
 

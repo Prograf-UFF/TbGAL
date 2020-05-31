@@ -30,22 +30,22 @@ namespace tbgal {
     namespace detail {
 
         template<typename ScalarType>
-        constexpr decltype(auto) _op_impl_get_factors_count(ScalarType const &arg) noexcept {
+        constexpr decltype(auto) _op_impl_get_factors_count(ScalarType const &arg) {
             return 0;
         }
         
         template<typename ScalarType, typename FactoringProductType>
-        constexpr decltype(auto) _op_impl_get_factors_count(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+        constexpr decltype(auto) _op_impl_get_factors_count(FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
             return arg.factors_count();
         }
         
         template<typename ScalarType>
-        constexpr decltype(auto) _op_impl_get_scalar(ScalarType const &arg) noexcept {
+        constexpr decltype(auto) _op_impl_get_scalar(ScalarType const &arg) {
             return arg;
         }
         
         template<typename ScalarType, typename FactoringProductType>
-        constexpr decltype(auto) _op_impl_get_scalar(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+        constexpr decltype(auto) _op_impl_get_scalar(FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
             return arg.scalar();
         }
         
@@ -53,17 +53,17 @@ namespace tbgal {
         private:
 
             template<typename ResultingMatrixType>
-            constexpr static std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix(ResultingMatrixType &result) noexcept {
+            constexpr static std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix(ResultingMatrixType &result) {
                 return std::tuple<ResultingMatrixType&, DefaultIndexType>(result, cols(result));
             }
 
             template<typename ResultingMatrixType, typename ScalarType>
-            constexpr static std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix(ResultingMatrixType &result, ScalarType const &) noexcept {
+            constexpr static std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix(ResultingMatrixType &result, ScalarType const &) {
                 return std::tuple<ResultingMatrixType&, DefaultIndexType>(result, cols(result));
             }
 
             template<typename ResultingMatrixType, typename ScalarType, typename FactoringProductType>
-            constexpr static std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix(ResultingMatrixType &result, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+            constexpr static std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix(ResultingMatrixType &result, FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
                 using MetricSpaceType = typename FactoringProductType::MetricSpaceType;
                 constexpr DefaultIndexType DimensionsAtCompileTime = MetricSpaceType::DimensionsAtCompileTime;
                 if (arg.factors_count() > 0) {
@@ -79,12 +79,12 @@ namespace tbgal {
             }
 
             template<typename ResultingMatrixType, typename FirstScalarType, typename... NextTypes>
-            constexpr static std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix(ResultingMatrixType &result, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
+            constexpr static std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix(ResultingMatrixType &result, FirstScalarType const &arg1, NextTypes const &... args) {
                 return fill_matrix(result, args...);
             }
 
             template<typename ResultingMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-            constexpr static std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix(ResultingMatrixType &result, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
+            constexpr static std::tuple<ResultingMatrixType&, DefaultIndexType> fill_matrix(ResultingMatrixType &result, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) {
                 using MetricSpaceType = typename FirstFactoringProductType::MetricSpaceType;
                 constexpr DefaultIndexType DimensionsAtCompileTime = MetricSpaceType::DimensionsAtCompileTime;
                 if (arg1.factors_count() > 0) {
@@ -101,8 +101,8 @@ namespace tbgal {
 
         public:
 
-            template<typename... Types>
-            constexpr static decltype(auto) eval(Types const &... args) noexcept {
+            template<typename... Types, std::enable_if_t<is_any_v<std::true_type, is_multivector_t<Types>...>, int> = 0>
+            constexpr static decltype(auto) eval(Types const &... args) {
                 using ResultingScalarType = common_scalar_type_t<Types...>;
                 using ResultingMetricSpaceType = metric_space_type_t<Types...>;
                 using ResultingFactoringProductType = OuterProduct<ResultingMetricSpaceType>;
@@ -134,27 +134,32 @@ namespace tbgal {
                 }
                 return ResultingFactoredMultivectorType(space_ptr, 0);
             }
+
+            template<typename... Types, std::enable_if_t<!is_any_v<std::true_type, is_multivector_t<Types>...>, int> = 0>
+            constexpr static decltype(auto) eval(Types const &... args) {
+                return (args * ... * 1);
+            }
         };
 
     }
 
     template<typename FirstType, typename... NextTypes>
-    constexpr decltype(auto) op(FirstType const &arg1, NextTypes const &... args) noexcept {
+    constexpr decltype(auto) op(FirstType const &arg1, NextTypes const &... args) {
         return detail::op_impl::eval(arg1, args...);
     }
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType>
-    constexpr decltype(auto) operator^(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
+    constexpr decltype(auto) operator^(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         return op(arg1, arg2);
     }
 
-    template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
-    constexpr decltype(auto) operator^(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) noexcept {
+    template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType>, int> >
+    constexpr decltype(auto) operator^(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) {
         return op(arg1, arg2);
     }
 
-    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
-    constexpr decltype(auto) operator^(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
+    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType>, int> >
+    constexpr decltype(auto) operator^(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         return op(arg1, arg2);
     }
 

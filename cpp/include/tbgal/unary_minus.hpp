@@ -26,7 +26,7 @@
 namespace tbgal {
 
     template<typename ScalarType, typename MetricSpaceType>
-    constexpr decltype(auto) unary_minus(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) noexcept {
+    constexpr decltype(auto) unary_minus(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) {
         using ResultingScalarType = ScalarType;
         using ResultingFactoringProductType = GeometricProduct<MetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
@@ -34,15 +34,20 @@ namespace tbgal {
     }
 
     template<typename ScalarType, typename MetricSpaceType>
-    constexpr decltype(auto) unary_minus(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) noexcept {
+    constexpr decltype(auto) unary_minus(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) {
         using ResultingScalarType = ScalarType;
         using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
         return ResultingFactoredMultivectorType(arg.space_ptr(), -arg.scalar(), arg.factors_and_complement_in_signed_metric(), arg.factors_count());
     }
 
+    template<typename Type, typename = std::enable_if_t<!is_multivector_v<Type>, int> >
+    constexpr decltype(auto) unary_minus(Type const &arg) {
+        return -arg;
+    }
+
     template<typename ScalarType, typename FactoringProductType>
-    constexpr decltype(auto) operator-(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+    constexpr decltype(auto) operator-(FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
         return unary_minus(arg);
     }
 

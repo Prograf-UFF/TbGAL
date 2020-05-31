@@ -61,13 +61,13 @@ namespace tbgal {
         using scalar_type_t = typename scalar_type<MatrixType>::type;
 
         template<typename MatrixType>
-        constexpr decltype(auto) coeff(MatrixType &, DefaultIndexType, DefaultIndexType) noexcept;
+        constexpr decltype(auto) coeff(MatrixType &, DefaultIndexType, DefaultIndexType);
 
         template<typename MatrixType>
-        constexpr decltype(auto) cols(MatrixType const &) noexcept;
+        constexpr decltype(auto) cols(MatrixType const &);
 
         template<typename MatrixType>
-        constexpr decltype(auto) rows(MatrixType const &) noexcept;
+        constexpr decltype(auto) rows(MatrixType const &);
 
         template<typename ScalarType, DefaultIndexType SizeAtCompileTime, DefaultIndexType MaxSizeAtCompileTime>
         struct diagonal_matrix_type;
@@ -82,76 +82,76 @@ namespace tbgal {
         using matrix_type_t = typename matrix_type<ScalarType, RowsAtCompileTime, ColsAtCompileTime, MaxRowsAtCompileTime, MaxColsAtCompileTime>::type;
 
         template<typename ScalarType, DefaultIndexType SizeAtCompileTime, DefaultIndexType MaxSizeAtCompileTime>
-        constexpr decltype(auto) make_diagonal_matrix(DefaultIndexType) noexcept;
+        constexpr decltype(auto) make_diagonal_matrix(DefaultIndexType);
 
         template<typename ScalarType, DefaultIndexType SizeAtCompileTime, DefaultIndexType MaxSizeAtCompileTime>
-        constexpr decltype(auto) make_identity_matrix(DefaultIndexType) noexcept;
+        constexpr decltype(auto) make_identity_matrix(DefaultIndexType);
 
         template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, DefaultIndexType MaxColsAtCompileTime>
-        constexpr decltype(auto) make_matrix(DefaultIndexType, DefaultIndexType) noexcept;
+        constexpr decltype(auto) make_matrix(DefaultIndexType, DefaultIndexType);
 
         template<typename ScalarType, DefaultIndexType RowsAtCompileTime, DefaultIndexType ColsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, DefaultIndexType MaxColsAtCompileTime>
-        constexpr decltype(auto) make_zero_matrix(DefaultIndexType, DefaultIndexType) noexcept;
+        constexpr decltype(auto) make_zero_matrix(DefaultIndexType, DefaultIndexType);
 
         template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename SourceMatrixType, typename TargetMatrixType>
-        constexpr void assign_block(SourceMatrixType const &, DefaultIndexType, DefaultIndexType, TargetMatrixType &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
+        constexpr void assign_block(SourceMatrixType const &, DefaultIndexType, DefaultIndexType, TargetMatrixType &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType);
 
         template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename SourceMatrixType, typename TargetMatrixType>
-        constexpr void assign_block(SourceMatrixType const &, DefaultIndexType, DefaultIndexType, TargetMatrixType &, DefaultIndexType, DefaultIndexType) noexcept;
+        constexpr void assign_block(SourceMatrixType const &, DefaultIndexType, DefaultIndexType, TargetMatrixType &, DefaultIndexType, DefaultIndexType);
 
         template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename SourceType, typename TargetMatrixType>
-        constexpr void assign_block(SourceType const &, TargetMatrixType &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
+        constexpr void assign_block(SourceType const &, TargetMatrixType &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType);
 
         template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename MatrixType>
-        constexpr decltype(auto) block(MatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
+        constexpr decltype(auto) block(MatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType);
 
         template<typename MatrixType>
-        constexpr void conservative_resize(MatrixType &, DefaultIndexType, DefaultIndexType) noexcept;
+        constexpr void conservative_resize(MatrixType &, DefaultIndexType, DefaultIndexType);
 
         template<typename MatrixType>
-        constexpr decltype(auto) determinant(MatrixType const &) noexcept;
+        constexpr decltype(auto) determinant(MatrixType const &);
         
         template<typename MatrixType>
-        constexpr decltype(auto) es_eigenvectors_matrix(MatrixType const &arg) noexcept;
+        constexpr decltype(auto) es_eigenvectors_matrix(MatrixType const &arg);
         
         template<typename MatrixType>
-        constexpr decltype(auto) evaluate(MatrixType const &arg) noexcept;
+        constexpr decltype(auto) evaluate(MatrixType const &arg);
 
         template<typename... ScalarTypes>
-        constexpr decltype(auto) fill_column_matrix(ScalarTypes &&...) noexcept;
+        constexpr decltype(auto) fill_column_matrix(ScalarTypes &&...);
 
         template<DefaultIndexType RowsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, typename IteratorType, typename... ExtraScalarTypes>
-        constexpr decltype(auto) fill_column_matrix_using_iterator(IteratorType, IteratorType, ExtraScalarTypes &&...) noexcept;
+        constexpr decltype(auto) fill_column_matrix_using_iterator(IteratorType, IteratorType, ExtraScalarTypes &&...);
 
         template<typename MatrixType>
-        constexpr decltype(auto) inverse(MatrixType const &) noexcept;
+        constexpr decltype(auto) inverse(MatrixType const &);
 
         template<typename FirstMatrixType, typename SecondMatrixType>
-        constexpr decltype(auto) prod(FirstMatrixType const &, SecondMatrixType const &) noexcept;
+        constexpr decltype(auto) prod(FirstMatrixType const &, SecondMatrixType const &);
 
         template<DefaultIndexType FirstBlockRowsAtCompileTime, DefaultIndexType SecondBlockRowsAtCompileTime, DefaultIndexType SecondBlockColsAtCompileTime, typename FirstMatrixType, typename SecondMatrixType>
-        constexpr decltype(auto) prod_block(FirstMatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, SecondMatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
+        constexpr decltype(auto) prod_block(FirstMatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, SecondMatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType);
 
         template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename FirstMatrixType, typename SecondMatrixType>
-        constexpr decltype(auto) prod_block(FirstMatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType, SecondMatrixType const &) noexcept;
+        constexpr decltype(auto) prod_block(FirstMatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType, SecondMatrixType const &);
 
         template<DefaultIndexType BlockRowsAtCompileTime, DefaultIndexType BlockColsAtCompileTime, typename FirstMatrixType, typename SecondMatrixType>
-        constexpr decltype(auto) prod_block(FirstMatrixType const &, SecondMatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType) noexcept;
+        constexpr decltype(auto) prod_block(FirstMatrixType const &, SecondMatrixType const &, DefaultIndexType, DefaultIndexType, DefaultIndexType, DefaultIndexType);
 
         template<typename MatrixType>
-        constexpr decltype(auto) qr_orthogonal_matrix(MatrixType const &) noexcept;
+        constexpr decltype(auto) qr_orthogonal_matrix(MatrixType const &);
 
         template<typename MatrixType>
-        constexpr decltype(auto) reverse_columns(MatrixType const &) noexcept;
+        constexpr decltype(auto) reverse_columns(MatrixType const &);
 
         template<typename MatrixType>
-        constexpr decltype(auto) split_columns_and_swap(MatrixType const &, DefaultIndexType) noexcept;
+        constexpr decltype(auto) split_columns_and_swap(MatrixType const &, DefaultIndexType);
 
         template<typename FirstMatrixType, typename SecondMatrixType>
-        constexpr decltype(auto) subtract(FirstMatrixType const &arg1, SecondMatrixType const &arg2) noexcept;
+        constexpr decltype(auto) subtract(FirstMatrixType const &arg1, SecondMatrixType const &arg2);
 
         template<typename MatrixType>
-        constexpr decltype(auto) transpose(MatrixType const &) noexcept;
+        constexpr decltype(auto) transpose(MatrixType const &);
 
     }
 

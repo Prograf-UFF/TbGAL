@@ -46,7 +46,7 @@ namespace tbgal {
         }
     }
 
-    template<typename Type, typename = std::enable_if_t<!is_multivector_v<Type> > >
+    template<typename Type, typename = std::enable_if_t<!is_multivector_v<Type>, int> >
     constexpr decltype(auto) rnorm_sqr(Type const &arg) {
         return arg * arg;
     }

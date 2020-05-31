@@ -38,66 +38,66 @@
 namespace tbgal {
 
     template<typename ValueType>
-    constexpr decltype(auto) default_tolerance() noexcept;
+    constexpr decltype(auto) default_tolerance();
 
     template<>
-    constexpr decltype(auto) default_tolerance<std::float_t>() noexcept {
+    constexpr decltype(auto) default_tolerance<std::float_t>() {
         return TBGAL_DEFAULT_FLT_TOLERANCE;
     }
 
     template<>
-    constexpr decltype(auto) default_tolerance<std::double_t>() noexcept {
+    constexpr decltype(auto) default_tolerance<std::double_t>() {
         return TBGAL_DEFAULT_DBL_TOLERANCE;
     }
 
     template<>
-    constexpr decltype(auto) default_tolerance<std::int8_t>() noexcept {
+    constexpr decltype(auto) default_tolerance<std::int8_t>() {
         return 0;
     }
 
     template<>
-    constexpr decltype(auto) default_tolerance<std::int16_t>() noexcept {
+    constexpr decltype(auto) default_tolerance<std::int16_t>() {
         return 0;
     }
 
     template<>
-    constexpr decltype(auto) default_tolerance<std::int32_t>() noexcept {
+    constexpr decltype(auto) default_tolerance<std::int32_t>() {
         return 0;
     }
 
     template<>
-    constexpr decltype(auto) default_tolerance<std::int64_t>() noexcept {
+    constexpr decltype(auto) default_tolerance<std::int64_t>() {
         return 0;
+    }
+
+    template<typename ScalarType>
+    constexpr bool is_zero(ScalarType const &arg) {
+        return abs(arg) <= default_tolerance<ScalarType>();
+    }
+
+    template<typename ScalarType, typename FactoringProductType>
+    constexpr bool is_zero(FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
+        return arg.factors_count() == 0 && abs(arg.scalar()) <= default_tolerance<ScalarType>();
     }
 
     template<typename Type>
-    constexpr bool is_blade(Type const &arg) noexcept {
+    constexpr bool is_blade(Type const &arg) {
         return true;
     }
 
     template<typename ScalarType, typename MetricSpaceType>
-    constexpr bool is_blade(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) noexcept {
+    constexpr bool is_blade(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) {
         return arg.factors_count() == 0 || arg.factors_count() == 1 || is_zero(arg.scalar());
         //TODO [FUTURE] Implement the general case.
     }
 
     template<typename ScalarType, typename MetricSpaceType>
-    constexpr bool is_blade(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) noexcept {
+    constexpr bool is_blade(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) {
         return true;
     }
 
-    template<typename ScalarType>
-    constexpr bool is_zero(ScalarType const &arg) noexcept {
-        return abs(arg) <= default_tolerance<ScalarType>();
-    }
-
-    template<typename ScalarType, typename FactoringProductType>
-    constexpr bool is_zero(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
-        return arg.factors_count() == 0 && abs(arg.scalar()) <= default_tolerance<ScalarType>();
-    }
-
-    template<typename MetricSpaceType, typename ScalarType, typename = std::enable_if_t<!is_multivector_v<std::remove_cv_t<std::remove_reference_t<ScalarType> > > > >
-    decltype(auto) scalar(MetricSpaceType const *space_ptr, ScalarType &&value) noexcept {
+    template<typename MetricSpaceType, typename ScalarType, typename = std::enable_if_t<!is_multivector_v<std::remove_cv_t<std::remove_reference_t<ScalarType> > >, int> >
+    decltype(auto) scalar(MetricSpaceType const *space_ptr, ScalarType &&value) {
         using ResultingScalarType = std::remove_cv_t<std::remove_reference_t<ScalarType> >;
         using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
@@ -112,9 +112,8 @@ namespace tbgal {
             using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
             using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
             static_assert(MetricSpaceType::DimensionsAtCompileTime == Dynamic || MetricSpaceType::DimensionsAtCompileTime == sizeof...(ScalarTypes), "Invalid number of coordinates.");
-            assert(space_ptr->dimensions() == sizeof...(ScalarTypes));
             if (space_ptr->dimensions() != sizeof...(ScalarTypes)) {
-                throw tbgal::NotSupportedError("Incorrect number of components in the vector. Please check space dimensionality and try again.");
+                throw NotSupportedError("Incorrect number of components in the vector. Please check space dimensionality and try again.");
             }
             auto input = detail::evaluate(detail::from_actual_to_signed_metric(space_ptr, detail::fill_column_matrix(std::move(coords)...)));
             auto qr_tuple = detail::qr_orthogonal_matrix(input);
@@ -135,9 +134,8 @@ namespace tbgal {
             using ResultingScalarType = std::common_type_t<std::remove_cv_t<std::remove_reference_t<typename std::iterator_traits<IteratorType>::value_type> >, std::remove_cv_t<std::remove_reference_t<ExtraScalarTypes> >...>;
             using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
             using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
-            assert(space_ptr->dimensions() == (std::distance(begin, end) + sizeof...(extra_coords)));
             if (space_ptr->dimensions() != (std::distance(begin, end) + sizeof...(extra_coords))) {
-                throw tbgal::NotSupportedError("Incorrect number of components in the vector. Please check space dimensionality and try again.");
+                throw NotSupportedError("Incorrect number of components in the vector. Please check space dimensionality and try again.");
             }
             auto input = detail::evaluate(detail::from_actual_to_signed_metric(space_ptr, detail::fill_column_matrix_using_iterator<MetricSpaceType::DimensionsAtCompileTime, MetricSpaceType::MaxDimensionsAtCompileTime>(begin, end, std::move(extra_coords)...)));
             auto qr_tuple = detail::qr_orthogonal_matrix(input);
@@ -156,22 +154,24 @@ namespace tbgal {
 
     }
     
-    template<typename MetricSpaceType, typename... ScalarTypes, typename = std::enable_if_t<std::disjunction_v<std::bool_constant<!detail::is_iterator_v<ScalarTypes> >...> > >
+    template<typename MetricSpaceType, typename... ScalarTypes, typename = std::enable_if_t<std::disjunction_v<std::bool_constant<!detail::is_iterator_v<ScalarTypes> >...>, int> >
     decltype(auto) vector(MetricSpaceType const *space_ptr, ScalarTypes &&... coords) {
         return detail::make_vector(space_ptr, std::move(coords)...);
     }
 
-    template<typename MetricSpaceType, typename IteratorType, typename = std::enable_if_t<detail::is_iterator_v<IteratorType> > >
+    template<typename MetricSpaceType, typename IteratorType, typename = std::enable_if_t<detail::is_iterator_v<IteratorType>, int> >
     decltype(auto) vector(MetricSpaceType const *space_ptr, IteratorType begin, IteratorType end) {
         return detail::make_vector_using_iterator(space_ptr, begin, end);
     }
 
     template<typename ScalarType, typename MetricSpaceType>
-    decltype(auto) e(MetricSpaceType const *space_ptr, DefaultIndexType index) noexcept {
+    decltype(auto) e(MetricSpaceType const *space_ptr, DefaultIndexType index) {
         using ResultingScalarType = ScalarType;
         using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
-        assert(1 <= index && index <= space_ptr->dimensions());
+        if (index < 1 || space_ptr->dimensions() < index) {
+            throw NotSupportedError("Invalid index value. Please check space dimensionality and try again.");
+        }
         auto aux = detail::make_matrix<ScalarType, MetricSpaceType::DimensionsAtCompileTime, 1, MetricSpaceType::MaxDimensionsAtCompileTime, 1>(space_ptr->dimensions(), 1);
         detail::assign_block<Dynamic, 1>(detail::make_zero_matrix<ScalarType, Dynamic, 1, MetricSpaceType::DimensionsAtCompileTime, 1>(index - 1, 1), aux, 0, 0, index - 1, 1);
         detail::coeff(aux, index - 1, 0) = 1;

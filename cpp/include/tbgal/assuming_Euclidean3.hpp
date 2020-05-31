@@ -33,8 +33,8 @@ namespace tbgal {
 
         static MetricSpaceType const SPACE;
         
-        _TBGAL_OVERLOAD_UTILS(SPACE)
-        _TBGAL_OVERLOAD_EUCLIDEAN_UTILS(SPACE)
+        TBGAL_OVERLOAD_UTILS(SPACE)
+        TBGAL_OVERLOAD_EUCLIDEAN_UTILS(SPACE)
 
         static auto const e1 = e(1);
         static auto const e2 = e(2);

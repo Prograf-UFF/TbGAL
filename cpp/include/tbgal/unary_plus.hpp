@@ -26,12 +26,17 @@
 namespace tbgal {
 
     template<typename ScalarType, typename FactoringProductType>
-    constexpr FactoredMultivector<ScalarType, FactoringProductType> unary_plus(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+    constexpr FactoredMultivector<ScalarType, FactoringProductType> unary_plus(FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
+        return arg;
+    }
+
+    template<typename Type, typename = std::enable_if_t<!is_multivector_v<Type>, int> >
+    constexpr Type unary_plus(Type const &arg) {
         return arg;
     }
 
     template<typename ScalarType, typename FactoringProductType>
-    constexpr FactoredMultivector<ScalarType, FactoringProductType> operator+(FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+    constexpr FactoredMultivector<ScalarType, FactoringProductType> operator+(FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
         return arg;
     }
 

@@ -42,31 +42,31 @@ namespace tbgal {
         inline EuclideanMetricSpace(EuclideanMetricSpace const &) = default;
         inline EuclideanMetricSpace(EuclideanMetricSpace &&) = default;
 
-        inline EuclideanMetricSpace(IndexType dimensions) noexcept :
+        inline EuclideanMetricSpace(IndexType dimensions) :
             Super(dimensions, 0),
             basis_vectors_str_(0) {
             update_basis_vectors_str(dimensions);
         }
 
-        inline EuclideanMetricSpace() noexcept :
+        inline EuclideanMetricSpace() :
             EuclideanMetricSpace((DimensionsAtCompileTime != Dynamic) ? DimensionsAtCompileTime : 0) {
         }
 
         inline EuclideanMetricSpace & operator=(EuclideanMetricSpace const &) = default;
         inline EuclideanMetricSpace & operator=(EuclideanMetricSpace &&) = default;
 
-        inline std::string const & basis_vector_str(IndexType index) const noexcept override {
+        inline std::string const & basis_vector_str(IndexType index) const override {
             return basis_vectors_str_[index];
         }
 
-        inline void set_dimensions(IndexType dimensions) noexcept {
+        inline void set_dimensions(IndexType dimensions) {
             Super::set_dimensions(dimensions, 0);
             update_basis_vectors_str(dimensions);
         }
 
     private:
 
-        inline void update_basis_vectors_str(IndexType dimensions) noexcept {
+        inline void update_basis_vectors_str(IndexType dimensions) {
             basis_vectors_str_.resize(dimensions);
             for (IndexType ind = 0; ind != dimensions; ++ind) {
                 basis_vectors_str_[ind] = "e" + std::to_string(ind + 1);

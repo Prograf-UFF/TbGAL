@@ -31,22 +31,22 @@ namespace tbgal {
         private:
 
             template<typename ScalarType, typename MetricSpaceType>
-            constexpr static decltype(auto) to_geometric_factors(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) noexcept {
+            constexpr static decltype(auto) to_geometric_factors(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) {
                 return std::make_tuple(arg.scalar(), arg.factors_in_signed_metric());
             }
             
             template<typename ScalarType, typename MetricSpaceType>
-            constexpr static decltype(auto) to_geometric_factors(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) noexcept {
+            constexpr static decltype(auto) to_geometric_factors(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) {
                 auto factors_tuple = from_outer_to_geometric_factors(arg.space_ptr(), arg.factors_in_signed_metric());
                 return std::make_tuple(arg.scalar() * std::get<0>(factors_tuple), std::get<1>(factors_tuple));
             }
             
             template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType, typename ColumnMatrixType>
-            constexpr static void update_factors(MetricSpaceType const *, ScalarType &, FactorsMatrixType const &, DynamicSquareMatrixType const &, FactorsMatrixType const &, TwoByTwoMatrixType const &, TwoByTwoMatrixType const &, DynamicColumnMatrixType const &, ColumnMatrixType const &) noexcept {
+            constexpr static void update_factors(MetricSpaceType const *, ScalarType &, FactorsMatrixType const &, DynamicSquareMatrixType const &, FactorsMatrixType const &, TwoByTwoMatrixType const &, TwoByTwoMatrixType const &, DynamicColumnMatrixType const &, ColumnMatrixType const &) {
             }
 
             template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType, typename ColumnMatrixType, typename FirstScalarType, typename... NextTypes>
-            constexpr static void update_factors(MetricSpaceType const *space_ptr, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, TwoByTwoMatrixType &inv_T, DynamicColumnMatrixType &x, ColumnMatrixType &z, FirstScalarType const &arg1, NextTypes const &... args) noexcept {
+            constexpr static void update_factors(MetricSpaceType const *space_ptr, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, TwoByTwoMatrixType &inv_T, DynamicColumnMatrixType &x, ColumnMatrixType &z, FirstScalarType const &arg1, NextTypes const &... args) {
                 constexpr DefaultIndexType DimensionsAtCompileTime = MetricSpaceType::DimensionsAtCompileTime;
                 constexpr DefaultIndexType MaxDimensionsAtCompileTime = MetricSpaceType::MaxDimensionsAtCompileTime;
 
@@ -59,7 +59,7 @@ namespace tbgal {
             }
 
             template<typename MetricSpaceType, typename ScalarType, typename FactorsMatrixType, typename DynamicSquareMatrixType, typename TwoByTwoMatrixType, typename DynamicColumnMatrixType, typename ColumnMatrixType, typename FirstScalarType, typename FirstFactoringProductType, typename... NextTypes>
-            constexpr static void update_factors(MetricSpaceType const *space_ptr, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, TwoByTwoMatrixType &inv_T, DynamicColumnMatrixType &x, ColumnMatrixType &z, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) noexcept {
+            constexpr static void update_factors(MetricSpaceType const *space_ptr, ScalarType &alpha, FactorsMatrixType &A, DynamicSquareMatrixType &MA, FactorsMatrixType &QA, TwoByTwoMatrixType &T, TwoByTwoMatrixType &inv_T, DynamicColumnMatrixType &x, ColumnMatrixType &z, FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, NextTypes const &... args) {
                 using IndexType = typename MetricSpaceType::IndexType;
 
                 constexpr DefaultIndexType DimensionsAtCompileTime = MetricSpaceType::DimensionsAtCompileTime;
@@ -199,7 +199,7 @@ namespace tbgal {
         public:
 
             template<typename... Types>
-            constexpr static decltype(auto) eval(Types const &... args) noexcept {
+            constexpr static decltype(auto) eval(Types const &... args) {
                 using ResultingScalarType = common_scalar_type_t<Types...>;
                 using ResultingMetricSpaceType = metric_space_type_t<Types...>;
                 using ResultingFactoringProductType = GeometricProduct<ResultingMetricSpaceType>;
@@ -259,22 +259,22 @@ namespace tbgal {
     }
 
     template<typename FirstType, typename... NextTypes>
-    constexpr decltype(auto) gp(FirstType const &arg1, NextTypes const &... args) noexcept {
+    constexpr decltype(auto) gp(FirstType const &arg1, NextTypes const &... args) {
         return std::conditional_t<detail::gp_impl_reduces_to_op_impl_v<FirstType, NextTypes...>, detail::op_impl, detail::gp_impl>::eval(arg1, args...);
     }
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType>
-    constexpr decltype(auto) operator*(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
+    constexpr decltype(auto) operator*(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         return gp(arg1, arg2);
     }
 
-    template<typename FirstScsalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
-    constexpr decltype(auto) operator*(FactoredMultivector<FirstScsalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) noexcept {
+    template<typename FirstScsalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType>, int> >
+    constexpr decltype(auto) operator*(FactoredMultivector<FirstScsalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) {
         return gp(arg1, arg2);
     }
 
-    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
-    constexpr decltype(auto) operator*(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
+    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType>, int> >
+    constexpr decltype(auto) operator*(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         return gp(arg1, arg2);
     }
 

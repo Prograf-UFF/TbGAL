@@ -28,7 +28,7 @@ namespace tbgal {
     namespace detail {
 
         template<typename ScalarType, typename FactoringProductType>
-        std::ostream & write(std::ostream &os, FactoredMultivector<ScalarType, FactoringProductType> const &arg) noexcept {
+        std::ostream & write(std::ostream &os, FactoredMultivector<ScalarType, FactoringProductType> const &arg) {
             using IndexType = typename FactoredMultivector<ScalarType, FactoringProductType>::IndexType;
             os << arg.scalar();
             if (arg.factors_count() > 0) {
@@ -54,7 +54,7 @@ namespace tbgal {
     }
 
     template<typename ScalarType, typename MetricSpaceType>
-    std::ostream & operator <<(std::ostream &os, FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType>> const &arg) noexcept {
+    std::ostream & operator <<(std::ostream &os, FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) {
         os << "gp(";
         detail::write(os, arg);
         os << ")";
@@ -62,7 +62,7 @@ namespace tbgal {
     }
 
     template<typename ScalarType, typename MetricSpaceType>
-    std::ostream & operator <<(std::ostream &os, FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType>> const &arg) noexcept {
+    std::ostream & operator <<(std::ostream &os, FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) {
         os << "op(";
         detail::write(os, arg);
         os << ")";

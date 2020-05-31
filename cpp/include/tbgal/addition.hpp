@@ -33,7 +33,9 @@ namespace tbgal {
         using ResultingFactoringProductType = OuterProduct<typename FirstFactoringProductType::MetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
         static_assert(std::is_same_v<typename FirstFactoringProductType::MetricSpaceType, typename SecondFactoringProductType::MetricSpaceType>, "The multivectors must have the same metric space.");
-        assert(arg1.space_ptr() == arg2.space_ptr());
+        if (arg1.space_ptr() != arg2.space_ptr()) {
+            throw NotSupportedError("Operations with multivectors from different models of geometry are not supported yet.");
+        }
         if (arg1.factors_count() == arg2.factors_count()) {
             if (arg1.factors_count() == 0) {
                 return ResultingFactoredMultivectorType(arg1.space_ptr(), arg1.scalar() + arg2.scalar());
@@ -45,7 +47,7 @@ namespace tbgal {
         throw NotSupportedError("The general case of summation of factored multivectors is not supported.");
     }
 
-    template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
+    template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType>, int> >
     constexpr decltype(auto) addition(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) {
         if (arg1.factors_count() == 0) {
             return scalar(arg1.space_ptr(), arg1.scalar() + arg2);
@@ -53,7 +55,7 @@ namespace tbgal {
         throw NotSupportedError("The general case of summation of factored multivectors is not supported.");
     }
 
-    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
+    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType>, int> >
     constexpr decltype(auto) addition(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         if (arg2.factors_count() == 0) {
             return scalar(arg2.space_ptr(), arg1 + arg2.scalar());
@@ -61,7 +63,7 @@ namespace tbgal {
         throw NotSupportedError("The general case of summation of factored multivectors is not supported.");
     }
 
-    template<typename FirstScalarType, typename SecondScalarType, typename = std::enable_if_t<!(is_multivector_v<FirstScalarType> || is_multivector_v<SecondScalarType>)> >
+    template<typename FirstScalarType, typename SecondScalarType, typename = std::enable_if_t<!(is_multivector_v<FirstScalarType> || is_multivector_v<SecondScalarType>), int> >
     constexpr decltype(auto) addition(FirstScalarType const &arg1, SecondScalarType const &arg2) {
         return arg1 + arg2;
     }
@@ -76,12 +78,12 @@ namespace tbgal {
         return addition(arg1, arg2);
     }
 
-    template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
+    template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType>, int> >
     constexpr decltype(auto) operator+(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) {
         return addition(arg1, arg2);
     }
 
-    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
+    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType>, int> >
     constexpr decltype(auto) operator+(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         return addition(arg1, arg2);
     }

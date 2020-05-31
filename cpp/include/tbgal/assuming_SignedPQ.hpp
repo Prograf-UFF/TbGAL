@@ -45,8 +45,8 @@ namespace tbgal {
 
         static MetricSpaceType SPACE;
         
-        _TBGAL_OVERLOAD_UTILS(SPACE)
-        _TBGAL_OVERLOAD_SIGNED_UTILS(SPACE)
+        TBGAL_OVERLOAD_UTILS(SPACE)
+        TBGAL_OVERLOAD_SIGNED_UTILS(SPACE)
 
     }
 

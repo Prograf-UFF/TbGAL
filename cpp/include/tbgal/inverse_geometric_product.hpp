@@ -26,22 +26,22 @@
 namespace tbgal {
 
     template<typename FirstType, typename SecondType>
-    constexpr decltype(auto) igp(FirstType const &arg1, SecondType const &arg2) noexcept {
+    constexpr decltype(auto) igp(FirstType const &arg1, SecondType const &arg2) {
         return gp(arg1, inverse(arg2));
     }
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType>
-    constexpr decltype(auto) operator/(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
+    constexpr decltype(auto) operator/(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         return igp(arg1, arg2);
     }
 
-    template<typename FirstScsalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
-    constexpr decltype(auto) operator/(FactoredMultivector<FirstScsalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) noexcept {
+    template<typename FirstScsalarType, typename FirstFactoringProductType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType>, int> >
+    constexpr decltype(auto) operator/(FactoredMultivector<FirstScsalarType, FirstFactoringProductType> const &arg1, SecondScalarType const &arg2) {
         return igp(arg1, arg2);
     }
 
-    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
-    constexpr decltype(auto) operator/(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
+    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType>, int> >
+    constexpr decltype(auto) operator/(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         return igp(arg1, arg2);
     }
 

@@ -26,7 +26,7 @@
 namespace tbgal {
 
     template<typename FirstScalarType, typename FirstFactoringProductType, typename SecondScalarType, typename SecondFactoringProductType>
-    constexpr decltype(auto) rcont(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
+    constexpr decltype(auto) rcont(FactoredMultivector<FirstScalarType, FirstFactoringProductType> const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         using ResultingScalarType = std::common_type_t<FirstScalarType, SecondScalarType>;
         using ResultingFactoredMultivectorType = decltype(undual(op(arg2, dual(arg1))));
         if (!is_blade(arg1) || !is_blade(arg2) || (arg1.factors_count() >= arg2.factors_count())) {
@@ -38,20 +38,20 @@ namespace tbgal {
         return ResultingFactoredMultivectorType(detail::space_ptr(arg1, arg2), 0);
     }
 
-    template<typename FirstScalarType, typename FirstMetricSpaceType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
-    constexpr decltype(auto) rcont(FactoredMultivector<FirstScalarType, GeometricProduct<FirstMetricSpaceType> > const &arg1, SecondScalarType const &arg2) noexcept {
+    template<typename FirstScalarType, typename FirstMetricSpaceType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType>, int> >
+    constexpr decltype(auto) rcont(FactoredMultivector<FirstScalarType, GeometricProduct<FirstMetricSpaceType> > const &arg1, SecondScalarType const &arg2) {
         using ResultingScalarType = std::common_type_t<FirstScalarType, SecondScalarType>;
         using ResultingFactoringProductType = GeometricProduct<FirstMetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
         auto resulting_scalar = arg1.scalar() * arg2;
         if (!is_zero(resulting_scalar)) {
-            return ResultingFactoredMultivectorType(arg1.space_ptr(), resulting_scalar, arg1.factors_in_signed_metric(), arg1.factors_count());
+            return ResultingFactoredMultivectorType(arg1.space_ptr(), resulting_scalar, arg1.factors_in_signed_metric());
         }
         return ResultingFactoredMultivectorType(arg1.space_ptr(), 0);
     }
 
-    template<typename FirstScalarType, typename FirstMetricSpaceType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType> > >
-    constexpr decltype(auto) rcont(FactoredMultivector<FirstScalarType, OuterProduct<FirstMetricSpaceType> > const &arg1, SecondScalarType const &arg2) noexcept {
+    template<typename FirstScalarType, typename FirstMetricSpaceType, typename SecondScalarType, typename = std::enable_if_t<!is_multivector_v<SecondScalarType>, int> >
+    constexpr decltype(auto) rcont(FactoredMultivector<FirstScalarType, OuterProduct<FirstMetricSpaceType> > const &arg1, SecondScalarType const &arg2) {
         using ResultingScalarType = std::common_type_t<FirstScalarType, SecondScalarType>;
         using ResultingFactoringProductType = OuterProduct<FirstMetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
@@ -62,14 +62,14 @@ namespace tbgal {
         return ResultingFactoredMultivectorType(arg1.space_ptr(), 0);
     }
 
-    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType> > >
-    constexpr decltype(auto) rcont(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) noexcept {
+    template<typename FirstScalarType, typename SecondScalarType, typename SecondFactoringProductType, typename = std::enable_if_t<!is_multivector_v<FirstScalarType>, int> >
+    constexpr decltype(auto) rcont(FirstScalarType const &arg1, FactoredMultivector<SecondScalarType, SecondFactoringProductType> const &arg2) {
         using ResultingType = std::common_type_t<FirstScalarType, SecondScalarType>;
         return arg2.factors_count() == 0 ? arg1 * arg2.scalar() : ResultingType(0);
     }
 
-    template<typename FirstScalarType, typename SecondScalarType, typename = std::enable_if_t<!(is_multivector_v<FirstScalarType> || is_multivector_v<SecondScalarType>)> >
-    constexpr decltype(auto) rcont(FirstScalarType const &arg1, SecondScalarType const &arg2) noexcept {
+    template<typename FirstScalarType, typename SecondScalarType, typename = std::enable_if_t<!(is_multivector_v<FirstScalarType> || is_multivector_v<SecondScalarType>), int> >
+    constexpr decltype(auto) rcont(FirstScalarType const &arg1, SecondScalarType const &arg2) {
         return arg1 * arg2;
     }
 

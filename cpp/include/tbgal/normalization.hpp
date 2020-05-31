@@ -26,7 +26,7 @@
 namespace tbgal {
 
     template<typename ScalarType, typename MetricSpaceType>
-    constexpr decltype(auto) unit(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) noexcept {
+    constexpr decltype(auto) unit(FactoredMultivector<ScalarType, GeometricProduct<MetricSpaceType> > const &arg) {
         using ResultingScalarType = std::common_type_t<ScalarType, typename MetricSpaceType::ScalarType>;
         using ResultingFactoringProductType = GeometricProduct<MetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
@@ -39,7 +39,7 @@ namespace tbgal {
     }
 
     template<typename ScalarType, typename MetricSpaceType>
-    constexpr decltype(auto) unit(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) noexcept {
+    constexpr decltype(auto) unit(FactoredMultivector<ScalarType, OuterProduct<MetricSpaceType> > const &arg) {
         using ResultingScalarType = std::common_type_t<ScalarType, typename MetricSpaceType::ScalarType>;
         using ResultingFactoringProductType = OuterProduct<MetricSpaceType>;
         using ResultingFactoredMultivectorType = FactoredMultivector<ResultingScalarType, ResultingFactoringProductType>;
@@ -52,8 +52,8 @@ namespace tbgal {
         }
     }
 
-    template<typename Type, typename = std::enable_if_t<!is_multivector_v<Type> > >
-    constexpr Type unit(Type const &arg) noexcept {
+    template<typename Type, typename = std::enable_if_t<!is_multivector_v<Type>, int> >
+    constexpr Type unit(Type const &arg) {
         return arg / abs(arg);
     }
 

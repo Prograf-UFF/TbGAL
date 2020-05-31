@@ -45,7 +45,7 @@ namespace tbgal {
         inline ConformalMetricSpace(ConformalMetricSpace const &) = default;
         inline ConformalMetricSpace(ConformalMetricSpace &&) = default;
 
-        inline ConformalMetricSpace(IndexType base_space_dimensions) noexcept :
+        inline ConformalMetricSpace(IndexType base_space_dimensions) :
             Super(base_space_dimensions + 1, 1),
             basis_vectors_str_(),
             from_actual_to_signed_metric_(),
@@ -53,29 +53,29 @@ namespace tbgal {
             update_basis_vectors_str(base_space_dimensions);
         }
 
-        inline ConformalMetricSpace() noexcept :
+        inline ConformalMetricSpace() :
             ConformalMetricSpace((BaseSpaceDimensionsAtCompileTime != Dynamic) ? BaseSpaceDimensionsAtCompileTime : 0) {
         }
 
         inline ConformalMetricSpace & operator=(ConformalMetricSpace const &) = default;
         inline ConformalMetricSpace & operator=(ConformalMetricSpace &&) = default;
 
-        inline std::string const & basis_vector_str(IndexType index) const noexcept override {
+        inline std::string const & basis_vector_str(IndexType index) const override {
             return basis_vectors_str_[index];
         }
         
-        inline IndexType base_space_dimensions() const noexcept {
+        inline IndexType base_space_dimensions() const {
             return Super::dimensions() - 2;
         }
 
-        inline void set_base_space_dimensions(IndexType base_space_dimensions) noexcept {
+        inline void set_base_space_dimensions(IndexType base_space_dimensions) {
             Super::set_dimensions(base_space_dimensions + 1, 1);
             update_basis_vectors_str(base_space_dimensions);
         }
 
     private:
 
-        inline void update_basis_vectors_str(IndexType base_space_dimensions) noexcept {
+        inline void update_basis_vectors_str(IndexType base_space_dimensions) {
             basis_vectors_str_.resize(base_space_dimensions + 2);
             for (IndexType ind = 0; ind != base_space_dimensions; ++ind) {
                 basis_vectors_str_[ind] = "e" + std::to_string(ind + 1);
@@ -106,7 +106,7 @@ namespace tbgal {
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
         struct from_actual_to_signed_metric_impl<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const *space_ptr, MatrixType &&factors_in_actual_metric) noexcept {
+            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const *space_ptr, MatrixType &&factors_in_actual_metric) {
                 return detail::prod(space_ptr->from_actual_to_signed_metric_, std::move(factors_in_actual_metric));
             }
         };
@@ -114,7 +114,7 @@ namespace tbgal {
         template<DefaultIndexType BaseSpaceDimensionsAtCompileTime, DefaultIndexType MaxBaseSpaceDimensionsAtCompileTime>
         struct from_signed_to_actual_metric_impl<ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> > {
             template<typename MatrixType>
-            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const *space_ptr, MatrixType &&factors_in_signed_metric) noexcept {
+            constexpr static decltype(auto) eval(ConformalMetricSpace<BaseSpaceDimensionsAtCompileTime, MaxBaseSpaceDimensionsAtCompileTime> const *space_ptr, MatrixType &&factors_in_signed_metric) {
                 return detail::prod(space_ptr->from_signed_to_actual_metric_, std::move(factors_in_signed_metric));
             }
         };
