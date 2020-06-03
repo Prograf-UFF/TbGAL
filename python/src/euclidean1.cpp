@@ -20,17 +20,11 @@
  * along with TbGAL. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <boost/python.hpp>
-#include <boost/python/numpy.hpp>
-
 #include "../../cpp/include/tbgal/using_Eigen.hpp"
 #include "../../cpp/include/tbgal/assuming_Euclidean1.hpp"
 
-#include "macro.hpp"
+#include "common.hpp"
 #include "macro_Euclidean.hpp"
-
-namespace py = boost::python;
-namespace np = boost::python::numpy;
 
 BOOST_PYTHON_MODULE(euclidean1) {
     using namespace tbgal;
@@ -44,6 +38,6 @@ BOOST_PYTHON_MODULE(euclidean1) {
     PY_TBGAL_EXPOSE_EUCLIDEAN_METRIC_SPACE(MetricSpaceType);
     PY_TBGAL_EXPOSE_EUCLIDEAN_UTILS();
     
-    PY_TBGAL_EXPOSE_VARIABLE("space", SPACE);
-    PY_TBGAL_EXPOSE_VARIABLE("e1", e1);
+    PY_TBGAL_EXPOSE_GLOBAL_VARIABLE("space", SPACE);
+    PY_TBGAL_EXPOSE_GLOBAL_VARIABLE("e1", e1);
 }

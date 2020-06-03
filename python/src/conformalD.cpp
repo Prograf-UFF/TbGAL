@@ -20,17 +20,11 @@
  * along with TbGAL. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <boost/python.hpp>
-#include <boost/python/numpy.hpp>
-
 #include "../../cpp/include/tbgal/using_Eigen.hpp"
 #include "../../cpp/include/tbgal/assuming_ConformalD.hpp"
 
-#include "macro.hpp"
+#include "common.hpp"
 #include "macro_Conformal.hpp"
-
-namespace py = boost::python;
-namespace np = boost::python::numpy;
 
 BOOST_PYTHON_MODULE(conformalD) {
     using namespace tbgal;
@@ -44,7 +38,7 @@ BOOST_PYTHON_MODULE(conformalD) {
     PY_TBGAL_EXPOSE_CONFORMAL_METRIC_SPACE(MetricSpaceType);
     PY_TBGAL_EXPOSE_CONFORMAL_UTILS();
     
-    PY_TBGAL_EXPOSE_VARIABLE("space", SPACE);
+    PY_TBGAL_EXPOSE_GLOBAL_VARIABLE("space", SPACE);
     PY_TBGAL_EXPOSE_FUNCTION("no", no);
     PY_TBGAL_EXPOSE_FUNCTION("ni", ni);
 }

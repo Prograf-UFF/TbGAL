@@ -30,15 +30,7 @@
         .def("set_base_space_dimensions", &METRIC_SPACE_TYPE::set_base_space_dimensions)
 
 #define PY_TBGAL_EXPOSE_MINKOWSKI_UTILS() \
-    py::def("euclidean_vector", py::raw_function(+[](py::tuple const &args, py::dict const &) { \
-        std::vector<DefaultScalarType> dummy; \
-        dummy.assign(py::stl_input_iterator<DefaultScalarType>(args), py::stl_input_iterator<DefaultScalarType>()); \
-        return vector(dummy.begin(), dummy.end()); \
-    })); \
-    py::def("point", py::raw_function(+[](py::tuple const &args, py::dict const &) { \
-        std::vector<DefaultScalarType> dummy; \
-        dummy.assign(py::stl_input_iterator<DefaultScalarType>(args), py::stl_input_iterator<DefaultScalarType>()); \
-        return vector(dummy.begin(), dummy.end()); \
-    }));
+    py::def("euclidean_vector", py::raw_function(+[](py::tuple const &args, py::dict const &) { return euclidean_vector(tbgal::python::begin<DefaultScalarType>(args), tbgal::python::end<DefaultScalarType>(args)); })); \
+    py::def("point", py::raw_function(+[](py::tuple const &args, py::dict const &) { return point(tbgal::python::begin<DefaultScalarType>(args), tbgal::python::end<DefaultScalarType>(args)); }));
 
 #endif // __TBGAL_PYTHON_MACRO_MINKOWSKI_HPP__

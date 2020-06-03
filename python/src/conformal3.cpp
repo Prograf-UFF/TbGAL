@@ -20,17 +20,11 @@
  * along with TbGAL. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <boost/python.hpp>
-#include <boost/python/numpy.hpp>
-
 #include "../../cpp/include/tbgal/using_Eigen.hpp"
 #include "../../cpp/include/tbgal/assuming_Conformal3.hpp"
 
-#include "macro.hpp"
+#include "common.hpp"
 #include "macro_Conformal.hpp"
-
-namespace py = boost::python;
-namespace np = boost::python::numpy;
 
 BOOST_PYTHON_MODULE(conformal3) {
     using namespace tbgal;
@@ -44,10 +38,10 @@ BOOST_PYTHON_MODULE(conformal3) {
     PY_TBGAL_EXPOSE_CONFORMAL_METRIC_SPACE(MetricSpaceType);
     PY_TBGAL_EXPOSE_CONFORMAL_UTILS();
     
-    PY_TBGAL_EXPOSE_VARIABLE("space", SPACE);
-    PY_TBGAL_EXPOSE_VARIABLE("e1", e1);
-    PY_TBGAL_EXPOSE_VARIABLE("e2", e2);
-    PY_TBGAL_EXPOSE_VARIABLE("e3", e3);
-    PY_TBGAL_EXPOSE_VARIABLE("no", no);
-    PY_TBGAL_EXPOSE_VARIABLE("ni", ni);
+    PY_TBGAL_EXPOSE_GLOBAL_VARIABLE("space", SPACE);
+    PY_TBGAL_EXPOSE_GLOBAL_VARIABLE("e1", e1);
+    PY_TBGAL_EXPOSE_GLOBAL_VARIABLE("e2", e2);
+    PY_TBGAL_EXPOSE_GLOBAL_VARIABLE("e3", e3);
+    PY_TBGAL_EXPOSE_GLOBAL_VARIABLE("no", no);
+    PY_TBGAL_EXPOSE_GLOBAL_VARIABLE("ni", ni);
 }

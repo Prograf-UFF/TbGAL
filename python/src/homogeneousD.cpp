@@ -20,17 +20,11 @@
  * along with TbGAL. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <boost/python.hpp>
-#include <boost/python/numpy.hpp>
-
 #include "../../cpp/include/tbgal/using_Eigen.hpp"
 #include "../../cpp/include/tbgal/assuming_HomogeneousD.hpp"
 
-#include "macro.hpp"
+#include "common.hpp"
 #include "macro_Homogeneous.hpp"
-
-namespace py = boost::python;
-namespace np = boost::python::numpy;
 
 BOOST_PYTHON_MODULE(homogeneousD) {
     using namespace tbgal;
@@ -44,6 +38,6 @@ BOOST_PYTHON_MODULE(homogeneousD) {
     PY_TBGAL_EXPOSE_HOMOGENEOUS_METRIC_SPACE(MetricSpaceType);
     PY_TBGAL_EXPOSE_HOMOGENEOUS_UTILS();
     
-    PY_TBGAL_EXPOSE_VARIABLE("space", SPACE);
+    PY_TBGAL_EXPOSE_GLOBAL_VARIABLE("space", SPACE);
     PY_TBGAL_EXPOSE_FUNCTION("ep", ep);
 }

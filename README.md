@@ -29,7 +29,7 @@ Please, let Eduardo Vera Sousa ([http://www.ic.uff.br/~eduardovera](http://www.i
 1. [Requirements](#1-requirements)
 2. [How to Build and Install TbGAL](#2-how-to-build-and-install-tbgal)
 3. [Compiling and Running Examples](#3-compiling-and-running-examples)
-4. [Compiling and Running Unit-Tests](#4-compiling-and-running-unit-tests)
+4. [Compiling and Running Unit Tests](#4-compiling-and-running-unit-tests)
 5. [Documentation](#5-documentation)
 6. [Related Project](#6-related-project)
 7. [License](#7-license)
@@ -57,7 +57,7 @@ Required Python packages and C++ libraries, if you want to use TbGAL with Python
 - [Boost.Python](https://www.boost.org/doc/libs/release/libs/python/doc/html/index.html) (version >= 1.56), a C++ library which enables seamless interoperability between C++ and the Python programming language.
 - [Boost.NumPy](https://www.boost.org/doc/libs/release/libs/python/doc/html/numpy/index.html), a C++ library that extends Boost.Python to NumPy.
 
-Optional C++ libraries to test TbGAL:
+Required C++ libraries, if you want to run unit tests:
 
 - [GATL](https://github.com/laffernandes/gatl) is another C++ library for geometric algebra.
 - [Google Test](https://github.com/google/googletest) is a unit testing library for the C++ programming language, based on the xUnit architecture.
@@ -140,9 +140,9 @@ Use the files in the `<tbgal-dir>/cpp/example` directory as examples of how to u
 
 Similarly, you will find examples of how to use the TbGAL library with Python in the [`<tbgal-dir>/python/example/py2`](python/example/py2) and [`<tbgal-dir>/python/example/py3`](python/example/py3) directories.
 
-## 4. Compiling and Running Unit-Tests
+## 4. Compiling and Running Unit Tests
 
-The basic steps for configuring and building the C++ unit-tests of the TbGAL look like this:
+The basic steps for configuring and building the C++ unit tests of the TbGAL look like this:
 
 ```bash
 cd <tbgal-dir>/cpp/test
@@ -152,7 +152,7 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build . --parallel 8
 ```
 
-The configuration process will donwload, build, and install [Google Test](https://github.com/google/googletest) and [GATL](https://github.com/laffernandes/gatl) automatically. If successfull, call the `test` target to run all tests:
+The configuration process will donwload, build, and install [Google Test](https://github.com/google/googletest) automatically. [GATL](https://github.com/laffernandes/gatl) must be installed by you first. If successfull, call the `test` target to run all tests:
 
 ```bash
 cmake --build . --target test
