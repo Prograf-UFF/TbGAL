@@ -28,7 +28,7 @@
         .def("dimensions", &METRIC_SPACE_TYPE::dimensions) \
         .def("p_dimensions", &METRIC_SPACE_TYPE::p_dimensions) \
         .def("q_dimensions", &METRIC_SPACE_TYPE::q_dimensions) \
-        .def("set_dimensions", &METRIC_SPACE_TYPE::set_dimensions)
+        .def("set_dimensions", &METRIC_SPACE_TYPE::set_dimensions, py::args("p_dimensions", "q_dimensions"))
 
 #define PY_TBGAL_EXPOSE_SIGNED_UTILS()
 
