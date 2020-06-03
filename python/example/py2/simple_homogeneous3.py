@@ -27,9 +27,9 @@ y = float(raw_input('y = '))
 z = float(raw_input('z = '))
 print
 
-p = point(x, y, z);
-d = direction(x, y, z);
-l = p ^ d;
+p = point(x, y, z)
+d = direction(x, y, z)
+l = p ^ d
 
 print '-- Result'
 print 'p =', p

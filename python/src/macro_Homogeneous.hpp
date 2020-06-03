@@ -30,8 +30,8 @@
         .def("set_base_space_dimensions", &METRIC_SPACE_TYPE::set_base_space_dimensions)
 
 #define PY_TBGAL_EXPOSE_HOMOGENEOUS_UTILS() \
-    py::def("direction", py::raw_function(+[](py::tuple const &args, py::dict const &) { return direction(tbgal::python::begin<DefaultScalarType>(args), tbgal::python::end<DefaultScalarType>(args)); })); \
-    py::def("euclidean_vector", py::raw_function(+[](py::tuple const &args, py::dict const &) { return euclidean_vector(tbgal::python::begin<DefaultScalarType>(args), tbgal::python::end<DefaultScalarType>(args)); })); \
-    py::def("point", py::raw_function(+[](py::tuple const &args, py::dict const &) { return point(tbgal::python::begin<DefaultScalarType>(args), tbgal::python::end<DefaultScalarType>(args)); }));
+    py::def("direction", py::raw_function(+[](py::tuple const &args, py::dict const &) { return direction(tbgal::python::begin<DefaultScalarType>(&args), tbgal::python::end<DefaultScalarType>(&args)); })); \
+    py::def("euclidean_vector", py::raw_function(+[](py::tuple const &args, py::dict const &) { return euclidean_vector(tbgal::python::begin<DefaultScalarType>(&args), tbgal::python::end<DefaultScalarType>(&args)); })); \
+    py::def("point", py::raw_function(+[](py::tuple const &args, py::dict const &) { return point(tbgal::python::begin<DefaultScalarType>(&args), tbgal::python::end<DefaultScalarType>(&args)); }));
 
 #endif // __TBGAL_PYTHON_MACRO_HOMOGENEOUS_HPP__

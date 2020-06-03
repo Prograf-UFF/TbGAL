@@ -42,68 +42,70 @@ namespace tbgal {
             using reference = ValueType&;
             using iterator_category = std::random_access_iterator_tag;
 
-            sequence_const_iterator(py::object const &object, difference_type current) :
-                object_(object),
-                current_(current) {
+            inline sequence_const_iterator(py::object const *object_ptr, difference_type index) :
+                object_ptr_(object_ptr),
+                index_(index) {
             }
 
-            sequence_const_iterator(sequence_const_iterator const &other) = default;
-            sequence_const_iterator(sequence_const_iterator &&other) = default;
+            inline sequence_const_iterator(sequence_const_iterator const &other) = default;
+            inline sequence_const_iterator(sequence_const_iterator &&other) = default;
 
-            sequence_const_iterator& operator++() {
-                ++current_;
+            inline sequence_const_iterator& operator++() {
+                ++index_;
                 return *this;
             }
 
-            sequence_const_iterator& operator--() {
-                --current_;
+            inline sequence_const_iterator& operator--() {
+                --index_;
                 return *this;
             }
 
-            sequence_const_iterator operator++(int) {
+            inline sequence_const_iterator operator++(int) {
                 sequence_const_iterator retval = *this;
                 ++(*this);
                 return retval;
             }
 
-            sequence_const_iterator operator--(int) {
+            inline sequence_const_iterator operator--(int) {
                 sequence_const_iterator retval = *this;
                 --(*this);
                 return retval;
             }
 
-            bool operator==(sequence_const_iterator const &other) const {
-                return current_ == other.current_;
+            inline bool operator==(sequence_const_iterator const &other) const {
+                assert(object_ptr_ == other.object_ptr_);
+                return index_ == other.index_;
             }
 
-            bool operator!=(sequence_const_iterator const &other) const {
-                return current_ != other.current_;
+            inline bool operator!=(sequence_const_iterator const &other) const {
+                assert(object_ptr_ == other.object_ptr_);
+                return index_ != other.index_;
             }
 
-            value_type operator*() const {
-                return py::extract<value_type>(object_[current_])();
+            inline value_type operator*() const {
+                return py::extract<value_type>(object_ptr_->operator[](index_))();
             }
 
-            difference_type operator-(sequence_const_iterator const &other) const {
-                return current_ - other.current_;
+            inline difference_type operator-(sequence_const_iterator const &other) const {
+                return index_ - other.index_;
             }
 
         private:
 
-            py::object const &object_;
-            difference_type current_;
+            py::object const *object_ptr_;
+            difference_type index_;
 
             friend class boost::iterator_core_access;
         };
 
         template<typename ValueType>
-        sequence_const_iterator<ValueType> begin(py::object const &object) {
-            return sequence_const_iterator<ValueType>(object, 0);
+        sequence_const_iterator<ValueType> begin(py::object const *object_ptr) {
+            return sequence_const_iterator<ValueType>(object_ptr, 0);
         }
 
         template<typename ValueType>
-        sequence_const_iterator<ValueType> end(py::object const &object) {
-            return sequence_const_iterator<ValueType>(object, py::len(object));
+        sequence_const_iterator<ValueType> end(py::object const *object_ptr) {
+            return sequence_const_iterator<ValueType>(object_ptr, py::len(*object_ptr));
         }
 
     }
@@ -325,7 +327,7 @@ namespace tbgal {
     py::def("scalar", +[](std::int32_t value) { return scalar(DefaultScalarType(value)); }); \
     py::def("scalar", +[](std::int64_t value) { return scalar(DefaultScalarType(value)); }); \
     py::def("scalar", +[](DefaultScalarType value) { return scalar(value); }); \
-    py::def("vector", py::raw_function(+[](py::tuple const &args, py::dict const &) { return vector(tbgal::python::begin<DefaultScalarType>(args), tbgal::python::end<DefaultScalarType>(args)); }));
+    py::def("vector", py::raw_function(+[](py::tuple const &args, py::dict const &) { return vector(tbgal::python::begin<DefaultScalarType>(&args), tbgal::python::end<DefaultScalarType>(&args)); }));
 
 #define PY_TBGAL_EXPOSE_FUNCTION(NAME, FUNCTION) \
     py::def(NAME, &FUNCTION)

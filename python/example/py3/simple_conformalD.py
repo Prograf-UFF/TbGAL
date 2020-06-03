@@ -27,10 +27,10 @@ print()
 
 x = euclidean_vector(10, 20, 30, 40 ,50, 60, 70, 80, 90, 100)
 x1 = sp(x, e(1))
-x3 = sp(x, e(3));    # We have to use the e(i), no(), and ni()
-                     # functions instead of the ei, no, and ni
-Y = x^ni();          # constants because the number of dimensions
-                     # of the base space is defined at runtime
+x3 = sp(x, e(3))    # We have to use the e(i), no(), and ni()
+                    # functions instead of the ei, no, and ni
+Y = x^ni()          # constants because the number of dimensions
+                    # of the base space is defined at runtime
 print('x =', x)
 print('x1 =', x1)
 print('x3 =', x3)
