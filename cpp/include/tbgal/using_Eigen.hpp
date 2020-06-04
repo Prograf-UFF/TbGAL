@@ -189,7 +189,7 @@ namespace tbgal {
 
         template<DefaultIndexType RowsAtCompileTime, DefaultIndexType MaxRowsAtCompileTime, typename IteratorType, typename... ExtraScalarTypes>
         constexpr decltype(auto) fill_column_matrix_using_iterator(IteratorType begin, IteratorType end, ExtraScalarTypes &&...extra_args) {
-            matrix_type_t<std::remove_cv_t<std::remove_reference_t<typename std::iterator_traits<IteratorType>::value_type> >, RowsAtCompileTime, 1, MaxRowsAtCompileTime, 1> result(std::distance(begin, end), 1);
+            matrix_type_t<std::remove_cv_t<std::remove_reference_t<typename std::iterator_traits<IteratorType>::value_type> >, RowsAtCompileTime, 1, MaxRowsAtCompileTime, 1> result(std::distance(begin, end) + sizeof...(extra_args), 1);
             Eigen::Index ind = 0;
             for (; begin != end; ++ind, ++begin) {
                 result(ind, 0) = *begin;

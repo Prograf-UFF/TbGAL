@@ -34,4 +34,4 @@ l = p ^ d
 print '-- Result'
 print 'p =', p
 print 'd =', d
-print 'l = p ^ d', l
+print 'l = p ^ d =', l
