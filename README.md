@@ -160,7 +160,287 @@ cmake --build . --target test
 
 ## 5. Documentation
 
-Documentation is under construction. Sorry!
+Here you find a brief description of the namespaces, macros, classes, functions, procedures, and operators available for the user. All methods are available with C++ and most of them with Python. The detailed documentation is not ready yet.
+
+Contents:
+
+- [Namespaces](#namespaces)
+- [Macros](#macros)
+- [Classes and Data Types](#classes-and-data-types)
+- [Utilities Constants and Functions](#utilities-constants-and-functions)
+- [Products and Basic Operations](#products-and-basic-operations)
+- [Overloaded Operators](#overloaded-operators)
+- [Tools](#tools)
+- [Algebra-Specific Declarations](#algebra-specific-declarations)
+  - [Signed](#signed)
+  - [Euclidean](#euclidean)
+  - [Homogeneous/Projective](#homogeneousprojective)
+  - [Mikowski/Spacetime](#mikowskispacetime)
+  - [Conformal](#conformal)
+
+### Namespaces
+
+In C++, namespaces are declarative regions that provide scope to the names of the types, function, variables, *etc.*, inside it. TbGAL defines the following namespaces.
+
+| Namespace | Description |
+| --- | --- |
+| `tbgal` | The main namespace that encloses all TbGAL implementations |
+| `tbgal::Euclidean1`, `tbgal::Euclidean2`, `tbgal::Euclidean3`, `tbgal::EuclideanD` | The namespace of Euclidean geometric algebra of R<sup>*n*</sup> |
+| `tbgal::Homogeneous1`, `tbgal::Homogeneous2`, `tbgal::Homogeneous3`, `tbgal::HomogeneousD` | The namespace of homogeneous/projective geometric algebra of R<sup>*d*</sup> (*n* = *d* + 1) |
+| `tbgal::Minkowski1`, `tbgal::Minkowski2`, `tbgal::Minkowski3`, `tbgal::MinkowskiD` | The namespace of Mikowski/spacetime algebra of R<sup>*d*</sup> (*n* = *d* + 2) |
+| `tbgal::Conformal1`, `tbgal::Conformal2`, `tbgal::Conformal3`, `tbgal::ConformalD` | The namespace of conformal geometric algebra of R<sup>*d*</sup> (*n* = *d* + 2) |
+| `tbgal::SignedPQ` | The namespace of geometric algebras of R<sup>*p, q*</sup> (*n* = *p* + *q*) with metric signatura *(p, q)* |
+
+The `tbgal` namespace also declares a nested `detail` namespace. This is the namespace where the magic happens. Don't touch it!
+
+According to the TbGAL conventions, the root directory for the header files that you will include in your program is the `tbgal` folder. The core operations may be implemented by TbGAL using different libraries, so you have to indicate the one that will be used. So far, Eigen is the only one available. It can be indicated by including the header file `tbgal/using_Eigen.hpp`. Also, the header file for each above-mentioned namespace is its name preceded by `assuming_` and followed by the `.hpp` extension. Putting both conventions together, we have `tbgal/assuming_Euclidean3.hpp`, `tbgal/assuming_Homogeneous3.hpp`, `tbgal/assuming_Minkowski3.hpp`, `tbgal/assuming_Conformal3.hpp`, and so on.
+
+As an example, if you want to use the Eigen-based implementation of TbGAL with conformal geometric algebra of R<sup>3</sup> then you have to put the following instructions among the first lines of your source code:
+
+```cpp
+#include <tbgal/using_Eigen.hpp>
+#include <tbgal/assuming_Conformal3.hpp>
+
+using namespace tbgal;
+using namespace tbgal::Conformal3;
+```
+
+In Python, one only have to import the content of the submodule related to the model of geometry:
+
+```python
+from tbgal.conformal3 import *
+```
+
+### Macros
+
+Optionally, set the following macros before including TbGAL headers in your program to change some conventions of the library.
+
+| Class | Description |
+| --- | --- |
+| `TBGAL_DEFAULT_SCALAR_TYPE` | Defines the floating-point type assumed as default by the library for scalar values (default is `std::double_t`) |
+| `TBGAL_DEFAULT_INDEX_TYPE` | Defines the signed integral type assumed as default by the library for indices (default is `std::int64_t`) |
+| `TBGAL_DEFAULT_FLT_TOLERANCE`, `TBGAL_DEFAULT_DBL_TOLERANCE` | Define the tolerances for round-errors while comparing `std::float_t` and `std::double_t` values, respectively |
+
+### Classes and Data Types
+
+The following basic data types are defined in order to assign a meaning to conventional types, like `double`, `int`, and so on.
+
+| Basic Type | Description |
+| --- | --- |
+| `DefaultScalarType` | The floating point type assumed as default by the library for scalar values (see `TBGAL_DEFAULT_SCALAR_TYPE`) |
+| `DefaultIndexType` | The signed integral type assumed as default by the library for indices (see `TBGAL_DEFAULT_INDEX_TYPE`) |
+
+The following classes correspond to the most important structures of TbGAL.
+
+| Class | Description |
+| --- | --- |
+| `FactoredMultivector<ScalarType, FactoringProductType>` | Concrete class for multivectors enconding a *k*-blade or *k*-versor using the factorization defined by the `FactoringProductType` tag class |
+| `GeometricProduct<MetricSpaceType>`, `OuterProduct<MetricSpaceType>` | Tag classes for the `FactoringProductType` |
+| `BaseSignedMetricSpace<P, Q [, MaxN]>` | Abstract superclass of classes implementing the `MetricSpaceType` concept |
+| `ConformalMetricSpace<D [, MaxD]>`, `EuclideanMetricSpace<N [, MaxN]>`, `HomogeneousMetricSpace<D [, MaxD]>`, `MinkowskiMetricSpace<D [, MaxD]>`, `SignedMetricSpace<P, Q [, MaxN]>` | Concrete classes implementing the `MetricSpaceType` concept |
+
+| Exception Class | Description |
+| --- | --- |
+| `NotSupportedError` | An exception to report errors related to not implemented features |
+
+The `D`, `P`, `Q`, `MaxD`, and `MaxN` template arguments of the classes implementing the `MetricSpaceType` concept may be set to non-negative integer values in compilation time. As a result, the dimensionality of the vector space will be constant at runtime. The other option is to set them to `Dynamic` if one plans to change the dimensionality of the vector space at runtime. You don't have to worry about that if you are using a model of geometry defined in one of the `tbgal/assuming_[whatever].hpp` headers.
+
+The explicit use of C++ templates while implementing a solution may be overwhelming. For the sake of simplicity, it is strongly recommended to use the `auto` placeholder type specifier (please, refer to the [C++ specification](https://en.cppreference.com/w/cpp/language/auto) for details) whenever possible.
+
+### Utilities Constants and Functions
+
+Here you find some useful functions to assist the implementation of your program.
+
+| Function | Description |
+| --- | --- |
+| `e(index)` | Returns an unit basis vector |
+| `scalar(arg)` | Converts the given numerical value to a scalar factored multivector |
+| `vector(coords...)` | Makes a vector with the given set of coordinates |
+| `vector(begin, end)` | Makes a vector with the set of coordinates accessed by the iterators |
+
+### Products and Basic Operations
+
+The following tables present a set of basic products and operations from geometric algebra.
+
+| Product | Description |
+| --- | --- |
+| `dot(arg1, arg2)` | Dot product |
+| `gp(arg1, arg2)` | Geometric/Clifford product |
+| `hip(arg1, arg2)` | Hestenes inner product |
+| `igp(arg1, arg2)` | Inverse geometric/Clifford product (the argument `rhs` must be a versor)  |
+| `lcont(arg1, arg2)` | Left contraction |
+| `op(arg1, args...)` | Outer/Wedge product |
+| `rcont(arg1, arg2)` | Right contraction |
+| `sp(arg1, arg2)` | Scalar product |
+
+| Simple Binary Operation | Description |
+| --- | --- |
+| `addition(arg1, arg2)`, `add(arg1, arg2)` | Addition |
+| `subtraction(arg1, arg2)`, `sub(arg1, arg2)` | Subtraction |
+
+| Sign-Change Operation | Description |
+| --- | --- |
+| `conjugate(arg)` | Clifford conjugation |
+| `involute(arg)` | Grade involution |
+| `reverse(arg)` | Reversion |
+| `unary_minus(arg)` | Unary minus |
+| `unary_plus(arg)` | Unary plus |
+
+| Dualization Operation | Description |
+| --- | --- |
+| `dual(arg)` | Dualization operation |
+| `undual(arg)` | Undualization operation |
+
+| Norm-Based Operation | Description |
+| --- | --- |
+| `rnorm_sqr(arg)` | Squared reverse norm |
+| `rnorm(arg)` | Reverse norm |
+| `inverse(arg)`, `inv(arg)` | Inverse of the given versor using the squared reverse norm |
+| `unit(arg)` | Unit under reverse norm |
+
+| Transformation Operation | Description |
+| --- | --- |
+| `apply_even_versor(versor, arg)` | Returns the argument transformed by the even versor using the sandwich product |
+| `apply_odd_versor(versor, arg)` | Returns the argument transformed by the odd versor using the sandwich product |
+| `apply_rotor(rotor, arg)` | Returns the argument transformed by the rotor using the sandwich product |
+
+### Overloaded Operators
+
+TbGAL overload some C++ operators to make the writing of source code closer to the writing of mathematical expressions with geometric algebra.
+
+It is important to notice that the precedence and associativity of C++ operators are different than the one assumed in mathematical functions. For instance, one would expect that the outer/wedge product `^` would be evaluated before the addition operation in the following expression `a + b ^ c`, because product precedes addition in math. However, in C++ the addition operator (`+`) precedes the bitwise XOR operator (`^`), leading to possible mistakes while implementing mathematical procedures (please, refer to the [C++ specification](https://en.cppreference.com/w/cpp/language/operator_precedence) for details). As a result, the resulting expression in this example would be `(a + b) ^ c`. The use of parenthesis is strongly recommended in order to avoid those mistakes. By rewriting the example, `a + (b ^ c)` will guarantee the expected behavior.
+
+| Arithmetic Operator | Description |
+| --- | --- |
+| `+arg` | Unary plus (same as `unary_plus(arg)`) |
+| `-arg` | Unary minus (same as `unary_minus(arg)`) |
+| `arg1 + arg2` | Addition (same as `add(arg1, arg2)`) |
+| `arg1 - arg2` | Subtraction (same as `sub(arg1, arg2)`) |
+| `arg1 * arg2` | Geometric/Clifford product (same as `gp(arg1, arg2)`) |
+| `arg1 / arg2` | Inverse geometric/Clifford product (same as `igp(arg1, arg2)`) |
+| `arg1 ^ arg2` | Outer/Wedge product (same as `op(arg1, arg2)`) |
+
+| Input/Output Operator | Description |
+| --- | --- |
+| `os << arg` | Insert formatted output |
+
+### Tools
+
+TbGAL includes a set of useful functions to help developers to write their programs.
+
+| Function | Description |
+| --- | --- |
+| `default_tolerance<ValueType>()` | Return the standard tolerance value `tol` assumed for the given value type |
+
+| Testing Function | Description |
+| --- | --- |
+| `is_blade(arg)` | Returns whether the given argument is a blade |
+| `is_zero(arg)` | Returns whether the given argument is equal to *zero* |
+
+| Testing Meta-Function | Description |
+| --- | --- |
+| `is_multivector_v<Type>` | Returns whether the given type is a factored multivector expression |
+
+### Algebra-Specific Declarations
+
+In the following sub-section, you find declarations that are specific of the respective geometric algebra.
+
+#### Signed
+
+Classes and constants of signed geometric algebras of R<sup>*p, q*</sup>. They are available in the following namespace: `tbgal::SignedPQ`.
+
+| Class | Description |
+| --- | --- |
+| `SignedMetricSpace<P, Q [, MaxN]>` | Orthogonal metric space with signature (*p*, *q*) (*n* = *p* + *q*) |
+
+| Constant Value | Description |
+| --- | --- |
+| `SPACE` | An instance of the orthogonal metric space class with signature (*p*, *q*) |
+
+#### Euclidean
+
+Classes, constants, functions, and operations of Euclidean geometric algebras of R<sup>*n*</sup>. They are available in the following namespaces: `tbgal::Euclidean1`, `tbgal::Euclidean2`, `tbgal::Euclidean3`, and `tbgal::EuclideanD`.
+
+| Class | Description |
+| --- | --- |
+| `EuclideanMetricSpace<N [, MaxN]>` | Euclidean metric space |
+
+| Constant Value | Description |
+| --- | --- |
+| `e1`, `e2`, ..., `eN` | Euclidean basis vector (same as `e(1)`,  `e(2)`, ..., `e(N)`) |
+| `SPACE` | An instance of the Euclidean metric space class |
+
+| Function | Description |
+| --- | --- |
+| `euclidean_vector(coords...)` | Makes an Euclidean vector with the given set of coordinates |
+| `euclidean_vector(begin, end)` | Makes an Euclidean vector with the set of coordinates accessed by the iterators |
+
+#### Homogeneous/Projective
+
+Classes, constants, functions, and operations of homogeneous/projective geometric algebras of R<sup>*d*</sup> (*n* = *d* + 1). They are available in the following namespaces: `tbgal::Homogeneous1`, `tbgal::Homogeneous2`, `tbgal::Homogeneous3`, and `tbgal::HomogeneousD`.
+
+| Class | Description |
+| --- | --- |
+| `HomogeneousMetricSpace<D [, MaxD]>` | Homogeneous/Projective metric space |
+
+| Constant Value | Description |
+| --- | --- |
+| `e1`, `e2`, ..., `eD` | Euclidean basis vector (same as `e(1)`,  `e(2)`, ..., `e(D)`) |
+| `ep` | Positive extra basis vector interpreted as the point at the origin (same as `e(D + 1)`) |
+| `SPACE` | An instance of the homogeneous/projective metric space class |
+
+| Function | Description |
+| --- | --- |
+| `direction(coords...)` | Makes a direction vector using the given set of coordinates |
+| `direction(begin, end)` | Makes a direction vector using the set of coordinates accesses by the iterators |
+| `euclidean_vector(coords...)` | Makes an Euclidean vector with the given set of coordinates |
+| `euclidean_vector(begin, end)` | Makes an Euclidean vector with the set of coordinates accessed by the iterators |
+| `point(coords...)` | Makes an unit point using the given set of coordinates |
+| `point(begin, end)` | Makes an unit point using the set of coordinates accesses by the iterators |
+
+#### Mikowski/Spacetime
+
+Classes, constants, functions, and operations of Mikowski/spacetime geometric algebras of R<sup>*d*</sup> (*n* = *d* + 2). They are available in the following namespaces: `tbgal::Minkowski1`, `tbgal::Minkowski2`, `tbgal::Minkowski3`, and `tbgal::MinkowskiD`.
+
+| Class | Description |
+| --- | --- |
+| `MinkowskiMetricSpace<D [, MaxD]>` | Minkowski/Spacetime metric space |
+
+| Constant Value | Description |
+| --- | --- |
+| `e1`, `e2`, ..., `eD` | Euclidean basis vector (same as `e(1)`, `e(2)`, ..., `e(D)`) |
+| `ep` | Positive extra basis vector (same as `e(D + 1)`) |
+| `em` | Negative extra basis vector (same as `e(D + 2)`) |
+| `SPACE` | An instance of the Minkowski/spacetime metric space class |
+
+| Function | Description |
+| --- | --- |
+| `euclidean_vector(coords...)` | Makes an Euclidean vector with the given set of coordinates |
+| `euclidean_vector(begin, end)` | Makes an Euclidean vector with the set of coordinates accessed by the iterators |
+| `point(coords...)` | Makes an unit point using the given set of coordinates |
+| `point(begin, end)` | Makes an unit point using the set of coordinates accesses by the iterators |
+
+#### Conformal
+
+Classes, constants, functions, and operations of conformal geometric algebras of R<sup>*d*</sup> (*n* = *d* + 2). They are available in the following namespaces: `tbgal::Conformal1`, `tbgal::Conformal2`, `tbgal::Conformal3`, and `tbgal::ConformalD`.
+
+| Class | Description |
+| --- | --- |
+| `ConformalMetricSpace<D [, MaxD]>` | Conformal metric space |
+
+| Constant Value | Description |
+| --- | --- |
+| `e1`, `e2`, ..., `eD` | Euclidean basis vector (same as `e(1)`,  `e(2)`, ..., `e(D)`) |
+| `no` | Null vector interpreted as the point at the origin (same as `e(D + 1)`) |
+| `ni` | Null vector interpreted as the point at infinity (same as `e(D + 2)`) |
+| `SPACE` | An instance of the conformal metric space class |
+
+| Function | Description |
+| --- | --- |
+| `euclidean_vector(coords...)` | Makes an Euclidean vector with the given set of coordinates |
+| `euclidean_vector(begin, end)` | Makes an Euclidean vector with the set of coordinates accessed by the iterators |
+| `point(coords...)` | Makes an unit point using the given set of coordinates |
+| `point(begin, end)` | Makes an unit point using the set of coordinates accesses by the iterators |
 
 ## 6. Related Project
 
