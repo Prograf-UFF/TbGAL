@@ -213,7 +213,7 @@ from tbgal.conformal3 import *
 
 ### Macros
 
-Optionally, set the following macros before including TbGAL headers in your program to change some conventions of the library.
+Optionally, set the following macros before including TbGAL headers in your program to change some conventions of the library. They are not available in Python.
 
 | Class | Description |
 | --- | --- |
